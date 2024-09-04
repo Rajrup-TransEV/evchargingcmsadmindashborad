@@ -12,6 +12,9 @@ import './charts/ChartjsConfig';
 // Import pages
 import Dashboard from './pages/Dashboard';
 import Login from './pages/login';
+import OTPVerify from './pages/otpverification';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
 
@@ -25,9 +28,11 @@ function App() {
 
   return (
     <>
+    <ToastContainer/>
       <Routes>
         <Route exact path="/" element={<Dashboard />} />
         <Route exact path='/signin' element={<Login/>}/>
+        <Route exact path='/otpverify' element={<OTPVerify/>}/>
       </Routes>
     </>
   );
