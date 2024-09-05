@@ -17,8 +17,8 @@ const Login = () => {
     try {
       //take api key value from env
       const apikey = import.meta.env.VITE_API_KEY;
-     
-      const response = await fetch('http://localhost:3000/userauth/login', {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const response = await fetch(`${rooturi}/userauth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
