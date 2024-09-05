@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';
 import FilterButton from '../components/DropdownFilter';
@@ -18,10 +18,61 @@ import DashboardCard11 from '../partials/dashboard/DashboardCard11';
 import DashboardCard12 from '../partials/dashboard/DashboardCard12';
 import DashboardCard13 from '../partials/dashboard/DashboardCard13';
 import Banner from '../partials/Banner';
+import { toast } from 'react-toastify';
+
 
 function Dashboard() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate()
+  //authorization in effect
+  useEffect(() => {
+    const checkAuthentication = async () => {
+     
+      // Take API key value from env
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+      
+      try {
+        const gettoken = localStorage.getItem("token");
+        console.log(gettoken)
+        if (!gettoken) {
+          navigate("/signin");
+          return;
+        }
+        
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiauthkey': apikey,
+          },
+          body: JSON.stringify({ token: gettoken })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log(data)
+          if (data.user.userType !== "superadmin") {
+            toast("You have no authorization to view this page");
+            navigate("/signin");
+          } else {
+            console.log("You are an authorized user");
+          }
+        } else {
+          toast("Failed to verify user");
+          navigate("/signin");
+        }
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+        toast("An error occurred during authentication");
+        navigate("/signin");
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]); // Dependency array includes navigate to avoid stale closure
 
   return (
     <div className="flex h-screen overflow-hidden">
