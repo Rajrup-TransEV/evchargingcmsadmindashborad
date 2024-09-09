@@ -9,7 +9,54 @@ const ChargerDetails = () => {
   const [chargerData, setChargerData] = useState(null);
   const[qrCode,setQrcode]=useState(null);
   const [loading, setLoading] = useState(true);
+  //use ffect to directly check for if user logged in or not
+  useEffect(() => {
+    const checkAuthentication = async () => {
+     
+      // Take API key value from env
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+      
+      try {
+        const gettoken = localStorage.getItem("token");
+        console.log(gettoken)
+        if (!gettoken) {
+          navigate("/signin");
+          return;
+        }
+        
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiauthkey': apikey,
+          },
+          body: JSON.stringify({ token: gettoken })
+        });
+        
+        const data = await response.json();
+        console.log(data)        
+        if (response.ok) {
 
+          if (data.user.userType !== "superadmin") {
+            toast("You have no authorization to view this page");
+            navigate("/signin");
+          } else {
+            console.log("You are an authorized user");
+          }
+        } else {
+          toast("Failed to verify user");
+          navigate("/signin");
+        }
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+        toast("An error occurred during authentication");
+        navigate("/signin");
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]); // Dependency array includes navigate to avoid stale closure
   // Fetch single charger data
   useEffect(() => {
     const fetchsingulardata = async () => {
