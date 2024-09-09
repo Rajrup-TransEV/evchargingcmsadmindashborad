@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import React, { useState, useEffect } from 'react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,6 +44,50 @@ const Login = () => {
       setLoading(false);
     }
   };
+ 
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+
+      try {
+        const gettoken = localStorage.getItem("token");
+        if (!gettoken) {
+          navigate("/signin");
+          return;
+        }
+
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiauthkey': apikey,
+          },
+          body: JSON.stringify({ token: gettoken })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          if (data.user.userType !== "superadmin") {
+            toast("You have no authorization to view this page");
+            navigate("/signin");
+          } else {
+            console.log("You are an authorized user");
+            navigate("/")
+          }
+        } else {
+          toast("Failed to verify user");
+          navigate("/signin");
+        }
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+        toast("An error occurred during authentication");
+        navigate("/signin");
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]);
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">

@@ -22,6 +22,8 @@ const AddCharger = () => {
   const[charger_image,setcharger_image]=useState('')
   const[chargerbuyer,setchargerbuyer]=useState('')
   const [loading, setLoading] = useState(false);
+  const [ocppurl, setOcppurl] = useState('');
+  const [chargeridentity, setChargerIdentity]=useState('')
   const navigate = useNavigate()
   //use ffect to directly check for if user logged in or not
   useEffect(() => {
@@ -49,9 +51,9 @@ const AddCharger = () => {
         });
         
         const data = await response.json();
-        
+        console.log(data)        
         if (response.ok) {
-          console.log(data)
+
           if (data.user.userType !== "superadmin") {
             toast("You have no authorization to view this page");
             navigate("/signin");
@@ -86,10 +88,12 @@ const AddCharger = () => {
                 'Content-Type': 'application/json',
                 'apiauthkey': apikey,
             },
-            body:JSON.stringify({Chargerserialnum,ChargerName,Chargerhost,Segment,Subsegment,Total_Capacity,Chargertype,parking,number_of_connectors,Connector_type,connector_total_capacity,lattitude,longitute,full_address,charger_use_type,twenty_four_seven_open_status,charger_image,chargerbuyer})
+            body:JSON.stringify({Chargerserialnum,ChargerName,Chargerhost,Segment,Subsegment,Total_Capacity,Chargertype,parking,number_of_connectors,Connector_type,connector_total_capacity,lattitude,longitute,full_address,charger_use_type,twenty_four_seven_open_status,charger_image,chargerbuyer,chargeridentity})
         })
             const data = await response.json()
+            console.log(data)
         if(response.ok){
+          setOcppurl(data.ocppurl)
             toast(data.message)
         }else{
             toast.error("Something went wrong plase try again")
@@ -105,13 +109,13 @@ const AddCharger = () => {
 return (
 <section className="bg-white">
   <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-    <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
+    {/* <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
       <img
         alt="addchargerimage"
-        src="https://images.unsplash.com/photo-1605106702734-205df224ecce?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+        src={qrCodeUrl}
         className="absolute inset-0 h-full w-full object-cover"
       />
-    </aside>
+    </aside> */}
 
     <main
       className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
@@ -376,6 +380,19 @@ return (
               className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
             />
           </div>
+
+          <div className="col-span-6">
+            <label htmlFor="chargeridentity" className="block text-sm font-medium text-gray-700">   Charger Serial identity eg . format [dist name, dist code , kvw] "WB24007" </label>
+
+            <input
+              type="text"
+              id="chargeridentity"
+              name="chargeridentity"
+              value={chargeridentity}
+              onChange={(e)=>setChargerIdentity(e.target.value)}
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+          </div>
           
           <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
             <button
@@ -385,6 +402,20 @@ return (
             </button>
           </div>
         </form>
+            {/* Display QR Code if it exists */}
+            {ocppurl && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold text-gray-900">OCPP URL</h2>
+                <input
+              type="text"
+              id="ocppurl"
+              name="ocppurl"
+              value={ocppurl}
+             
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />           
+              </div>
+            )}
       </div>
     </main>
   </div>

@@ -16,6 +16,8 @@ import OTPVerify from './pages/otpverification';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AddCharger from './pages/addcharger';
+import ChargerOperationsView from './pages/chargerops';
+import ChargerDetails from './pages/chargerdetails';
 
 function App() {
 
@@ -35,6 +37,8 @@ function App() {
         <Route exact path='/signin' element={<Login/>}/>
         <Route exact path='/otpverify' element={<OTPVerify/>}/>
         <Route exact path="/addcharger" element={<AddCharger/>}/>
+        <Route exact path='/listofcharger' element={<ChargerOperationsView/>}/>
+        <Route exact path="/chargerdetails/:uid" element={<ChargerDetails/>}/>
       </Routes>
     </>
   );

@@ -1,0 +1,10 @@
+/* Ensure the table can scroll horizontally */
+.table-container {
+    overflow-x: auto;
+  }
+  
+  /* Adjust table columns and table layout */
+  table {
+    min-width: 1000px; /* Adjust as needed */
+  }
+  
