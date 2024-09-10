@@ -18,6 +18,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import AddCharger from './pages/addcharger';
 import ChargerOperationsView from './pages/chargerops';
 import ChargerDetails from './pages/chargerdetails';
+import AddNewuser from './pages/admincrud/addnewuser';
+import ListofUsers from './pages/admincrud/listofusers';
+import SingleUserDetails from './pages/admincrud/singleuserdetails';
 
 function App() {
 
@@ -39,6 +42,9 @@ function App() {
         <Route exact path="/addcharger" element={<AddCharger/>}/>
         <Route exact path='/listofcharger' element={<ChargerOperationsView/>}/>
         <Route exact path="/chargerdetails/:uid" element={<ChargerDetails/>}/>
+        <Route exact path='/createnewuser' element={<AddNewuser/>}/>
+        <Route exact path='/listofusers' element={<ListofUsers/>}/>
+        <Route exact path="/userdetails/:uid" element={<SingleUserDetails/>}/>
       </Routes>
     </>
   );
