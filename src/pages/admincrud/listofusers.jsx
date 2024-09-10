@@ -90,7 +90,7 @@ const ListofUsers = () => {
   const totalPages = Math.ceil(userData.length / itemsPerPage);
 //charger details
 const handleUidClick = (uid) => {
-  navigate(`/chargerdetails/${uid}`);
+  navigate(`/userdetails/${uid}`);
 };
   return (
     <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">

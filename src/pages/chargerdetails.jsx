@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import QRCode from 'react-qr-code';
+
 
 const ChargerDetails = () => {
   const navigate = useNavigate();
