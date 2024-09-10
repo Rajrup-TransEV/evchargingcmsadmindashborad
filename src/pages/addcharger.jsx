@@ -96,7 +96,7 @@ const AddCharger = () => {
           setOcppurl(data.ocppurl)
             toast(data.message)
         }else{
-            toast.error("Something went wrong plase try again")
+            toast.error("Something went wrong please try again")
         }
     } catch (error) {
     console.log(error)  

@@ -1,6 +1,98 @@
-import React from 'react'
-
+import React, { useState,useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 const AddNewuser = () => {
+  const [firstname,setFirstname]=useState('')
+  const [lastname,setLastname]=useState('')
+  const [email,setEmail]=useState('')
+  const [password,setpassword]=useState('')
+  const [address,setAddress]=useState('')
+  const [phonenumber,setPhonenumber]=useState('')
+  const [role,setRole]=useState('')
+  const [designation,setDesignation]=useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  //use effect to directly check for if user logged in or not
+  useEffect(() => {
+    const checkAuthentication = async () => {
+     
+      // Take API key value from env
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+      
+      try {
+        const gettoken = localStorage.getItem("token");
+        console.log(gettoken)
+        if (!gettoken) {
+          navigate("/signin");
+          return;
+        }
+        
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiauthkey': apikey,
+          },
+          body: JSON.stringify({ token: gettoken })
+        });
+        
+        const data = await response.json();
+        console.log(data)        
+        if (response.ok) {
+
+          if (data.user.userType !== "superadmin") {
+            toast("You have no authorization to view this page");
+            navigate("/signin");
+          } else {
+            console.log("You are an authorized user");
+          }
+        } else {
+          toast("Failed to verify user");
+          navigate("/signin");
+        }
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+        toast("An error occurred during authentication");
+        navigate("/signin");
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]); // Dependency array includes navigate to avoid stale closure
+  
+  //handel the submitted from data
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+              //take api key value from env
+        const apikey = import.meta.env.VITE_API_KEY;
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const response = await fetch(`${rooturi}/admin/create/userprofilecreate`,{
+          method:'POST',
+          headers:{
+            'Content-Type': 'application/json',
+            'apiauthkey': apikey,
+        },
+        body:JSON.stringify({firstname,lastname,email,password,address,phonenumber,role,designation})
+        })
+        const data = await response.json()
+        console.log(data)
+        if(response.ok){
+            toast.info(data.message)
+        }else{
+              toast.error(data.message)
+              console.log(data.error)
+        }
+    } catch (error) {
+      toast.error("unknown error occurred",error)
+      console.log(error)
+    }finally{
+      setLoading(false)
+    }
+  }
   return (
 
   <section class="bg-white dark:bg-gray-900">
@@ -17,7 +109,7 @@ const AddNewuser = () => {
         class="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
       >
         <div class="max-w-xl lg:max-w-3xl">
-          <a class="block text-blue-600" href="#">
+          <a class="block text-blue-600" href="/">
             <span class="sr-only">Home</span>
             <svg
               class="h-8 sm:h-10"
@@ -33,15 +125,14 @@ const AddNewuser = () => {
           </a>
   
           <h1 class="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-            Welcome to Squid 🦑
+            Welcome to Create new user section 🦑
           </h1>
   
           <p class="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi nam dolorum aliquam,
-            quibusdam aperiam voluptatum.
+            Create a new admin user from here directly
           </p>
   
-          <form action="#" class="mt-8 grid grid-cols-6 gap-6">
+          <form action="#" class="mt-8 grid grid-cols-6 gap-6" onSubmit={handleSubmit} >
             <div class="col-span-6 sm:col-span-3">
               <label
                 for="FirstName"
@@ -52,15 +143,17 @@ const AddNewuser = () => {
   
               <input
                 type="text"
-                id="FirstName"
-                name="first_name"
+                id="firstname"
+                name="firstname"
+                value={firstname}
+                onChange={(e)=>setFirstname(e.target.value)}
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
   
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="LastName"
+                for="lastname"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
                 Last Name
@@ -68,8 +161,10 @@ const AddNewuser = () => {
   
               <input
                 type="text"
-                id="LastName"
-                name="last_name"
+                id="lastname"
+                name="lastname"
+                value={lastname}
+                onChange={(e)=>setLastname(e.target.value)}
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
@@ -81,8 +176,10 @@ const AddNewuser = () => {
   
               <input
                 type="email"
-                id="Email"
+                id="email"
                 name="email"
+                value={email}
+                onChange={(e)=>setEmail(e.target.value)}
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
@@ -97,65 +194,87 @@ const AddNewuser = () => {
   
               <input
                 type="password"
-                id="Password"
+                id="password"
                 name="password"
+                value={password}
+                onChange={(e)=>setpassword(e.target.value)}
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
-  
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="PasswordConfirmation"
+                for="address"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                Password Confirmation
+                Address
               </label>
   
               <input
-                type="password"
-                id="PasswordConfirmation"
-                name="password_confirmation"
+                type="text"
+                id="address"
+                name="address"
+                value={address}
+                onChange={(e)=>setAddress(e.target.value)}
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
-  
-            <div class="col-span-6">
-              <label for="MarketingAccept" class="flex gap-4">
-                <input
-                  type="checkbox"
-                  id="MarketingAccept"
-                  name="marketing_accept"
-                  class="size-5 rounded-md border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:focus:ring-offset-gray-900"
-                />
-  
-                <span class="text-sm text-gray-700 dark:text-gray-200">
-                  I want to receive emails about events, product updates and company announcements.
-                </span>
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="address"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                Phone Number
               </label>
-            </div>
   
-            <div class="col-span-6">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                By creating an account, you agree to our
-                <a href="#" class="text-gray-700 underline dark:text-gray-200">
-                  terms and conditions
-                </a>
-                and
-                <a href="#" class="text-gray-700 underline dark:text-gray-200"> privacy policy </a>.
-              </p>
+              <input
+                type="text"
+                id="phonenumber"
+                name="phonenumber"
+                value={phonenumber}
+                onChange={(e)=>setPhonenumber(e.target.value)}
+                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              />
             </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="role"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                Role "eg . admin, user "
+              </label>
   
+              <input
+                type="text"
+                id="role"
+                name="role"
+                value={role}
+                onChange={(e)=>setRole(e.target.value)}
+                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="role"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                Designation
+              </label>
+  
+              <input
+                type="text"
+                id="designation"
+                name="designation"
+                value={designation}
+                onChange={(e)=>setDesignation(e.target.value)}
+                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
             <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
               <button
                 class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500 dark:hover:bg-blue-700 dark:hover:text-white"
               >
-                Create an account
+           {loading ? 'Processing...' : 'Save charger user details'}
               </button>
-  
-              <p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
-                Already have an account?
-                <a href="#" class="text-gray-700 underline dark:text-gray-200">Log in</a>.
-              </p>
             </div>
           </form>
         </div>
