@@ -21,6 +21,7 @@ import ChargerDetails from './pages/chargerdetails';
 import AddNewuser from './pages/admincrud/addnewuser';
 import ListofUsers from './pages/admincrud/listofusers';
 import SingleUserDetails from './pages/admincrud/singleuserdetails';
+import LogRetentionlist from './pages/logdetails/loglist';
 
 function App() {
 
@@ -45,6 +46,7 @@ function App() {
         <Route exact path='/createnewuser' element={<AddNewuser/>}/>
         <Route exact path='/listofusers' element={<ListofUsers/>}/>
         <Route exact path="/userdetails/:uid" element={<SingleUserDetails/>}/>
+        <Route exact path="/logretentionlist" element={<LogRetentionlist/>} />
       </Routes>
     </>
   );
