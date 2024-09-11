@@ -507,4 +507,4 @@ const ChargerSettings = () => {
   );
 };
 
-export default Charger
+export default ChargerSettings
