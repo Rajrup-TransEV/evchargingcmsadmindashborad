@@ -106,6 +106,12 @@ const AddCharger = () => {
         setLoading(false)
     }
   }
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files[0]; // Get the first file from the input
+    if (selectedFile) {
+        setcharger_image(selectedFile); // Update the state with the selected file
+    }
+};
 return (
 <section className="bg-white">
   <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
@@ -121,7 +127,7 @@ return (
       className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
     >
       <div className="max-w-xl lg:max-w-3xl">
-        <a className="block text-blue-600" href="#">
+        <a className="block text-blue-600" href="/">
           <span className="sr-only">Home</span>
           <svg
             className="h-8 sm:h-10"
@@ -360,11 +366,11 @@ return (
             <label htmlFor="charger_image" className="block text-sm font-medium text-gray-700">   charger_image </label>
 
             <input
-              type="text"
+              type="file"
               id="charger_image"
               name="charger_image"
-              value={charger_image}
-              onChange={(e)=>setcharger_image(e.target.value)}
+       
+              onChange={handleFileUpload}
               className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
             />
           </div>
