@@ -18,10 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AddCharger from './pages/addcharger';
 import ChargerOperationsView from './pages/chargerops';
 import ChargerDetails from './pages/chargerdetails';
-import AddNewuser from './pages/admincrud/addnewuser';
-import ListofUsers from './pages/admincrud/listofusers';
-import SingleUserDetails from './pages/admincrud/singleuserdetails';
-import LogRetentionlist from './pages/logdetails/loglist';
+import ChargerSettings from './pages/chargersettings';
 
 function App() {
 
@@ -43,10 +40,7 @@ function App() {
         <Route exact path="/addcharger" element={<AddCharger/>}/>
         <Route exact path='/listofcharger' element={<ChargerOperationsView/>}/>
         <Route exact path="/chargerdetails/:uid" element={<ChargerDetails/>}/>
-        <Route exact path='/createnewuser' element={<AddNewuser/>}/>
-        <Route exact path='/listofusers' element={<ListofUsers/>}/>
-        <Route exact path="/userdetails/:uid" element={<SingleUserDetails/>}/>
-        <Route exact path="/logretentionlist" element={<LogRetentionlist/>} />
+        <Route exact path="/settings/:uid" element={<ChargerSettings/>}/>
       </Routes>
     </>
   );
