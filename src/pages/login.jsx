@@ -9,42 +9,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      //take api key value from env
-      const apikey = import.meta.env.VITE_API_KEY;
-      const rooturi = import.meta.env.VITE_ROOT_URI;
-      const response = await fetch(`${rooturi}/userauth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apiauthkey':apikey, // Replace 'your-api-key' with your actual API key
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Handle successful login, e.g., redirect to another page
-          toast(data.message)
-        navigate('/otpverify', { replace: true });
-      } else {
-        toast(data.message)
-        setError(data.message || 'Login failed');
-      }
-    } catch (error) {
-      toast(data.message)
-      setError('An error occurred during login');
-    } finally {
-      setLoading(false);
-    }
-  };
- 
   useEffect(() => {
     const checkAuthentication = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
@@ -88,6 +52,45 @@ const Login = () => {
 
     checkAuthentication();
   }, [navigate]);
+
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      //take api key value from env
+      const apikey = import.meta.env.VITE_API_KEY;
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const response = await fetch(`${rooturi}/userauth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apiauthkey':apikey, // Replace 'your-api-key' with your actual API key
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Handle successful login, e.g., redirect to another page
+          toast(data.message)
+        navigate('/otpverify', { replace: true });
+      } else {
+        toast(data.message)
+        setError(data.message || 'Login failed');
+      }
+    } catch (error) {
+      // toast(data.message)
+      setError('An error occurred during login');
+    } finally {
+      setLoading(false);
+    }
+  };
+ 
+
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
