@@ -8,6 +8,7 @@ const ChargerDetails = () => {
   const { uid } = useParams();
   const [chargerData, setChargerData] = useState(null);
   const[qrCode,setQrcode]=useState(null);
+  const [chargerImage,setChargerImage]=useState(null)
   const [loading, setLoading] = useState(true);
   //use ffect to directly check for if user logged in or not
   useEffect(() => {
@@ -78,6 +79,7 @@ const ChargerDetails = () => {
           console.log(result)
           setChargerData(result.chargerdata);
           setQrcode(result.qrdata)
+          setChargerImage(result.chargerimageurl)
         } else {
           toast("Failed to fetch charger details");
         }
@@ -117,7 +119,7 @@ const ChargerDetails = () => {
             <p className="mb-2">{chargerData.Total_Capacity}</p>
           </div>
           <div>
-            <img src={chargerData.charger_image} alt="Charger" className="mb-4" />
+            <img src={chargerImage} alt="Charger" className="mb-4" />
             <p className="font-bold">Charger Use Type:</p>
             <p className="mb-2">{chargerData.charger_use_type}</p>
             <p className="font-bold">Connector Total Capacity:</p>
