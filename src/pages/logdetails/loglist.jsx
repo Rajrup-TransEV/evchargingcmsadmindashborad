@@ -159,65 +159,97 @@ const LogRetentionlist = () => {
                     </tbody>
                 </table>
             </div>
-
             <div className="rounded-b-lg border-t border-gray-200 px-4 py-2 sm:px-6 md:px-8">
-                <ol className="flex justify-end gap-1 text-xs font-medium">
-                    <li>
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                            className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-                        >
-                            <span className="sr-only">Prev Page</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-3 h-3"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </button>
-                    </li>
+    <ol className="flex justify-end gap-1 text-xs font-medium">
+        <li>
+            <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
+            >
+                <span className="sr-only">Prev Page</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-3 h-3"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                >
+                    <path
+                        fillRule="evenodd"
+                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                    />
+                </svg>
+            </button>
+        </li>
 
-                    {Array.from({ length: totalPages }, (_, index) => (
-                        <li key={index}>
-                            <button
-                                onClick={() => setCurrentPage(index + 1)}
-                                className={`block w-8 rounded text-center leading-8 ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'border border-gray-100 bg-white text-gray-900'}`}
-                            >
-                                {index + 1}
-                            </button>
-                        </li>
-                    ))}
+        {/* Previous 10 Button */}
+        {currentPage > 10 && (
+            <li>
+                <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 10, 1))}
+                    className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900"
+                >
+                    <span className="sr-only">Previous 10 Pages</span>
+                    Previous 10
+                </button>
+            </li>
+        )}
 
-                    <li>
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                            className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-                        >
-                            <span className="sr-only">Next Page</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-3 h-3"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </button>
-                    </li>
-                </ol>
-            </div>
+        {/* Page Numbers */}
+        {Array.from({ length: Math.min(totalPages, 10) }, (_, index) => {
+            const pageNumber = index + 1 + (Math.floor((currentPage - 1) / 10) * 10);
+            if (pageNumber > totalPages) return null; // Skip if page number exceeds total pages
+            return (
+                <li key={pageNumber}>
+                    <button
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`block w-8 rounded text-center leading-8 ${currentPage === pageNumber ? 'bg-blue-600 text-white' : 'border border-gray-100 bg-white text-gray-900'}`}
+                    >
+                        {pageNumber}
+                    </button>
+                </li>
+            );
+        })}
+
+        {/* Next 10 Button */}
+        {totalPages > 10 && currentPage <= totalPages - 10 && (
+            <li>
+                <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 10, totalPages))}
+                    className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900"
+                >
+                    <span className="sr-only">Next 10 Pages</span>
+                    Next 10
+                </button>
+            </li>
+        )}
+
+        <li>
+            <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="inline-flex items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
+            >
+                <span className="sr-only">Next Page</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-3 h-3"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                >
+                    <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                    />
+                </svg>
+            </button>
+        </li>
+    </ol>
+</div>
+
+
         </div>
     );
 };

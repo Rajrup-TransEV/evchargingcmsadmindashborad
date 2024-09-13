@@ -70,7 +70,7 @@ const ListofVehicles = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching charger data:", error);
-        toast("Failed to fetch charger data");
+        toast("Failed to fetch list of vehicle  data");
         setuserData([]);
         setLoading(false);
       }
