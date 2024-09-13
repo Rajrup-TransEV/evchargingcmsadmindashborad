@@ -9,7 +9,7 @@ const ChargerSettings = () => {
   const [connectors, setConnectors] = useState([]);
   const [selectedConnector, setSelectedConnector] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(true); // Use WebSocket to set this
   const [parameters, setParameters] = useState([]);
   const [selectedViewParameter, setSelectedViewParameter] = useState('');
   const [viewedParameter, setViewedParameter] = useState(null);
@@ -23,8 +23,44 @@ const ChargerSettings = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
 
-  const STATUS_FETCH_TIMEOUT = 15000;
-  const RETRY_INTERVAL = 15000;
+  useEffect(() => {
+    // WebSocket connection to monitor charger online/offline status
+    const rooturi = import.meta.env.VITE_BK_ROOT_URI;
+    const fewsuri = import.meta.env.VITE_FE_WS_URI;
+    const ws = new WebSocket(`${fewsuri}/frontend/ws/${uid}`);
+
+    ws.onopen = () => {
+      console.log(`WebSocket connected to ${fewsuri}/frontend/ws/${uid}`);
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.status === 'Online') {
+        setIsOnline(true);
+        setStatus('Online');
+      } else if (data.status === 'Offline') {
+        setIsOnline(false);
+        setStatus('Offline');
+      }
+    };
+
+    ws.onclose = () => {
+      console.log(`WebSocket connection closed for charger ${uid}`);
+      setIsOnline(false); // Assume offline on disconnect
+      setStatus('Offline');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsOnline(false);
+      setStatus('Offline');
+    };
+
+    // Cleanup on unmount
+    return () => {
+      ws.close();
+    };
+  }, [uid]);
 
   const fetchChargerStatus = async () => {
     const rooturi = import.meta.env.VITE_BK_ROOT_URI;
@@ -32,14 +68,6 @@ const ChargerSettings = () => {
     setLoading(true);
     setIsLoadingConnectors(true);
     setIsConnectorLoading(true);
-
-    const timeout = setTimeout(() => {
-      setIsOnline(false);
-      setStatus('Offline');
-      setConnectors([]);
-      setConnectorStatus('Offline');
-      toast.error('Charger is offline');
-    }, STATUS_FETCH_TIMEOUT);
 
     try {
       const response = await fetch(`${rooturi}/api/status`, {
@@ -50,16 +78,6 @@ const ChargerSettings = () => {
         },
         body: JSON.stringify({ uid }),
       });
-
-      clearTimeout(timeout);
-
-      if (response.status === 404) {
-        setStatus('Offline');
-        setIsOnline(false);
-        setConnectors([]);
-        setConnectorStatus('Offline');
-        return;
-      }
 
       const data = await response.json();
       if (response.ok) {
@@ -110,7 +128,7 @@ const ChargerSettings = () => {
   const handleConnectorChange = async (e) => {
     const selectedConnectorId = e.target.value;
     setSelectedConnector(selectedConnectorId);
-    
+
     if (!selectedConnectorId) return;
 
     setIsConnectorLoading(true);
@@ -222,7 +240,7 @@ const ChargerSettings = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success(`Charger successfully ${connectorStatus === 'Available' ? 'disengaged' : 'engaged'}`);
-        fetchChargerStatus();
+        await fetchChargerStatus(); // Refresh status after the operation
       } else {
         toast.error('Operation failed');
       }
@@ -254,7 +272,7 @@ const ChargerSettings = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success('Charger refresh successful');
-        fetchChargerStatus();
+        fetchChargerStatus(); // Refresh status after refresh
       } else {
         toast.error(`Failed to refresh charger: ${data.detail}`);
       }
@@ -296,16 +314,18 @@ const ChargerSettings = () => {
   };
 
   useEffect(() => {
-    setIsConnectorLoading(true);
+    // Load status and parameters when component loads or focus changes
     fetchChargerStatus();
     fetchChargerParameters();
 
-    const parameterInterval = setInterval(fetchChargerParameters, STATUS_FETCH_TIMEOUT);
-    const statusInterval = setInterval(fetchChargerStatus, STATUS_FETCH_TIMEOUT);
+    const handleFocus = () => {
+      fetchChargerStatus();
+      fetchChargerParameters();
+    };
 
+    window.addEventListener('focus', handleFocus);
     return () => {
-      clearInterval(statusInterval);
-      clearInterval(parameterInterval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [uid]);
 
@@ -315,12 +335,6 @@ const ChargerSettings = () => {
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <button
-            className="mr-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={fetchChargerStatus}
-          >
-            Refresh Status
-          </button>
           <div className="relative">
             <button
               className="mr-4 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
@@ -507,4 +521,4 @@ const ChargerSettings = () => {
   );
 };
 
-export default ChargerSettings
+export default ChargerSettings;
