@@ -64,15 +64,33 @@ const handelSubmit = async(e)=>{
     const apikey = import.meta.env.VITE_API_KEY;
     const rooturi = import.meta.env.VITE_ROOT_URI;
 
-    const response = await fetch(`${rooturi}/userauth/login`,{
-      
+    const response = await fetch(`${rooturi}/admin/createav`,{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apiauthkey': apikey,
+      },
+      body:JSON.stringify({
+        vehiclename,
+        vehiclemodel,
+        vehiclelicense,
+        vehicleowner,
+        vehicletype,
+        vehiclecategory
+      })
     })
-
+    const data= await response.json()
+    if(response.ok){
+      toast(data.message)
+    }else{
+      toast.error(data.message)
+      setLoading(false)
+    }
   } catch (error) {
     console.log(error)
+    toast.error('Failed to add data')
+    setLoading(false)
   }
-
-
 
 }
 
@@ -115,7 +133,7 @@ const handelSubmit = async(e)=>{
         Add a new vehicle here 
           </p>
   
-          <form action="#" class="mt-8 grid grid-cols-6 gap-6">
+          <form action="#" class="mt-8 grid grid-cols-6 gap-6" onSubmit={handelSubmit}>
             <div class="col-span-6 sm:col-span-3">
               <label
                 for="vehiclename"
@@ -172,7 +190,7 @@ const handelSubmit = async(e)=>{
                 for="vehicleowner"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                vehicleowner
+                Vehicleowner email
               </label>
   
               <input
