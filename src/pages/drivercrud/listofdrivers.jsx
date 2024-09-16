@@ -1,95 +1,99 @@
+//list of drivers
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-const ListofVehicles = () => {
+
+const ListOfDrivres = () => {
     const navigate = useNavigate();
-    const [listofvehicle, setlistofvehicle] = useState([]); // Initial state is an empty array
+    const [listofdrivers, setlistofdriver] = useState([]); // Initial state is an empty array
     const [loading, setLoading] = useState(true); // State to handle loading status
     const [currentPage, setCurrentPage] = useState(1); // Current page state
     const [itemsPerPage] = useState(10); // Number of items to display per page
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      const rooturi = import.meta.env.VITE_ROOT_URI;
-      const apikey = import.meta.env.VITE_API_KEY;
 
-      try {
-        const gettoken = localStorage.getItem("token");
-        if (!gettoken) {
-          navigate("/signin");
-          return;
-        }
-
-        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apiauthkey': apikey,
-          },
-          body: JSON.stringify({ token: gettoken })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          if (data.user.userType !== "superadmin") {
-            toast("You have no authorization to view this page");
+    useEffect(() => {
+        const checkAuthentication = async () => {
+          const rooturi = import.meta.env.VITE_ROOT_URI;
+          const apikey = import.meta.env.VITE_API_KEY;
+    
+          try {
+            const gettoken = localStorage.getItem("token");
+            if (!gettoken) {
+              navigate("/signin");
+              return;
+            }
+    
+            const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apiauthkey': apikey,
+              },
+              body: JSON.stringify({ token: gettoken })
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+              if (data.user.userType !== "superadmin") {
+                toast("You have no authorization to view this page");
+                navigate("/signin");
+              } else {
+                console.log("You are an authorized user");
+              }
+            } else {
+              toast("Failed to verify user");
+              navigate("/signin");
+            }
+          } catch (error) {
+            console.error("Error during authentication check:", error);
+            toast("An error occurred during authentication");
             navigate("/signin");
-          } else {
-            console.log("You are an authorized user");
           }
-        } else {
-          toast("Failed to verify user");
-          navigate("/signin");
-        }
-      } catch (error) {
-        console.error("Error during authentication check:", error);
-        toast("An error occurred during authentication");
-        navigate("/signin");
-      }
-    };
+        };
+    
+        checkAuthentication();
+      }, [navigate]);
+    
 
-    checkAuthentication();
-  }, [navigate]);
-
-  useEffect(() => {
-    const fetchAllChargerData = async () => {
-      const rooturi = import.meta.env.VITE_ROOT_URI;
-      const apikey = import.meta.env.VITE_API_KEY;
-  
-      try {
-        const response = await fetch(`${rooturi}/admin/listofvehicle`, {
-          method: "GET",
-          headers: {
-            'Content-Type': 'application/json',
-            'apiauthkey': apikey,
-          },
-        });
-  
-        const result = await response.json();
-        const data = Array.isArray(result.data) ? result.data : [];
-        setlistofvehicle(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching charger data:", error);
-        toast("Failed to fetch list of vehicle  data");
-        setlistofvehicle([]);
-        setLoading(false);
-      }
-    };
-  
-    fetchAllChargerData();
-  }, []);
-
-  // Calculate the current chargers to display
-  const indexOfLastUser = currentPage * itemsPerPage;
-  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = listofvehicle.slice(indexOfFirstUser, indexOfLastUser);
-
+      useEffect(() => {
+        const fetchAllChargerData = async () => {
+          const rooturi = import.meta.env.VITE_ROOT_URI;
+          const apikey = import.meta.env.VITE_API_KEY;
+      
+          try {
+            const response = await fetch(`${rooturi}/admin/getallvehicleowener`, {
+              method: "GET",
+              headers: {
+                'Content-Type': 'application/json',
+                'apiauthkey': apikey,
+              },
+            });
+      
+            const result = await response.json();
+            const data = Array.isArray(result.data) ? result.data : [];
+            setlistofdriver(data);
+            setLoading(false);
+          } catch (error) {
+            console.error("Error fetching charger data:", error);
+            toast("Failed to fetch list of vehicle  data");
+            setlistofdriver([]);
+            setLoading(false);
+          }
+        };
+      
+        fetchAllChargerData();
+      }, []);
+    
+      // Calculate the current chargers to display
+      const indexOfLastUser = currentPage * itemsPerPage;
+      const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+      const listofDrivers = listofdrivers.slice(indexOfFirstUser, indexOfLastUser); 
+      
   // Calculate total pages
-  const totalPages = Math.ceil(listofvehicle.length / itemsPerPage);
-//charger details
-const handleUidClick = (uid) => {
-  navigate(`/userdetails/${uid}`);
-};
+  const totalPages = Math.ceil(listofdrivers.length / itemsPerPage);
+  //charger details
+  const handleUidClick = (uid) => {
+    navigate(`/vehicleowenerdetails/${uid}`);
+  };
   return (
     <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
     <div className="overflow-x-auto">
@@ -97,9 +101,9 @@ const handleUidClick = (uid) => {
         <thead className="ltr:text-left rtl:text-right">
           <tr>
             {[
-              'id', 'uid', 'vehiclename', 'vehiclemodel', 'vehiclelicense', 
-       'vehiclecategory', 'vehicletype', 'vehicleowenerId',
-              'isvehicleassigned', 'createdAt', 'updatedAt',
+              'id', 'uid', 'vehicleowenerfirstname', 'vehicleowenerlastename', 'vehicleoweneremail', 
+       'phonenumber', 'vehicleowenerlicense', 'vehicleowenergovdocs',
+              'vehicleowenernationality', 'vehicleoweneraddress','vehicleowenerrole','createdAt', 'updatedAt',
             ].map((heading) => (
               <th key={heading} className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 {heading}
@@ -115,8 +119,8 @@ const handleUidClick = (uid) => {
               </td>
             </tr>
           ) : (
-            currentUsers.length > 0 ? (
-              currentUsers.map((user) => (
+            listofDrivers.length > 0 ? (
+                listofDrivers.map((user) => (
                 <tr key={user.id}>
                   {[
                     user.id,  
@@ -125,9 +129,9 @@ const handleUidClick = (uid) => {
                     onClick={() => handleUidClick(user.uid)}
                   >
                     {user.uid}
-                  </button>,user.vehiclename,
-                    user.vehiclemodel, user.vehiclelicense,  user.vehiclecategory,
-                    user.vehicletype, user.vehicleowenerId, user.isvehicleassigned,
+                  </button>,user.vehicleowenerfirstname,
+                    user.vehicleowenerlastename, user.vehicleoweneremail,  user.phonenumber,
+                    user.vehicleowenerlicense, user.vehicleowenergovdocs, user.vehicleowenernationality,user.vehicleoweneraddress,user.vehicleowenerrole,
                    user.createdAt,user.updatedAt
                   ].map((cell, index) => (
                     <td key={index} className="whitespace-nowrap px-4 py-2 text-gray-700">
@@ -210,4 +214,4 @@ const handleUidClick = (uid) => {
   )
 }
 
-export default ListofVehicles
+export default ListOfDrivres
