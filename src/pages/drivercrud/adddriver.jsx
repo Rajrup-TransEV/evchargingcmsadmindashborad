@@ -1,99 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React from 'react'
 
-const AddVehicle = () => {
-  const navigate = useNavigate();
-  const[vehiclename,setvehiclename]=useState('');
-  const[vehiclemodel,setvehiclemodel]=useState('');
-  const[vehiclelicense,setvehiclelicense]=useState('');
-  const[vehicleowner,setvehicleowner]=useState('');
-  const[vehicletype,setvehicletype]=useState('');
-  const[vehiclecategory,setvehiclecategory]=useState('')
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const checkAuthentication = async () => {
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-        const apikey = import.meta.env.VITE_API_KEY;
-
-        try {
-            const gettoken = localStorage.getItem("token");
-            if (!gettoken) {
-                navigate("/signin");
-                return;
-            }
-
-            const response = await fetch(`${rooturi}/userauth/verifyuser`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiauthkey': apikey,
-                },
-                body: JSON.stringify({ token: gettoken })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                if (data.user.userType !== "superadmin") {
-                    toast("You have no authorization to view this page");
-                    navigate("/signin");
-                } else {
-                    console.log("You are an authorized user");
-                }
-            } else {
-                toast("Failed to verify user");
-                navigate("/signin");
-            }
-        } catch (error) {
-            console.error("Error during authentication check:", error);
-            toast("An error occurred during authentication");
-            navigate("/signin");
-        }
-    };
-
-    checkAuthentication();
-}, [navigate]);
-
-
-const handelSubmit = async(e)=>{
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const apikey = import.meta.env.VITE_API_KEY;
-    const rooturi = import.meta.env.VITE_ROOT_URI;
-
-    const response = await fetch(`${rooturi}/admin/createav`,{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apiauthkey': apikey,
-      },
-      body:JSON.stringify({
-        vehiclename,
-        vehiclemodel,
-        vehiclelicense,
-        vehicleowner,
-        vehicletype,
-        vehiclecategory
-      })
-    })
-    const data= await response.json()
-    if(response.ok){
-      toast(data.message)
-    }else{
-      toast.error(data.message)
-      setLoading(false)
-    }
-  } catch (error) {
-    console.log(error)
-    toast.error('Failed to add data')
-    setLoading(false)
-  }
-
-}
-
+const adddriver = () => {
   return (
   
   <section class="bg-white dark:bg-gray-900">
@@ -126,123 +33,128 @@ const handelSubmit = async(e)=>{
           </a>
   
           <h1 class="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-            Welcome to Add new vehicle section 🦑
+            Welcome to Squid 🦑
           </h1>
   
           <p class="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
-        Add a new vehicle here 
+                Add driver
           </p>
   
-          <form action="#" class="mt-8 grid grid-cols-6 gap-6" onSubmit={handelSubmit}>
+          <form action="#" class="mt-8 grid grid-cols-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="vehiclename"
+                for="FirstName"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                Vehicle Name
+                First Name
               </label>
   
               <input
                 type="text"
-                id="vehiclename"
-                name="vehiclename"
-                value={vehiclename}
-                onChange={(e)=>setvehiclename(e.target.value)}
+                id="FirstName"
+                name="first_name"
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
   
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="vehiclemodel"
+                for="LastName"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-               vehiclemodel
+                Last Name
               </label>
   
               <input
                 type="text"
-                id="vehiclemodel"
-                name="vehiclemodel"
-                value={vehiclemodel}
-                onChange={(e)=>setvehiclemodel(e.target.value)}
+                id="LastName"
+                name="last_name"
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
   
             <div class="col-span-6">
-              <label for="vehiclelicense" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              vehiclelicense
+              <label for="Email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Email
               </label>
   
               <input
-                type="text"
-                id="vehiclelicense"
-                name="vehiclelicense"
-                value={vehiclelicense}
-                onChange={(e)=>setvehiclelicense(e.target.value)}
+                type="email"
+                id="Email"
+                name="email"
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
   
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="vehicleowner"
+                for="Password"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                Vehicleowner email
+                Password
               </label>
   
               <input
-                type="text"
-                id="vehicleowner"
-                name="vehicleowner"
-                value={vehicleowner}
-                onChange={(e)=>setvehicleowner(e.target.value)}
+                type="password"
+                id="Password"
+                name="password"
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
   
             <div class="col-span-6 sm:col-span-3">
               <label
-                for="vehicletype"
+                for="PasswordConfirmation"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                vehicletype
+                Password Confirmation
               </label>
   
               <input
-                type="text"
-                id="vehicletype"
-                name="vehicletype"
-                value={vehicletype}
-                onChange={(e)=>setvehicletype(e.target.value)}
+                type="password"
+                id="PasswordConfirmation"
+                name="password_confirmation"
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
-             <div class="col-span-6 sm:col-span-3">
-              <label
-                for="vehiclecategory"
-                class="block text-sm font-medium text-gray-700 dark:text-gray-200"
-              >
-                vehiclecategory
-              </label>
   
-              <input
-                type="text"
-                id="vehiclecategory"
-                name="vehiclecategory"
-                value={vehiclecategory}
-                onChange={(e)=>setvehiclecategory(e.target.value)}
-                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              />
+            <div class="col-span-6">
+              <label for="MarketingAccept" class="flex gap-4">
+                <input
+                  type="checkbox"
+                  id="MarketingAccept"
+                  name="marketing_accept"
+                  class="size-5 rounded-md border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:focus:ring-offset-gray-900"
+                />
+  
+                <span class="text-sm text-gray-700 dark:text-gray-200">
+                  I want to receive emails about events, product updates and company announcements.
+                </span>
+              </label>
             </div>
+  
+            <div class="col-span-6">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                By creating an account, you agree to our
+                <a href="#" class="text-gray-700 underline dark:text-gray-200">
+                  terms and conditions
+                </a>
+                and
+                <a href="#" class="text-gray-700 underline dark:text-gray-200"> privacy policy </a>.
+              </p>
+            </div>
+  
             <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
               <button
                 class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500 dark:hover:bg-blue-700 dark:hover:text-white"
               >
                 Create an account
               </button>
+  
+              <p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
+                Already have an account?
+                <a href="#" class="text-gray-700 underline dark:text-gray-200">Log in</a>.
+              </p>
             </div>
           </form>
         </div>
@@ -253,4 +165,4 @@ const handelSubmit = async(e)=>{
   )
 }
 
-export default AddVehicle
+export default adddriver

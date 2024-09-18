@@ -71,6 +71,44 @@ const ChargerSettings = () => {
       clearInterval(intervalId);
     };
   }, [uid]);
+  useEffect(() => {
+    // WebSocket connection to monitor charger online/offline status
+    const rooturi = import.meta.env.VITE_BK_ROOT_URI;
+    const fewsuri = import.meta.env.VITE_FE_WS_URI;
+    const ws = new WebSocket(`${fewsuri}/frontend/ws/${uid}`);
+
+    ws.onopen = () => {
+      console.log(`WebSocket connected to ${fewsuri}/frontend/ws/${uid}`);
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.status === 'Online') {
+        setIsOnline(true);
+        setStatus('Online');
+      } else if (data.status === 'Offline') {
+        setIsOnline(false);
+        setStatus('Offline');
+      }
+    };
+
+    ws.onclose = () => {
+      console.log(`WebSocket connection closed for charger ${uid}`);
+      setIsOnline(false); // Assume offline on disconnect
+      setStatus('Offline');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsOnline(false);
+      setStatus('Offline');
+    };
+
+    // Cleanup on unmount
+    return () => {
+      ws.close();
+    };
+  }, [uid]);
 
   const fetchChargerStatus = async () => {
     const rooturi = import.meta.env.VITE_BK_ROOT_URI;

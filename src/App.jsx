@@ -24,6 +24,9 @@ import SingleUserDetails from './pages/admincrud/singleuserdetails';
 import LogRetentionlist from './pages/logdetails/loglist';
 import AddVehicle from './pages/vehiclecrud/addvehicle';
 import AddNewuser from './pages/admincrud/addnewuser';
+import ListofVehicles from './pages/vehiclecrud/listofvehicle';
+import ListOfDrivres from './pages/drivercrud/listofdrivers';
+import ShowDataByID from './pages/drivercrud/showdatabydid';
 
 function App() {
 
@@ -51,6 +54,9 @@ function App() {
         <Route exact path="/userdetails/:uid" element={<SingleUserDetails/>}/>
         <Route exact path="/logretentionlist" element={<LogRetentionlist/>}/>
         <Route exact path="/addvehicle" element={<AddVehicle/>}/>
+        <Route exact path='/listofvehicles' element={<ListofVehicles/>}/>
+        <Route exact path="/listofdrivers" element={<ListOfDrivres/>}/>
+        <Route exact path="/vehicleowenerdetails/:uid" element={<ShowDataByID/>} />
       </Routes>
     </>
   );
