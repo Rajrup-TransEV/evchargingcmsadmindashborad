@@ -28,6 +28,7 @@ import ListofVehicles from './pages/vehiclecrud/listofvehicle';
 import ListOfDrivres from './pages/drivercrud/listofdrivers';
 import ShowDataByID from './pages/drivercrud/showdatabydid';
 import AddHub from './pages/addhub/addhub';
+import ListofHubData from './pages/addhub/listofhubdata';
 
 function App() {
 
@@ -59,6 +60,7 @@ function App() {
         <Route exact path="/listofdrivers" element={<ListOfDrivres/>}/>
         <Route exact path="/vehicleowenerdetails/:uid" element={<ShowDataByID/>} />
         <Route exact path='/addhub' element={<AddHub/>} />
+        <Route exact path="/listofhubs" element={<ListofHubData/>}/>
       </Routes>
     </>
   );
