@@ -87,7 +87,9 @@ const ListofHubData = () => {
 
   // Calculate total pages
   const totalPages = Math.ceil(userData.length / itemsPerPage);
-
+  const handleUidClick = (uid) => {
+    navigate(`/hubdetails/${uid}`);
+  };
   return (
     <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
     <div className="overflow-x-auto">
