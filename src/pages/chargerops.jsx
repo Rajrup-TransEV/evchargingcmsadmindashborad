@@ -8,7 +8,6 @@ const ChargerOperationsView = () => {
   const [loading, setLoading] = useState(true); // State to handle loading status
   const [currentPage, setCurrentPage] = useState(1); // Current page state
   const [itemsPerPage] = useState(10); // Number of items to display per page
-
   useEffect(() => {
     const checkAuthentication = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
@@ -68,6 +67,7 @@ const ChargerOperationsView = () => {
   
         const result = await response.json();
         const data = Array.isArray(result.data) ? result.data : [];
+        console.log("list of incoming data",data)
         setChargerData(data);
         setLoading(false);
       } catch (error) {

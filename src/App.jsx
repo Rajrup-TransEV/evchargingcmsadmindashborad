@@ -27,6 +27,9 @@ import AddNewuser from './pages/admincrud/addnewuser';
 import ListofVehicles from './pages/vehiclecrud/listofvehicle';
 import ListOfDrivres from './pages/drivercrud/listofdrivers';
 import ShowDataByID from './pages/drivercrud/showdatabydid';
+import AddHub from './pages/addhub/addhub';
+import ListofHubData from './pages/addhub/listofhubdata';
+import HubDetails from './pages/addhub/hubdetails';
 
 function App() {
 
@@ -57,6 +60,9 @@ function App() {
         <Route exact path='/listofvehicles' element={<ListofVehicles/>}/>
         <Route exact path="/listofdrivers" element={<ListOfDrivres/>}/>
         <Route exact path="/vehicleowenerdetails/:uid" element={<ShowDataByID/>} />
+        <Route exact path='/addhub' element={<AddHub/>} />
+        <Route exact path="/listofhubs" element={<ListofHubData/>}/>
+        <Route exact path="/hubdetails/:uid" element={<HubDetails/>}/>
       </Routes>
     </>
   );
