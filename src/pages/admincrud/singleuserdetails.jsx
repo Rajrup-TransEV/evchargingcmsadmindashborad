@@ -85,10 +85,6 @@ const SingleUserDetails = () => {
         };
 
         fetchsingulardata();
-    }, [uid]);
-
-    // Fetch admin driver data
-    useEffect(() => {
         const fetchasddata = async () => {
             const rooturi = import.meta.env.VITE_ROOT_URI;
             const apikey = import.meta.env.VITE_API_KEY;
@@ -104,6 +100,7 @@ const SingleUserDetails = () => {
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log("driver data is coming ",result)
                     setAdminDriverdata(result.data || []); // Ensure it's an array
                 } else {
                     toast.error("Failed to fetch the details");
@@ -116,6 +113,37 @@ const SingleUserDetails = () => {
         };
         fetchasddata();
     }, [uid]);
+
+    // Fetch admin driver data
+    // useEffect(() => {
+    //     const fetchasddata = async () => {
+    //         const rooturi = import.meta.env.VITE_ROOT_URI;
+    //         const apikey = import.meta.env.VITE_API_KEY;
+    //         try {
+    //             const response = await fetch(`${rooturi}/admin/getvobyaid`, {
+    //                 method: "POST",
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'apiauthkey': apikey,
+    //                 },
+    //                 body: JSON.stringify({ adminid: uid })
+    //             });
+
+    //             if (response.ok) {
+    //                 const result = await response.json();
+    //                 console.log("driver data is coming ",result)
+    //                 setAdminDriverdata(result.data || []); // Ensure it's an array
+    //             } else {
+    //                 toast.error("Failed to fetch the details");
+    //             }
+    //         } catch (error) {
+    //             toast.error(`An error occurred while fetching the data ${error}`);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchasddata();
+    // }, [uid]);
 
     if (loading) return <div>Loading...</div>;
 
