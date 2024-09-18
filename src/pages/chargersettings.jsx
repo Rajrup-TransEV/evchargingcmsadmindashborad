@@ -56,9 +56,19 @@ const ChargerSettings = () => {
       setStatus('Offline');
     };
 
-    // Cleanup on unmount
+    // Fetch charger status immediately when the component loads
+    fetchChargerStatus();
+    fetchChargerParameters();
+
+    // Set an interval to fetch charger status every 1 minute
+    const intervalId = setInterval(() => {
+      fetchChargerStatus();
+    }, 60000); // 60000 milliseconds = 1 minute
+
+    // Cleanup on unmount (close WebSocket and clear interval)
     return () => {
       ws.close();
+      clearInterval(intervalId);
     };
   }, [uid]);
 
