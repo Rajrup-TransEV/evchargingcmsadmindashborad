@@ -67,6 +67,7 @@ const ChargerSettings = () => {
         setIsOnline(true);
         setStatus('Online');
         fetchChargerParameters(); // Load dropdown data when online
+        fetchChargerStatus();
       } else if (data.status === 'Offline') {
         setIsOnline(false);
         setStatus('Offline');
