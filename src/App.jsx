@@ -31,6 +31,7 @@ import AddHub from './pages/addhub/addhub';
 import ListofHubData from './pages/addhub/listofhubdata';
 import HubDetails from './pages/addhub/hubdetails';
 import AddWallet from './pages/walletcrud/addwalletdata';
+import TotalRevenue from './pages/totalrevenue';
 
 function App() {
 
@@ -65,6 +66,7 @@ function App() {
         <Route exact path="/listofhubs" element={<ListofHubData/>}/>
         <Route exact path="/hubdetails/:uid" element={<HubDetails/>}/>
         <Route exact path='/addwallet'element={<AddWallet/>}/>
+        <Route exact path='/totalrevenue' element={<TotalRevenue/>}/>
       </Routes>
     </>
   );
