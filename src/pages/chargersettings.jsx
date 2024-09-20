@@ -76,14 +76,14 @@ const ChargerSettings = () => {
 
     ws.onclose = () => {
       console.log(`WebSocket connection closed for charger ${uid}`);
-      setIsOnline(false); // Assume offline on disconnect
-      setStatus('Offline');
+      // setIsOnline(false); // Assume offline on disconnect
+      // setStatus('Offline');
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setIsOnline(false);
-      setStatus('Offline');
+      // setIsOnline(false);
+      // setStatus('Offline');
     };
 
     // Fetch charger status immediately when the component loads
