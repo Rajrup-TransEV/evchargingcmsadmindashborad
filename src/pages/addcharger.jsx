@@ -286,20 +286,23 @@ const AddCharger = () => {
                 />
               </div>
 
-              <div className="col-span-6">
-                <label htmlFor="Chargertype" className="block text-sm font-medium text-gray-700">
-                  Charger Type
-                </label>
-                <input
-                  type="text"
-                  id="Chargertype"
-                  name="Chargertype"
-                  value={Chargertype}
-                  onChange={(e) => setChargertype(e.target.value)}
-                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
-                />
-              </div>
-
+                    <div className="col-span-6">
+                    <label htmlFor="Chargertype" className="block text-sm font-medium text-gray-700">
+                      Charger Type
+                    </label>
+                    <select
+                      id="Chargertype"
+                      name="Chargertype"
+                      value={Chargertype}
+                      onChange={(e) => setChargertype(e.target.value)}
+                      className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                    >
+                      <option value="" disabled>Select Charger Type</option>
+                      <option value="AC">AC</option>
+                      <option value="DC">DC</option>
+                      <option value="HYBRID">HYBRID</option>
+                    </select>
+                  </div>
               <div className="col-span-6">
                 <label htmlFor="parking" className="block text-sm font-medium text-gray-700">
                   Parking

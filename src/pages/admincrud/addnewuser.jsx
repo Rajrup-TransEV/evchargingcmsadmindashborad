@@ -235,23 +235,27 @@ const AddNewuser = () => {
                 class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
               />
             </div>
-            <div class="col-span-6 sm:col-span-3">
+                        <div className="col-span-6 sm:col-span-3">
               <label
-                for="role"
-                class="block text-sm font-medium text-gray-700 dark:text-gray-200"
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                Role "eg . admin, user "
+                Role (e.g., Admin, User)
               </label>
-  
-              <input
-                type="text"
+
+              <select
                 id="role"
                 name="role"
                 value={role}
-                onChange={(e)=>setRole(e.target.value)}
-                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              />
+                onChange={(e) => setRole(e.target.value)}
+                className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              >
+                <option value="" disabled>Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
             </div>
+
             <div class="col-span-6 sm:col-span-3">
               <label
                 for="role"
