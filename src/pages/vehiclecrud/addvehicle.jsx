@@ -208,17 +208,20 @@ const handelSubmit = async(e)=>{
                 for="vehicletype"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                vehicletype
+                Vehicle condition
               </label>
   
-              <input
-                type="text"
-                id="vehicletype"
-                name="vehicletype"
-                value={vehicletype}
-                onChange={(e)=>setvehicletype(e.target.value)}
-                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              />
+              <select
+                 id="vehicletype"
+                 name="vehicletype"
+                 value={vehicletype}
+                 onChange={(e)=>setvehicletype(e.target.value)}
+                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              >
+                    <option value="" disabled>Select Vehicle condition</option>
+                    <option value="good">Good</option>
+                    <option value="bad">Bad</option>
+              </select>
             </div>
              <div class="col-span-6 sm:col-span-3">
               <label
