@@ -146,7 +146,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          {/* <li className="mb-1 last:mb-0">
+                          <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/totalrevenue"
@@ -158,7 +158,7 @@ function Sidebar({
                                 Total Revenue
                               </span>
                             </NavLink>
-                          </li> */}
+                          </li>
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
