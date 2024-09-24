@@ -146,7 +146,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          {/* <li className="mb-1 last:mb-0">
+                          <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/totalrevenue"
@@ -158,7 +158,7 @@ function Sidebar({
                                 Total Revenue
                               </span>
                             </NavLink>
-                          </li> */}
+                          </li>
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
@@ -660,13 +660,13 @@ function Sidebar({
                         <path d="M10 14a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2h-5Z" />
                       </svg>
                       <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                        Wallet crud
+                        Wallet Recharge manual
                       </span>
                     </div>
                     {/* Badge */}
-                    <div className="flex flex-shrink-0 ml-2">
+                    {/* <div className="flex flex-shrink-0 ml-2">
                       <span className="inline-flex items-center justify-center h-5 text-xs font-medium text-white bg-violet-400 px-2 rounded">4</span>
-                    </div>
+                    </div> */}
                   </div>
                 </NavLink>
               </li>

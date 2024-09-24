@@ -73,6 +73,25 @@ function Dashboard() {
 
     checkAuthentication();
   }, [navigate]); // Dependency array includes navigate to avoid stale closure
+  const [ipAddress, setIPAddress] = useState('');
+
+    useEffect(() => {
+        const fetchIP = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/admin/getip');
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                setIPAddress(result.data);
+            } catch (error) {
+                console.error('Error fetching IP address:', error);
+            }
+        };
+
+        fetchIP();
+    }, []);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -94,7 +113,9 @@ function Dashboard() {
 
               {/* Left: Title */}
               <div className="mb-4 sm:mb-0">
-                <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">Dashboard</h1>
+                <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold"> Dashborad
+                </h1>
+                <p>Your ip is {ipAddress}</p>
               </div>
 
               {/* Right: Actions */}
@@ -150,7 +171,7 @@ function Dashboard() {
         </main>
 
         {/* <Banner /> */}
-
+  
       </div>
     </div>
   );
