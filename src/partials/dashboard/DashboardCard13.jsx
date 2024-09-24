@@ -24,7 +24,7 @@ function DashboardCard13() {
                 <div className="grow flex justify-between">
                   <div className="self-center"><a className="font-medium text-gray-800 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white" href="#0">Qonto</a> billing</div>
                   <div className="shrink-0 self-start ml-2">
-                    <span className="font-medium text-gray-800 dark:text-gray-100">-$49.88</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-100">-RS49.88</span>
                   </div>
                 </div>
               </div>
@@ -88,7 +88,7 @@ function DashboardCard13() {
                 <div className="grow flex justify-between">
                   <div className="self-center"><a className="font-medium text-gray-800 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white" href="#0">App.com</a> Market Ltd 70 Wilson St London</div>
                   <div className="shrink-0 self-start ml-2">
-                    <span className="font-medium text-gray-800 dark:text-gray-100 line-through">+$99.99</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-100 line-through">+RS99.99</span>
                   </div>
                 </div>
               </div>
@@ -104,7 +104,7 @@ function DashboardCard13() {
                 <div className="grow flex justify-between">
                   <div className="self-center"><a className="font-medium text-gray-800 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white" href="#0">App.com</a> Market Ltd 70 Wilson St London</div>
                   <div className="shrink-0 self-start ml-2">
-                    <span className="font-medium text-gray-800 dark:text-gray-100">-$49.88</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-100">-RS49.88</span>
                   </div>
                 </div>
               </div>
