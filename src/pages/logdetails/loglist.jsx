@@ -98,16 +98,18 @@ const LogRetentionlist = () => {
     // Function to determine the class based on message type
     const getMessageTypeClass = (type) => {
         switch (type) {
+            case 'info':
+                return 'bg-gradient-to-r from-teal-300 to-sky-600 bg-clip-text text-transparent'
             case 'error':
-                return 'text-red-600'; // Red for error
+                return 'bg-gradient-to-r from-fuchsia-300 to-pink-600 bg-clip-text text-transparent'; // Red for error
             case 'success':
-                return 'text-green-600'; // Green for success
+                return 'bg-gradient-to-r from-green-300 to-teal-700 bg-clip-text text-transparent'; // Green for success
             case 'update':
-                return 'text-orange-600'; // Orange for update
+                return 'bg-gradient-to-r from-orange-300 to-red-600 bg-clip-text text-transparent0'; // Orange for update
             case 'processing':
-                return 'text-yellow-600'; // Yellow for processing
+                return 'bg-gradient-to-r from-yellow-300 to-emerald-400 bg-clip-text text-transparent'; // Yellow for processing
             default:
-                return 'text-gray-700'; // Default color
+                return 'bg-gradient-to-r from-indigo-500 to-sky-500 bg-clip-text text-transparent'; // Default color
         }
     };
 
