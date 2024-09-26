@@ -81,6 +81,32 @@ const ListofUsers = () => {
     fetchAllChargerData();
   }, []);
 
+  const handleDelete = async (uid) => {
+    const rooturi = import.meta.env.VITE_ROOT_URI;
+    const apikey = import.meta.env.VITE_API_KEY;
+
+    try {
+      const response = await fetch(`${rooturi}/admin/deleteadmindata`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apiauthkey': apikey,
+        },
+        body: JSON.stringify({ uid }), // Pass uid in request body
+      });
+
+      if (response.ok) {
+        toast.success("User deleted successfully");
+        // Remove deleted user from state
+        setuserData((prevUsers) => prevUsers.filter(user => user.uid !== uid));
+      } else {
+        toast.error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("An error occurred while deleting the user");
+    }
+  };
   // Calculate the current chargers to display
   const indexOfLastUser = currentPage * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
@@ -101,7 +127,7 @@ const handleUidClick = (uid) => {
               {[
                 'id', 'uid', 'firstname', 'lastname', 'email', 
                 'password', 'address', 'phonenumber', 'role',
-                'designation', 'createdAt', 'updatedAt',
+                'designation', 'createdAt', 'updatedAt', 'Actions'
               ].map((heading) => (
                 <th key={heading} className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                   {heading}
@@ -130,7 +156,13 @@ const handleUidClick = (uid) => {
                     </button>,user.firstname,
                       user.lastname, user.email, user.password, user.address,
                       user.phonenumber, user.role, user.designation,
-                     user.createdAt,user.updatedAt
+                     user.createdAt,user.updatedAt,
+                     <button 
+                        className="text-red-600 hover:underline" 
+                        onClick={() => handleDelete(user.uid)}
+                      >
+                        Delete
+                      </button>
                     ].map((cell, index) => (
                       <td key={index} className="whitespace-nowrap px-4 py-2 text-gray-700">
                         {cell}
