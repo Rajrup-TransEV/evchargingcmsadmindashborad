@@ -99,6 +99,46 @@ const ChargerOperationsView = () => {
     navigate(`/chargerdetails/${uid}`);
   };
 
+
+    // Charger details
+    const handleClick = (uid) => {
+      navigate(`/chargerdetails/${uid}`);
+    };
+  
+    // Delete function
+    const handleDelete = async (uid) => {
+      // Display confirmation dialog
+      const userConfirmed = window.confirm("Are you sure you want to delete this charger?");
+      
+      if (userConfirmed) {
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const apikey = import.meta.env.VITE_API_KEY;
+  
+        try {
+          const response = await fetch(`${rooturi}/admin/deletechargerunits`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apiauthkey': apikey,
+            },
+            body: JSON.stringify({ uid }), // Pass uid in request body
+          });
+  
+          if (response.ok) {
+            toast.success("Charger deleted successfully");
+            // Remove deleted charger from state
+            setChargerData((prevChargers) => prevChargers.filter(charger => charger.uid !== uid));
+          } else {
+            toast.error("Failed to delete charger");
+          }
+        } catch (error) {
+          console.error("Error deleting charger:", error);
+          toast.error("An error occurred while deleting the charger");
+        }
+      } else {
+        toast.info("Delete operation canceled");
+      }
+    };
   return (
     <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
       <div className="overflow-x-auto">
@@ -110,7 +150,7 @@ const ChargerOperationsView = () => {
                 'Chargerhost', 'Segment', 'Subsegment', 'Total_Capacity', 'Chargertype', 
                 'parking', 'number_of_connectors', 'Connector_type', 'connector_total_capacity', 
                 'lattitude', 'longitute', 'full_address', 'charger_use_type', 
-                'twenty_four_seven_open_status', 'charger_image', 'chargerbuyer', 'Created at', 'Manipulate' // Added Manipulate header
+                'twenty_four_seven_open_status', 'charger_image', 'chargerbuyer', 'Created at', 'Manipulate', 'Delete'  // Added Manipulate header
               ].map((heading) => (
                 <th key={heading} className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                   {heading}
@@ -149,7 +189,13 @@ const ChargerOperationsView = () => {
                         onClick={() => handleManipulateClick(charger.uid)}
                       >
                         Manipulate
-                      </button> // Added Manipulate button here
+                      </button>, // Added Manipulate button here
+                      <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => handleDelete(charger.uid)}
+                    >
+                      Delete
+                    </button> // Added Delete button here
                     ].map((cell, index) => (
                       <td key={index} className="whitespace-nowrap px-4 py-2 text-gray-700">
                         {cell}

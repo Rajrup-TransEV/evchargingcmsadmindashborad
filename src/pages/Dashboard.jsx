@@ -73,25 +73,42 @@ function Dashboard() {
 
     checkAuthentication();
   }, [navigate]); // Dependency array includes navigate to avoid stale closure
-  const [ipAddress, setIPAddress] = useState('');
+  // const [ipAddress, setIPAddress] = useState('');
+  const [ipAddress, setIpAddress] = useState('');
+  useEffect(() => {
+    // Fetch the IP address from the API
+    const fetchIpAddress = async () => {
+        try {
+            const response = await fetch("https://api.ipify.org?format=json");
+            const data = await response.json();
+            // Set the IP address in state
+            setIpAddress(data.ip);
+        } catch (error) {
+            console.error("Error fetching IP address:", error);
+        }
+    };
 
-    useEffect(() => {
-        const fetchIP = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/admin/getip');
+    fetchIpAddress();
+}, []); // Empty dependency array means this runs once after the initial render
+
+
+  //   useEffect(() => {
+  //       const fetchIP = async () => {
+  //           try {
+  //               const response = await fetch('http://localhost:3000/admin/getip');
                 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const result = await response.json();
-                setIPAddress(result.data);
-            } catch (error) {
-                console.error('Error fetching IP address:', error);
-            }
-        };
+  //               if (!response.ok) {
+  //                   throw new Error('Network response was not ok');
+  //               }
+  //               const result = await response.json();
+  //               setIPAddress(result.data);
+  //           } catch (error) {
+  //               console.error('Error fetching IP address:', error);
+  //           }
+  //       };
 
-        fetchIP();
-    }, []);
+  //       fetchIP();
+  //   }, []);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -145,23 +162,23 @@ function Dashboard() {
               {/* Line chart (Acme Professional) */}
               <DashboardCard03 />
               {/* Bar chart (Direct vs Indirect) */}
-              <DashboardCard04 />
+              {/* <DashboardCard04 /> */}
               {/* Line chart (Real Time Value) */}
-              <DashboardCard05 />
+              {/* <DashboardCard05 /> */}
               {/* Doughnut chart (Top Countries) */}
-              <DashboardCard06 />
+              {/* <DashboardCard06 /> */}
               {/* Table (Top Channels) */}
               <DashboardCard07 />
               {/* Line chart (Sales Over Time) */}
-              <DashboardCard08 />
+              {/* <DashboardCard08 /> */}
               {/* Stacked bar chart (Sales VS Refunds) */}
-              <DashboardCard09 />
+              {/* <DashboardCard09 /> */}
               {/* Card (Customers) */}
               <DashboardCard10 />
               {/* Card (Reasons for Refunds) */}
-              <DashboardCard11 />
+              {/* <DashboardCard11 /> */}
               {/* Card (Recent Activity) */}
-              <DashboardCard12 />
+              {/* <DashboardCard12 /> */}
               {/* Card (Income/Expenses) */}
               <DashboardCard13 />
               

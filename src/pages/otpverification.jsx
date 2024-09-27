@@ -19,7 +19,7 @@ const OTPVerify = () => {
             //take api key value form env
             const apikey = import.meta.env.VITE_API_KEY;
             const rooturi = import.meta.env.VITE_ROOT_URI
-            const response = await fetch(`${rooturi}/userauth/verifyloginotp`,{
+            const response = await fetch(`${rooturi}/userauth/login`,{
                 method:'POST',
                 headers:{
                     'Content-Type': 'application/json',
