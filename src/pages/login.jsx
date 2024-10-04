@@ -60,9 +60,6 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-
         try {
           const rooturi = import.meta.env.VITE_ROOT_URI;
           const apikey = import.meta.env.VITE_API_KEY;

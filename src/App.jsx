@@ -33,6 +33,7 @@ import HubDetails from './pages/addhub/hubdetails';
 import AddWallet from './pages/walletcrud/addwalletdata';
 import TotalRevenue from './pages/totalrevenue';
 import UpdateProfile from './pages/appuser/updateprofile';
+import AddMinimumBalance from './pages/appuser/addminimumbalance';
 
 function App() {
 
@@ -69,6 +70,7 @@ function App() {
         <Route exact path='/addwallet'element={<AddWallet/>}/>
         <Route exact path='/totalrevenue' element={<TotalRevenue/>}/>
         <Route exact path='/updateprofiles' element={<UpdateProfile/>} />
+        <Route exact path='/addminbal' element={<AddMinimumBalance/>}/>
       </Routes>
     </>
   );
