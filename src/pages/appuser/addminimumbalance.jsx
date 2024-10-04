@@ -8,49 +8,49 @@ const AddMinimumBalance = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // useEffect(() => {
-    //     const checkAuthentication = async () => {
-    //         const rooturi = import.meta.env.VITE_ROOT_URI;
-    //         const apikey = import.meta.env.VITE_API_KEY;
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            const rooturi = import.meta.env.VITE_ROOT_URI;
+            const apikey = import.meta.env.VITE_API_KEY;
 
-    //         try {
-    //             const gettoken = localStorage.getItem("token");
-    //             if (!gettoken) {
-    //                 navigate("/signin");
-    //                 return;
-    //             }
+            try {
+                const gettoken = localStorage.getItem("token");
+                if (!gettoken) {
+                    navigate("/signin");
+                    return;
+                }
 
-    //             const response = await fetch(`${rooturi}/userauth/verifyuser`, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'apiauthkey': apikey,
-    //                 },
-    //                 body: JSON.stringify({ token: gettoken })
-    //             });
+                const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apiauthkey': apikey,
+                    },
+                    body: JSON.stringify({ token: gettoken })
+                });
 
-    //             const data = await response.json();
-    //             if (response.ok) {
-    //                 if (data.user.userType !== "superadmin") {
-    //                     toast("You have no authorization to view this page");
-    //                     navigate("/signin");
-    //                 } else {
-    //                     console.log("You are an authorized user");
-    //                     navigate("/");
-    //                 }
-    //             } else {
-    //                 toast("Failed to verify user");
-    //                 navigate("/signin");
-    //             }
-    //         } catch (error) {
-    //             console.error("Error during authentication check:", error);
-    //             toast("An error occurred during authentication");
-    //             navigate("/signin");
-    //         }
-    //     };
+                const data = await response.json();
+                if (response.ok) {
+                    if (data.user.userType !== "superadmin") {
+                        toast("You have no authorization to view this page");
+                        navigate("/signin");
+                    } else {
+                        console.log("You are an authorized user");
+                        // navigate("/");
+                    }
+                } else {
+                    toast("Failed to verify user");
+                    navigate("/signin");
+                }
+            } catch (error) {
+                console.error("Error during authentication check:", error);
+                toast("An error occurred during authentication");
+                navigate("/signin");
+            }
+        };
 
-    //     checkAuthentication();
-    // }, [navigate]);
+        checkAuthentication();
+    }, [navigate]);
 
 const handleSubmit= async(e)=>{
     e.preventDefault();
