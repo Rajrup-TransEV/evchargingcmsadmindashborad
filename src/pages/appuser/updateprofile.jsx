@@ -148,6 +148,15 @@ const UpdateProfile = () => {
       fetchIpAddress();
   }, []); // Empty dependency array means this runs once after the initial render
   
+
+  const backtohome = (event) => {
+    event.preventDefault(); // Prevent default action
+    navigate("/"); // Navigate to home
+  }
+  
+
+
+
     return (
         <div>
             <form action="#" onSubmit={handleSubmit}>
@@ -197,6 +206,15 @@ const UpdateProfile = () => {
                     )}
                 </button>
             </form>
+            <div className="py-11">
+                <button 
+        className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+        onClick={(event) => backtohome(event)}
+    >
+        <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+        <span className="relative z-10">HOME</span>
+    </button>
+</div>
         </div>
     );
 };
