@@ -130,7 +130,7 @@ const AddWallet = () => {
                 const data = await result.json();
                 console.log(data);
                 const options = {
-                    key: "rzp_test_ySKlMUoDlIHU1z", // Enter the Key ID generated from the Dashboard
+                    key: "rzp_test_nzmqxQYhvCH9rD", // Enter the Key ID generated from the Dashboard
                     amount: Number(price) * 100, // Convert string to number and multiply by 100
                     currency: "INR",
                     name: "Transev",

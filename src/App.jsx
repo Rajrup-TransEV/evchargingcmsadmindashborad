@@ -34,6 +34,9 @@ import AddWallet from './pages/walletcrud/addwalletdata';
 import TotalRevenue from './pages/totalrevenue';
 import UpdateProfile from './pages/appuser/updateprofile';
 import AddMinimumBalance from './pages/appuser/addminimumbalance';
+import ListOfTrans from './pages/transactions/listoftrans';
+import TD from './pages/transactions/td';
+import ForgotPassword from './pages/forgotpassword';
 
 function App() {
 
@@ -71,6 +74,9 @@ function App() {
         <Route exact path='/totalrevenue' element={<TotalRevenue/>}/>
         <Route exact path='/updateprofiles' element={<UpdateProfile/>} />
         <Route exact path='/addminbal' element={<AddMinimumBalance/>}/>
+        <Route exact path="/liot" element={<ListOfTrans/>} />
+        <Route exact path="/td/:uid" element={<TD/>}/>
+        <Route exact path='/forgotpassword' element={<ForgotPassword/>}/>
       </Routes>
     </>
   );
