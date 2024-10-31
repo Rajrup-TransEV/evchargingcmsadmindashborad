@@ -118,6 +118,49 @@ const ListofUsers = () => {
 const handleUidClick = (uid) => {
   navigate(`/userdetails/${uid}`);
 };
+
+const [ipAddress, setIpAddress] = useState('');
+//ip tracking facility
+useEffect(() => {
+  // Fetch the IP address from the API
+  const fetchIpAddress = async () => {
+    const rooturi = import.meta.env.VITE_ROOT_URI;
+    const apikey = import.meta.env.VITE_API_KEY;
+      try {
+          const response = await fetch("https://api.ipify.org?format=json");
+          const data = await response.json();
+          console.log(data)
+          // Set the IP address in state
+          if(data){
+            setIpAddress(data.ip);
+            const currentDateTime = new Date().toISOString();
+            const pathfinder = "listofusers.jsx"
+            const resp = await fetch(`${rooturi}/admin/getip`,{
+                method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apiauthkey': apikey,
+            },
+            body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
+            })
+          }
+      
+
+      } catch (error) {
+          console.error("Error fetching IP address:", error);
+      }
+  };
+
+  fetchIpAddress();
+}, []); // Empty dependency array means this runs once after the initial render
+
+
+const backtohome = (event) => {
+  event.preventDefault(); // Prevent default action
+  navigate("/"); // Navigate to home
+}
+
+
   return (
     <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
       <div className="overflow-x-auto">
@@ -240,6 +283,15 @@ const handleUidClick = (uid) => {
           </li>
         </ol>
       </div>
+      <div className="py-11">
+                <button 
+        className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+        onClick={(event) => backtohome(event)}
+    >
+        <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+        <span className="relative z-10">HOME</span>
+    </button>
+</div>
     </div>
   );
 };
