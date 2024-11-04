@@ -7,7 +7,7 @@ const ListofAppUser = () => {
     const [userData, setuserData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(50);
     const [ipAddress, setIpAddress] = useState('');
 
     useEffect(() => {
@@ -114,18 +114,18 @@ const ListofAppUser = () => {
         const apikey = import.meta.env.VITE_API_KEY;
 
         try {
-            const response = await fetch(`${rooturi}/admin/deleteadmindata`, {
+            const response = await fetch(`${rooturi}/users/deleteauserdata`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apiauthkey': apikey,
                 },
-                body: JSON.stringify({ uid }),
+                body: JSON.stringify({ userid:uid }),
             });
 
             if (response.ok) {
                 toast.success("User deleted successfully");
-                setuserData((prevUsers) => prevUsers.filter(user => user.uid !== uid));
+                // setuserData((prevUsers) => prevUsers.filter(user => user.uid !== uid));
             } else {
                 toast.error("Failed to delete user");
             }

@@ -39,6 +39,8 @@ import TD from './pages/transactions/td';
 import ForgotPassword from './pages/forgotpassword';
 import ListofAppUser from './pages/appuser/appusercreate.jsx/listofappusers';
 import DetailsAppUser from './pages/appuser/appusercreate.jsx/detailappusers';
+import LogDetails from './pages/logdetails/logdetails';
+import ResetPassword from './pages/appuser/resetpassword';
 
 function App() {
 
@@ -81,6 +83,8 @@ function App() {
         <Route exact path='/forgotpassword' element={<ForgotPassword/>}/>
         <Route exact path='/listofappuser' element={<ListofAppUser/>}/>
         <Route exact path="/appuserdetails/:uid" element={<DetailsAppUser/>}/>
+        <Route exact path='/logdetails/:id' element={<LogDetails/>}/>
+        <Route exact path='/resetpassword' element={<ResetPassword/>} />
       </Routes>
     </>
   );

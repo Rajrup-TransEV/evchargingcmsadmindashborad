@@ -23,6 +23,34 @@ const ChargerSettings = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
 
+  // Fetch charger inactivity status every minute but not immediately after loading
+  useEffect(() => {
+    const checkChargerInactivity = async () => {
+      const rooturi = import.meta.env.VITE_BK_ROOT_URI;
+      const apikey = import.meta.env.VITE_BK_API_KEY;
+      try {
+        await fetch(`${rooturi}/api/check_charger_inactivity`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apikey,
+          },
+          body: JSON.stringify({ uid }),
+        });
+      } catch (error) {
+        console.error('Error checking charger inactivity:', error);
+      }
+    };
+
+    const intervalId = setInterval(() => {
+      checkChargerInactivity();
+    }, 60000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [uid]);
+
   useEffect(() => {
     // WebSocket connection to monitor charger online/offline status
     const rooturi = import.meta.env.VITE_BK_ROOT_URI;
@@ -38,6 +66,8 @@ const ChargerSettings = () => {
       if (data.status === 'Online') {
         setIsOnline(true);
         setStatus('Online');
+        fetchChargerParameters(); // Load dropdown data when online
+        fetchChargerStatus();
       } else if (data.status === 'Offline') {
         setIsOnline(false);
         setStatus('Offline');
@@ -46,19 +76,29 @@ const ChargerSettings = () => {
 
     ws.onclose = () => {
       console.log(`WebSocket connection closed for charger ${uid}`);
-      setIsOnline(false); // Assume offline on disconnect
-      setStatus('Offline');
+      // setIsOnline(false); // Assume offline on disconnect
+      // setStatus('Offline');
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setIsOnline(false);
-      setStatus('Offline');
+      // setIsOnline(false);
+      // setStatus('Offline');
     };
 
-    // Cleanup on unmount
+    // Fetch charger status immediately when the component loads
+    fetchChargerStatus();
+    fetchChargerParameters();
+
+    // Set an interval to fetch charger status every 1 minute
+    const intervalId = setInterval(() => {
+      fetchChargerStatus();
+    }, 60000); // 60000 milliseconds = 1 minute
+
+    // Cleanup on unmount (close WebSocket and clear interval)
     return () => {
       ws.close();
+      clearInterval(intervalId);
     };
   }, [uid]);
 
@@ -169,7 +209,6 @@ const ChargerSettings = () => {
     setSelectedChangeParameter(paramKey);
     const param = parameters.find(p => p.key === paramKey);
     setCurrentValue(param ? param.value : '');
-    fetchChargerParameters();
   };
 
   const handleParameterChange = async () => {
@@ -394,6 +433,15 @@ const ChargerSettings = () => {
               <div className="absolute inset-0 bg-gray-200 bg-opacity-50 w-full h-full rounded-md z-10"></div>
             )}
           </div>
+
+          {/* New button to manually refresh online/offline status */}
+          <button
+            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={fetchChargerStatus}
+            disabled={!isOnline || loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh Status'}
+          </button>
         </div>
 
         <p className="text-right font-semibold text-gray-600">
@@ -470,7 +518,6 @@ const ChargerSettings = () => {
                 setSelectedViewParameter(e.target.value);
                 const param = parameters.find(p => p.key === e.target.value);
                 setViewedParameter(param);
-                fetchChargerParameters();
               }}
               className="mt-1 block w-full rounded-md border-gray-200 shadow-sm"
               disabled={!isOnline}
@@ -480,6 +527,15 @@ const ChargerSettings = () => {
                 <option key={param.key} value={param.key}>{param.key}</option>
               ))}
             </select>
+
+            {/* Refresh Button beside dropdown */}
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={fetchChargerParameters}
+              disabled={!isOnline || isLoadingParameters}
+            >
+              {isLoadingParameters ? 'Refreshing...' : 'Refresh Parameters'}
+            </button>
           </div>
 
           {viewedParameter && (
@@ -520,6 +576,15 @@ const ChargerSettings = () => {
                 <option key={param.key} value={param.key}>{param.key}</option>
               ))}
             </select>
+
+            {/* Refresh Button beside dropdown */}
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={fetchChargerParameters}
+              disabled={!isOnline || isLoadingParameters}
+            >
+              {isLoadingParameters ? 'Refreshing...' : 'Refresh Parameters'}
+            </button>
           </div>
 
           <div className="mb-4">
