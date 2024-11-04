@@ -36,6 +36,9 @@ import UpdateProfile from './pages/appuser/updateprofile';
 import AddMinimumBalance from './pages/appuser/addminimumbalance';
 import ListOfTrans from './pages/transactions/listoftrans';
 import TD from './pages/transactions/td';
+import ForgotPassword from './pages/forgotpassword';
+import ListofAppUser from './pages/appuser/appusercreate.jsx/listofappusers';
+import DetailsAppUser from './pages/appuser/appusercreate.jsx/detailappusers';
 
 function App() {
 
@@ -75,6 +78,9 @@ function App() {
         <Route exact path='/addminbal' element={<AddMinimumBalance/>}/>
         <Route exact path="/liot" element={<ListOfTrans/>} />
         <Route exact path="/td/:uid" element={<TD/>}/>
+        <Route exact path='/forgotpassword' element={<ForgotPassword/>}/>
+        <Route exact path='/listofappuser' element={<ListofAppUser/>}/>
+        <Route exact path="/appuserdetails/:uid" element={<DetailsAppUser/>}/>
       </Routes>
     </>
   );
