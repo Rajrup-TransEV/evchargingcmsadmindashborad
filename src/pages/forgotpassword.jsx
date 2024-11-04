@@ -7,7 +7,7 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [otp, setOtp] = useState('');
-    const [otpSent, setOtpSent] = useState(false); // State to track if OTP has been sent
+    const [otpSent, setOtpSent] = useState(false);
     const navigate = useNavigate();
 
     // Fetch IP address
@@ -54,7 +54,7 @@ const ForgotPassword = () => {
             });
 
             if (response.ok) {
-                setOtpSent(true); // Show OTP field
+                setOtpSent(true);
                 toast.success("OTP sent to your email.");
             } else {
                 const data = await response.json();
@@ -95,58 +95,61 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-lg text-center">
-                <h1 className="text-2xl font-bold sm:text-3xl">Transev Forgot Password Page</h1>
+        <div className="relative flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
+            <div className="absolute inset-0 bg-black opacity-50 backdrop-blur-md"></div>
+            <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-lg text-center">
+                    <h1 className="text-2xl font-bold sm:text-3xl text-white">Transev Forgot Password Page</h1>
+                </div>
+
+                <form onSubmit={otpSent ? handleFinalSubmit : handleEmailSubmit} className="mx-auto mb-0 mt-8 max-w-md space-y-4 bg-white bg-opacity-80 rounded-lg p-6 shadow-lg">
+                    <div>
+                        <label htmlFor="email" className="sr-only">Email</label>
+                        <input
+                            type="email"
+                            className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+                            placeholder="Enter email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+
+                    {otpSent && (
+                        <>
+                            <div>
+                                <label htmlFor="newPassword" className="sr-only">New Password</label>
+                                <input
+                                    type="password"
+                                    className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+                                    placeholder="Enter new password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="otp" className="sr-only">OTP</label>
+                                <input
+                                    type="text"
+                                    className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+                                    placeholder="Enter OTP"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="submit"
+                            className="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white hover:bg-blue-600 transition duration-300"
+                        >
+                            {otpSent ? "Reset Password" : "Send OTP"}
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form onSubmit={otpSent ? handleFinalSubmit : handleEmailSubmit} className="mx-auto mb-0 mt-8 max-w-md space-y-4">
-                <div>
-                    <label htmlFor="email" className="sr-only">Email</label>
-                    <input
-                        type="email"
-                        className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
-                        placeholder="Enter email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-
-                {otpSent && (
-                    <>
-                        <div>
-                            <label htmlFor="newPassword" className="sr-only">New Password</label>
-                            <input
-                                type="password"
-                                className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
-                                placeholder="Enter new password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="otp" className="sr-only">OTP</label>
-                            <input
-                                type="text"
-                                className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
-                                placeholder="Enter OTP"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                            />
-                        </div>
-                    </>
-                )}
-
-                <div className="flex items-center justify-between">
-                    <button
-                        type="submit"
-                        className="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white"
-                    >
-                        {otpSent ? "Reset Password" : "Send OTP"}
-                    </button>
-                </div>
-            </form>
         </div>
     );
 };
