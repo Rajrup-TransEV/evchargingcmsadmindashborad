@@ -77,22 +77,25 @@ const LogDetails = () => {
 
         fetchLogDetails();
     }, [id]);
+
     const backtohome = (event) => {
         event.preventDefault(); // Prevent default action
         navigate("/"); // Navigate to home
-      }
+    }
+
     return (
-        <>
-             <div className="py-11">
-      <button 
-        className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
-        onClick={(event) => backtohome(event)}
-    >
-        <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
-        <span className="relative z-10">HOME</span>
-    </button>
-</div>
-            <article className="hover:animate-background rounded-xl bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 mt-[70px] p-0.5 shadow-xl transition hover:bg-[length:400%_400%] hover:shadow-sm hover:[animation-duration:_4s] dark:shadow-gray-700/25">
+        <div className="relative min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
+            <div className="absolute inset-0 bg-black opacity-80 backdrop-blur-md"></div>
+            <div className="relative z-10 py-11">
+                <button 
+                    className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+                    onClick={(event) => backtohome(event)}
+                >
+                    <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+                    <span className="relative z-10">HOME</span>
+                </button>
+            </div>
+            <article className="relative z-10 hover:animate-background rounded-xl bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 mt-[70px] p-0.5 shadow-xl transition hover:bg-[length:400%_400%] hover:shadow-sm hover:[animation-duration:_4s] dark:shadow-gray-700/25">
                 <div className="rounded-[10px] bg-white p-4 !pt-20 sm:p-6 dark:bg-gray-900">
                     <time datetime={logDetail?.createdAt} className="block text-xs text-gray-500 dark:text-gray-400">
                         {new Date(logDetail?.createdAt).toLocaleString()}
@@ -112,7 +115,7 @@ const LogDetails = () => {
                     </div>
                 </div>
             </article>
-        </>
+        </div>
     );
 };
 
