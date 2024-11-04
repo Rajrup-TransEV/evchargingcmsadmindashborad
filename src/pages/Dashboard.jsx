@@ -20,27 +20,24 @@ import DashboardCard13 from '../partials/dashboard/DashboardCard13';
 // import Banner from '../partials/Banner';
 import { toast } from 'react-toastify';
 
-
 function Dashboard() {
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate()
-  //authorization in effect
+  const navigate = useNavigate();
+  const [ipAddress, setIpAddress] = useState('');
+
+  // Authorization effect
   useEffect(() => {
     const checkAuthentication = async () => {
-     
-      // Take API key value from env
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
-      
+
       try {
         const gettoken = localStorage.getItem("token");
-        console.log(gettoken)
         if (!gettoken) {
           navigate("/signin");
           return;
         }
-        
+
         const response = await fetch(`${rooturi}/userauth/verifyuser`, {
           method: 'POST',
           headers: {
@@ -49,16 +46,13 @@ function Dashboard() {
           },
           body: JSON.stringify({ token: gettoken })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-          console.log(data)
           if (data.user.userType !== "superadmin") {
             toast("You have no authorization to view this page");
             navigate("/signin");
-          } else {
-            console.log("You are an authorized user");
           }
         } else {
           toast("Failed to verify user");
@@ -72,69 +66,49 @@ function Dashboard() {
     };
 
     checkAuthentication();
-  }, [navigate]); // Dependency array includes navigate to avoid stale closure
-  // const [ipAddress, setIPAddress] = useState('');
-  const [ipAddress, setIpAddress] = useState('');
+  }, [navigate]);
+
+  // Fetch IP address
   useEffect(() => {
-    // Fetch the IP address from the API
     const fetchIpAddress = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
-        try {
-            const response = await fetch("https://api.ipify.org?format=json");
-            const data = await response.json();
-            console.log(data)
-            // Set the IP address in state
-            if(data){
-              setIpAddress(data.ip);
-              const currentDateTime = new Date().toISOString();
-              const pathfinder = "dashboard.jsx"
-              const resp = await fetch(`${rooturi}/admin/getip`,{
-                  method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'apiauthkey': apikey,
-              },
-              body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
-              })
-            }
-        } catch (error) {
-            console.error("Error fetching IP address:", error);
+      try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        const data = await response.json();
+        
+        if (data) {
+          setIpAddress(data.ip);
+          const currentDateTime = new Date().toISOString();
+          const pathfinder = "dashboard.jsx";
+          await fetch(`${rooturi}/admin/getip`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apiauthkey': apikey,
+            },
+            body: JSON.stringify({ ip: data.ip, datetime: currentDateTime, path: pathfinder })
+          });
         }
+      } catch (error) {
+        console.error("Error fetching IP address:", error);
+      }
     };
 
     fetchIpAddress();
-}, []); // Empty dependency array means this runs once after the initial render
-
-
-  //   useEffect(() => {
-  //       const fetchIP = async () => {
-  //           try {
-  //               const response = await fetch('http://localhost:3000/admin/getip');
-                
-  //               if (!response.ok) {
-  //                   throw new Error('Network response was not ok');
-  //               }
-  //               const result = await response.json();
-  //               setIPAddress(result.data);
-  //           } catch (error) {
-  //               console.error('Error fetching IP address:', error);
-  //           }
-  //       };
-
-  //       fetchIP();
-  //   }, []);
+  }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="relative flex h-screen overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
+      <div className="absolute inset-0 bg-black opacity-50 backdrop-blur-md"></div>
 
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       {/* Content area */}
-      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-
-        {/*  Site header */}
+      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden z-10">
+        
+        {/* Site header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main className="grow">
@@ -145,9 +119,8 @@ function Dashboard() {
 
               {/* Left: Title */}
               <div className="mb-4 sm:mb-0">
-                <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold"> Dashborad
-                </h1>
-                <p>Your ip is {ipAddress}</p>
+                <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">Dashboard</h1>
+                <p>Your IP is {ipAddress}</p>
               </div>
 
               {/* Right: Actions */}
@@ -169,41 +142,26 @@ function Dashboard() {
 
             {/* Cards */}
             <div className="grid grid-cols-12 gap-6">
-
               {/* Line chart (Acme Plus) */}
               <DashboardCard01 />
               {/* Line chart (Acme Advanced) */}
               <DashboardCard02 />
               {/* Line chart (Acme Professional) */}
               <DashboardCard03 />
-              {/* Bar chart (Direct vs Indirect) */}
-              {/* <DashboardCard04 /> */}
-              {/* Line chart (Real Time Value) */}
-              {/* <DashboardCard05 /> */}
-              {/* Doughnut chart (Top Countries) */}
-              {/* <DashboardCard06 /> */}
               {/* Table (Top Channels) */}
               <DashboardCard07 />
-              {/* Line chart (Sales Over Time) */}
-              {/* <DashboardCard08 /> */}
-              {/* Stacked bar chart (Sales VS Refunds) */}
-              {/* <DashboardCard09 /> */}
               {/* Card (Customers) */}
               <DashboardCard10 />
-              {/* Card (Reasons for Refunds) */}
-              {/* <DashboardCard11 /> */}
-              {/* Card (Recent Activity) */}
-              {/* <DashboardCard12 /> */}
               {/* Card (Income/Expenses) */}
               <DashboardCard13 />
-              
             </div>
 
           </div>
         </main>
 
+        {/* Uncomment if needed */}
         {/* <Banner /> */}
-  
+
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ const Login = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showOtpField, setShowOtpField] = useState(false);
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -61,8 +60,8 @@ const Login = () => {
         setLoading(true);
         setError(null);
         try {
-          const rooturi = import.meta.env.VITE_ROOT_URI;
-          const apikey = import.meta.env.VITE_API_KEY;
+            const rooturi = import.meta.env.VITE_ROOT_URI;
+            const apikey = import.meta.env.VITE_API_KEY;
             const response = await fetch(`${rooturi}/userauth/login`, {
                 method: 'POST',
                 headers: {
@@ -91,9 +90,8 @@ const Login = () => {
 
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
-  
         const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
+        const apikey = import.meta.env.VITE_API_KEY;
         try {
             const response = await fetch(`${rooturi}/userauth/login`, {
                 method: 'POST',
@@ -117,54 +115,20 @@ const Login = () => {
             toast("An error occurred during OTP verification");
         }
     };
-    const [ipAddress, setIpAddress] = useState('');
-    //ip tracking facility
-    useEffect(() => {
-      // Fetch the IP address from the API
-      const fetchIpAddress = async () => {
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-        const apikey = import.meta.env.VITE_API_KEY;
-          try {
-              const response = await fetch("https://api.ipify.org?format=json");
-              const data = await response.json();
-              console.log(data)
-              // Set the IP address in state
-              if(data){
-                setIpAddress(data.ip);
-                const currentDateTime = new Date().toISOString();
-                const pathfinder = "login.jsx"
-                const resp = await fetch(`${rooturi}/admin/getip`,{
-                    method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiauthkey': apikey,
-                },
-                body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
-                })
-              }
-          
 
-          } catch (error) {
-              console.error("Error fetching IP address:", error);
-          }
-      };
-  
-      fetchIpAddress();
-  }, []); // Empty dependency array means this runs once after the initial render
-  
-//handel forgot password button clikck
-const handelForgotpasswordclick=()=>{
-    navigate("/forgotpassword")
-}
+    const handelForgotpasswordclick = () => {
+        navigate("/forgotpassword");
+    };
 
     return (
-        <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 bg-cover bg-center backdrop-blur-md" 
+             style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            <img src="https://res.cloudinary.com/djvmehyvd/image/upload/v1728105550/f2wo1jiwdtkhouymt94a.png" alt="logo" className="px-150 mt-40"/>
+                <img src="https://res.cloudinary.com/djvmehyvd/image/upload/v1728105550/f2wo1jiwdtkhouymt94a.png" alt="logo" className="px-150 mt-40 bg-white"/>
                 <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign in to your account</h2>
             </div>
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm bg-white bg-opacity-80 rounded-lg p-6">
                 <form className="space-y-6" onSubmit={showOtpField ? handleOtpSubmit : handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">Email address</label>
@@ -229,8 +193,8 @@ const handelForgotpasswordclick=()=>{
                 {error && <p className="mt-2 text-center text-sm text-red-500">{error}</p>}
             </div>
             <button
-            className='mt-10 text-center text-lg text-lime-600 text-wrap'
-                    onClick={handelForgotpasswordclick}
+                className='mt-10 text-center text-lg text-lime-600 text-wrap'
+                onClick={handelForgotpasswordclick}
             >
                 Forgot Password
             </button>
