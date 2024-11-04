@@ -150,6 +150,9 @@ const LogRetentionlist = () => {
     event.preventDefault(); // Prevent default action
     navigate("/"); // Navigate to home
   }
+  const handleUidClick=(id)=>{
+    navigate(`/logdetails/${id}`)
+  }
     return (
         <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
             <div className="overflow-x-auto">
@@ -174,7 +177,13 @@ const LogRetentionlist = () => {
                             currentLogs.length > 0 ? (
                                 currentLogs.map((log) => (
                                     <tr key={log.id}>
-                                        <td className="whitespace-nowrap px-4 py-2 text-teal-700">{log.id}</td>
+                                        <td className="whitespace-nowrap px-4 py-2 text-teal-700">
+                                            <button className='text-blue-600 hover:underline'
+                                            onClick={()=>handleUidClick(log.id)}
+                                            >
+                                                {log.id}
+                                            </button>
+                                        </td>
                                         <td className="whitespace-nowrap px-4 py-2 text-lime-500">{log.uid}</td>
                                         <td className="whitespace-nowrap px-4 py-2 ">
                                             <span className={getMessageTypeClass(log.messagetype)}>
