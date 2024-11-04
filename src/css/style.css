@@ -18,16 +18,16 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(223, 220, 220, 0.5); /* Color of the scrollbar thumb */
+    background: rgba(59, 59, 59, 0.5); /* Color of the scrollbar thumb */
     border-radius: 10px; /* Rounded corners for the thumb */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(223, 215, 215, 0.8); /* Color on hover */
+    background: rgba(54, 54, 54, 0.8); /* Color on hover */
 }
 
 /* For Firefox */
 * {
     scrollbar-width: thin; /* Makes the scrollbar thinner */
-    scrollbar-color: rgba(221, 215, 215, 0.5) transparent; /* Color of the thumb and track */
+    scrollbar-color: rgba(58, 57, 57, 0.5) transparent; /* Color of the thumb and track */
 }
