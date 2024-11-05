@@ -41,6 +41,8 @@ import ListofAppUser from './pages/appuser/appusercreate.jsx/listofappusers';
 import DetailsAppUser from './pages/appuser/appusercreate.jsx/detailappusers';
 import LogDetails from './pages/logdetails/logdetails';
 import ResetPassword from './pages/appuser/resetpassword';
+import DisputeformList from './pages/disputeformcrud/disputeformlist';
+import DispuetformDetails from './pages/disputeformcrud/disputeformdetails';
 
 function App() {
 
@@ -85,6 +87,8 @@ function App() {
         <Route exact path="/appuserdetails/:uid" element={<DetailsAppUser/>}/>
         <Route exact path='/logdetails/:id' element={<LogDetails/>}/>
         <Route exact path='/resetpassword' element={<ResetPassword/>} />
+        <Route exact path='/listofforms' element={<DisputeformList/>}/>
+      <Route exact path='/disputeformdetails/:id' element={<DispuetformDetails/>}/>
       </Routes>
     </>
   );
