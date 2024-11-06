@@ -131,7 +131,7 @@ const DispuetformDetails = () => {
               if(data){
                 setIpAddress(data.ip);
                 const currentDateTime = new Date().toISOString();
-                const pathfinder = "disputeformdetails.jsx"
+                const pathfinder = "helpandsupportdetails.jsx"
                 const resp = await fetch(`${rooturi}/admin/getip`,{
                     method: 'POST',
                 headers: {

@@ -121,6 +121,39 @@ const HelpandSupport = () => {
         event.preventDefault();
         navigate("/");
     };
+    const [ipAddress, setIpAddress] = useState('');
+    //ip tracking facility
+    useEffect(() => {
+      // Fetch the IP address from the API
+      const fetchIpAddress = async () => {
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const apikey = import.meta.env.VITE_API_KEY;
+          try {
+              const response = await fetch("https://api.ipify.org?format=json");
+              const data = await response.json();
+              console.log(data)
+              // Set the IP address in state
+              if(data){
+                setIpAddress(data.ip);
+                const currentDateTime = new Date().toISOString();
+                const pathfinder = "Helpandsupport.jsx"
+                const resp = await fetch(`${rooturi}/admin/getip`,{
+                    method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiauthkey': apikey,
+                },
+                body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
+                })
+              }
+          } catch (error) {
+              console.error("Error fetching IP address:", error);
+          }
+      };
+  
+      fetchIpAddress();
+  }, []); // Empty dependency array means this runs once after the initial render
+  
 
     return (
         <div className="rounded-lg border border-gray-200 p-6">
