@@ -8,6 +8,39 @@ const DispuetformDetails = () => {
     const [hubData, setHubData] = useState({});
     const [loading, setLoading] = useState(true);
 
+    // Function to fetch dispute form details
+    const fetchDetails = async () => {
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const apikey = import.meta.env.VITE_API_KEY;
+        try {
+            const response = await fetch(`${rooturi}/admin/dfsbid`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiauthkey': apikey,
+                },
+                body: JSON.stringify({ id: id })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result);
+                
+                // Check if result.data exists and is an object
+                if (result.data && typeof result.data === 'object') {
+                    setHubData(result.data); // Set hubData to the result.data object
+                } else {
+                    toast("No hub data found");
+                }
+            } else {
+                toast("Failed to fetch dispute form details");
+            }
+        } catch (error) {
+            console.log(error);
+            toast("An error occurred while fetching details");
+        }
+    };
+
     // Use effect to check if user is logged in
     useEffect(() => {
         const checkAuthentication = async () => {
@@ -50,42 +83,74 @@ const DispuetformDetails = () => {
         checkAuthentication();
     }, [navigate]);
 
-    // Fetch dispute form details
+    // Fetch dispute form details on component mount
     useEffect(() => {
-        const fetchDetails = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
-            try {
-                const response = await fetch(`${rooturi}/admin/dfsbid`, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
-                    body: JSON.stringify({ id: id })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log(result);
-                    
-                    // Check if result.data exists and is an object
-                    if (result.data && typeof result.data === 'object') {
-                        setHubData(result.data); // Set hubData to the result.data object
-                    } else {
-                        toast("No hub data found");
-                    }
-                } else {
-                    toast("Failed to fetch dispute form details");
-                }
-            } catch (error) {
-                console.log(error);
-                toast("An error occurred while fetching details");
-            }
-        };
-
-        fetchDetails();
+        fetchDetails(); // Call the fetchDetails function to get initial data
     }, [id]);
+
+    // Function to toggle resolved status
+    const toggleResolvedStatus = async () => {
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const apikey = import.meta.env.VITE_API_KEY;
+
+        try {
+            const response = await fetch(`${rooturi}/admin/resolvestatus`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiauthkey': apikey,
+                },
+                body: JSON.stringify({ id: id })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                toast(result.message); // Show success message
+                // Optionally, refetch details to update the UI
+                fetchDetails(); // Call fetchDetails again to get updated status
+            } else {
+                toast("Failed to update resolved status");
+            }
+        } catch (error) {
+            console.error(error);
+            toast("An error occurred while updating resolved status");
+        }
+    };
+    const [ipAddress, setIpAddress] = useState('');
+    //ip tracking facility
+    useEffect(() => {
+      // Fetch the IP address from the API
+      const fetchIpAddress = async () => {
+        const rooturi = import.meta.env.VITE_ROOT_URI;
+        const apikey = import.meta.env.VITE_API_KEY;
+          try {
+              const response = await fetch("https://api.ipify.org?format=json");
+              const data = await response.json();
+              console.log(data)
+              // Set the IP address in state
+              if(data){
+                setIpAddress(data.ip);
+                const currentDateTime = new Date().toISOString();
+                const pathfinder = "disputeformdetails.jsx"
+                const resp = await fetch(`${rooturi}/admin/getip`,{
+                    method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiauthkey': apikey,
+                },
+                body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
+                })
+              }
+          
+  
+          } catch (error) {
+              console.error("Error fetching IP address:", error);
+          }
+      };
+  
+      fetchIpAddress();
+  }, []); // Empty dependency array means this runs once after the initial render
+  
 
     return (
         <div className="relative flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
@@ -134,7 +199,23 @@ const DispuetformDetails = () => {
                             <p className="font-bold">Dispute details:</p>
                             <p className="mb-2">{hubData.disputedetails}</p>  
                             <p className="font-bold">Associated admin ID:</p>
-                            <p className="mb-2">{hubData.associatedadminid}</p>                   
+                            <p className="mb-2">{hubData.associatedadminid}</p>
+
+                            {/* Resolved Status Button */}
+                            <div className="mt-4">
+                                <button 
+                                    onClick={toggleResolvedStatus}
+                                    className={`py-2 px-4 rounded-full text-white font-semibold ${hubData.resolvedstatus ? 'bg-green-500' : 'bg-red-500'}`}
+                                >
+                                    {hubData.resolvedstatus ? 'Mark as Not Resolved' : 'Mark as Resolved'}
+                                </button>
+                            </div>
+
+                            {/* Display current resolved status */}
+                            <div className="mt-4">
+                                <span className="font-bold">Resolved Status:</span> 
+                                <span>{hubData.resolvedstatus ? 'Resolved' : 'Not Resolved'}</span>                 
+                            </div>  
                         </div>
                     </div>
                 )}
