@@ -40,6 +40,8 @@ import DisputeformList from './pages/disputeformcrud/disputeformlist';
 import DispuetformDetails from './pages/disputeformcrud/disputeformdetails';
 import HelpandSupport from './pages/helpandsupport/helpandsupport';
 import HelpandSupportd from './pages/helpandsupport/helpandsupportdetails';
+import UpdateAppUser from './pages/appuser/appusercreate.jsx/updateappuser';
+import UpdateChargerdetails from './pages/updatechargerdetails';
 
 function App() {
   const location = useLocation();
@@ -87,6 +89,8 @@ function App() {
         <Route exact path='/disputeformdetails/:id' element={<DispuetformDetails />} />
         <Route exact path='/helpandsupport' element={<HelpandSupport />} />
         <Route exact path="/supportdetails/:uid" element={<HelpandSupportd/>}/>
+        <Route exact path='/updateuser/:uid' element={<UpdateAppUser/>}/>
+        <Route exact path='/updatechargerdetails/:uid' element={<UpdateChargerdetails/>} />
       </Routes>
     </>
   );

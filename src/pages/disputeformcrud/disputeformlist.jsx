@@ -103,7 +103,7 @@ const DisputeformList = () => {
           const apikey = import.meta.env.VITE_API_KEY;
     
           try {
-            const response = await fetch(`${rooturi}/admin/deletehubdata`, {
+            const response = await fetch(`${rooturi}/admin/dfd`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -113,15 +113,15 @@ const DisputeformList = () => {
             });
     
             if (response.ok) {
-              toast.success("Hub deleted successfully");
+              toast.success("Diputefrom deleted successfully");
               // Remove deleted hub from state
               setUserData((prevHubs) => prevHubs.filter(hub => hub.uid !== uid));
             } else {
-              toast.error("Failed to delete hub");
+              toast.error("Failed to delete");
             }
           } catch (error) {
-            console.error("Error deleting hub:", error);
-            toast.error("An error occurred while deleting the hub");
+            console.error("Error deleting Disputeform:", error);
+            toast.error("An error occurred while deleting the Disputeform");
           }
         } else {
           toast.info("Delete operation canceled");
@@ -221,7 +221,7 @@ const DisputeformList = () => {
                       user.associatedadminid,
                       <button 
                         className="text-red-600 hover:underline"
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleDelete(user.uid)}
                       >
                         Delete
                       </button> // Added Delete button here

@@ -99,6 +99,9 @@ const ChargerOperationsView = () => {
     navigate(`/chargerdetails/${uid}`);
   };
   
+  const handleUpdate=(uid)=>{
+    navigate(`/updatechargerdetails/${uid}`)
+  }
 
     // Delete function
     const handleDelete = async (uid) => {
@@ -222,11 +225,17 @@ const ChargerOperationsView = () => {
                       <img src={charger.charger_image} alt="Charger" className="w-16 h-16 object-cover" />,
                       charger.chargerbuyer, charger.created_at,
                       <button 
-                        className="text-green-600 hover:underline"
+                        className="text-indigo-600 hover:underline"
                         onClick={() => handleManipulateClick(charger.uid)}
                       >
                         Manipulate
                       </button>, // Added Manipulate button here
+                                 <button
+                                 className="text-green-600 hover:underline"
+                                 onClick={() => handleUpdate(charger.uid)}
+                               >
+                                 Update
+                      </button>, // Added Delete button here
                       <button
                       className="text-red-600 hover:underline"
                       onClick={() => handleDelete(charger.uid)}

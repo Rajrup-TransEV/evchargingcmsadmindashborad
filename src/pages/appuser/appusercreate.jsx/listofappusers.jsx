@@ -147,7 +147,10 @@ const ListofAppUser = () => {
     const handleUidClick = (uid) => {
         navigate(`/appuserdetails/${uid}`);
       };
-      
+    
+    const handelUpdate=(uid)=>{
+        navigate(`/updateuser/${uid}`)
+    }
     return (
         <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8">
             <div className="overflow-x-auto">
@@ -190,6 +193,14 @@ const ListofAppUser = () => {
                                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">{user.username}</td>
                                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">{user.email}</td>
                                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">{user.phonenumber}</td>
+                                        <td className="whitespace-nowrap px-4 py-2">
+                                            <button 
+                                                className="text-green-600 hover:underline" 
+                                                onClick={() => handelUpdate(user.uid)}
+                                            >
+                                                Update
+                                            </button>
+                                        </td>
                                         <td className="whitespace-nowrap px-4 py-2">
                                             <button 
                                                 className="text-red-600 hover:underline" 

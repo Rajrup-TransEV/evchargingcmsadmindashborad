@@ -86,7 +86,7 @@ const HelpandSupport = () => {
         const apiKey = import.meta.env.VITE_API_KEY;
 
         try {
-            const response = await fetch(`${rootUri}/admin/deleteadmindata`, {
+            const response = await fetch(`${rootUri}/admin/cam`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,14 +96,14 @@ const HelpandSupport = () => {
             });
 
             if (response.ok) {
-                toast.success("User deleted successfully");
+                toast.success("Message deleted successfully");
                 setUserData((prevUsers) => prevUsers.filter(user => user.uid !== uid));
             } else {
-                toast.error("Failed to delete user");
+                toast.error("Failed to delete Message");
             }
         } catch (error) {
             console.error("Error deleting user:", error);
-            toast.error("An error occurred while deleting the user");
+            toast.error("An error occurred while deleting the Message");
         }
     };
 
