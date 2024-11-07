@@ -218,7 +218,7 @@ const AddCharger = () => {
 }, []); // Empty dependency array means this runs once after the initial render
 
   return (
-    <section className="bg-white">
+    <section className="relative flex flex-col h-screen overflow-y-auto bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
       <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
         <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
           <div className="max-w-xl lg:max-w-3xl">
