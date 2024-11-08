@@ -42,6 +42,8 @@ import HelpandSupport from './pages/helpandsupport/helpandsupport';
 import HelpandSupportd from './pages/helpandsupport/helpandsupportdetails';
 import UpdateAppUser from './pages/appuser/appusercreate.jsx/updateappuser';
 import UpdateChargerdetails from './pages/updatechargerdetails';
+import Feedbackfromlist from './pages/feedbackform/feedbackfromlist';
+import Feedbackdetail from './pages/feedbackform/feedbackformdetail';
 
 function App() {
   const location = useLocation();
@@ -91,6 +93,8 @@ function App() {
         <Route exact path="/supportdetails/:uid" element={<HelpandSupportd/>}/>
         <Route exact path='/updateuser/:uid' element={<UpdateAppUser/>}/>
         <Route exact path='/updatechargerdetails/:uid' element={<UpdateChargerdetails/>} />
+        <Route exact path="/listoffeedback" element={<Feedbackfromlist/>}/>
+        <Route exact path='/feedbackdetails/:uid' element={<Feedbackdetail/>}/>
       </Routes>
     </>
   );
