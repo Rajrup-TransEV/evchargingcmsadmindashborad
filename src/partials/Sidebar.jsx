@@ -581,19 +581,45 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          {/* <li className="mb-1 last:mb-0">
-                            <NavLink
+                          <li>
+                          <NavLink
                               end
-                              to="/listofhubs"
+                              to="/faqcreate"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " + (isActive ? "text-violet-500" : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
                               }
                             >
                               <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                            
+                                Create FAQ
                               </span>
                             </NavLink>
-                          </li> */}
+                            </li>
+                            <li>
+                          <NavLink
+                              end
+                              to="/faqlist"
+                              className={({ isActive }) =>
+                                "block transition duration-150 truncate " + (isActive ? "text-violet-500" : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                              }
+                            >
+                              <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                              FAQ list
+                              </span>
+                            </NavLink>
+                            </li>
+                            <li>
+                          <NavLink
+                              end
+                              to="/contactlist"
+                              className={({ isActive }) =>
+                                "block transition duration-150 truncate " + (isActive ? "text-violet-500" : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                              }
+                            >
+                              <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                          List of contacts
+                              </span>
+                            </NavLink>
+                            </li>
                         </ul>
                       </div>
                     </React.Fragment>
@@ -619,10 +645,6 @@ function Sidebar({
                         Wallet Recharge manual
                       </span>
                     </div>
-                    {/* Badge */}
-                    {/* <div className="flex flex-shrink-0 ml-2">
-                      <span className="inline-flex items-center justify-center h-5 text-xs font-medium text-white bg-violet-400 px-2 rounded">4</span>
-                    </div> */}
                   </div>
                 </NavLink>
               </li>

@@ -44,6 +44,12 @@ import UpdateAppUser from './pages/appuser/appusercreate.jsx/updateappuser';
 import UpdateChargerdetails from './pages/updatechargerdetails';
 import Feedbackfromlist from './pages/feedbackform/feedbackfromlist';
 import Feedbackdetail from './pages/feedbackform/feedbackformdetail';
+import Faqcreate from './pages/faqops/faqcreate';
+import Faqlist from './pages/faqops/faqlist';
+import Faqdetails from './pages/faqops/faqdetails';
+import Faqupdate from './pages/faqops/faqupdate';
+import Contactlist from './pages/contactops/contactlist';
+import Contactdetails from './pages/contactops/contactdetails';
 
 function App() {
   const location = useLocation();
@@ -95,6 +101,12 @@ function App() {
         <Route exact path='/updatechargerdetails/:uid' element={<UpdateChargerdetails/>} />
         <Route exact path="/listoffeedback" element={<Feedbackfromlist/>}/>
         <Route exact path='/feedbackdetails/:uid' element={<Feedbackdetail/>}/>
+        <Route exact path='/faqcreate' element={<Faqcreate/>}/>
+        <Route exact path="/faqlist" element={<Faqlist/>}/>
+        <Route exact path='/faqdetails/:uid' element={<Faqdetails/>}/>
+        <Route exact path='/faqupdate/:uid' element={<Faqupdate/>}/>
+        <Route exact path='/contactlist' element={<Contactlist/>}/>
+        <Route exact path='/contactdetails/:uid' element={<Contactdetails/>}/>
       </Routes>
     </>
   );
