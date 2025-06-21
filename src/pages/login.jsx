@@ -62,7 +62,7 @@ const Login = () => {
         try {
             const rooturi = import.meta.env.VITE_ROOT_URI;
             const apikey = import.meta.env.VITE_API_KEY;
-            const response = await fetch(`${rooturi}/admin/login/userlogin`, {
+            const response = await fetch(`${rooturi}/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
