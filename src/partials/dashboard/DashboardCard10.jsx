@@ -118,7 +118,7 @@ function DashboardCard10() {
                       <div className="flex items-center">
                         <div className="w-10 h-10 shrink-0 mr-2 sm:mr-3">
                           {/* Placeholder for customer image */}
-                          <div className="font-medium text-gray-800 dark:text-gray-100">{customer.id}</div>
+                         {/* <div className="font-medium text-gray-800 dark:text-gray-100">{customer.id}</div> */}
                         </div>
                         <div className="font-medium text-gray-800 dark:text-gray-100">{customer.firstname}</div>
                       </div>
