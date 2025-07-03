@@ -50,6 +50,7 @@ import Faqdetails from './pages/faqops/faqdetails';
 import Faqupdate from './pages/faqops/faqupdate';
 import Contactlist from './pages/contactops/contactlist';
 import Contactdetails from './pages/contactops/contactdetails';
+import UpdateHub from './pages/addhub/hubdataupdate';
 
 function App() {
   const location = useLocation();
@@ -82,6 +83,7 @@ function App() {
         <Route exact path='/addhub' element={<AddHub />} />
         <Route exact path="/listofhubs" element={<ListofHubData />} />
         <Route exact path="/hubdetails/:uid" element={<HubDetails />} />
+        <Route exact path="/updatehub" element={<UpdateHub />} />
         <Route exact path='/addwallet' element={<AddWallet />} />
         <Route exact path='/totalrevenue' element={<TotalRevenue />} />
         <Route exact path='/updateprofiles' element={<UpdateProfile />} />

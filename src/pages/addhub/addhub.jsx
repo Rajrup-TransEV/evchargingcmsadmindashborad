@@ -155,7 +155,7 @@ const AddHub = () => {
       };
   
       fetchIpAddress();
-  }, []); // Empty dependency array means this runs once after the initial render
+  }, []); 
   
   const backtohome = (event) => {
     event.preventDefault(); // Prevent default action
