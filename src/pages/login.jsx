@@ -13,8 +13,9 @@ const Login = () => {
 
     useEffect(() => {
         const checkAuthentication = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
+            const rooturi = import.meta.env.VITE_AUTH_ROOT_URI;
+            const apikey = import.meta.env.VITE_AUTH_API_KEY;
+
 
             try {
                 const gettoken = localStorage.getItem("token");
@@ -121,10 +122,10 @@ const Login = () => {
     };
 
     return (
-        <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 bg-cover bg-center backdrop-blur-md" 
-             style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
+        <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 bg-cover bg-center backdrop-blur-md"
+            style={{ backgroundImage: "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')" }}>
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <img src="https://res.cloudinary.com/djvmehyvd/image/upload/v1728105550/f2wo1jiwdtkhouymt94a.png" alt="logo" className="px-150 mt-40 bg-white"/>
+                <img src="https://res.cloudinary.com/djvmehyvd/image/upload/v1728105550/f2wo1jiwdtkhouymt94a.png" alt="logo" className="px-150 mt-40 bg-white" />
                 <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign in to your account</h2>
             </div>
 
