@@ -1,5 +1,318 @@
+// import React, { useState, useEffect } from 'react';
+// import { useParams, useNavigate } from 'react-router-dom';
+// import { toast } from 'react-toastify';
+
+// const AddHub = () => {
+//     const [hubname, sethubname] = useState('');
+//     const [hubchargers, sethubcharges] = useState([]);
+//     const [hubtariff, sethubtariff] = useState('');
+//     const [hublocation, sethublocation] = useState('');
+//     const [adminid, setadminid] = useState('');
+//     const [chargerids, setchargerids] = useState([]);
+//     const [loading, setLoading] = useState(false);
+//     const navigate = useNavigate();
+
+//     // Use effect to check for user authentication
+//     useEffect(() => {
+//         const checkAuthentication = async () => {
+//             const rooturi = import.meta.env.VITE_ROOT_URI;
+//             const apikey = import.meta.env.VITE_API_KEY;
+
+//             try {
+//                 const gettoken = localStorage.getItem("token");
+//                 if (!gettoken) {
+//                     navigate("/signin");
+//                     return;
+//                 }
+
+//                 const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'apiauthkey': apikey,
+//                     },
+//                     body: JSON.stringify({ token: gettoken })
+//                 });
+
+//                 const data = await response.json();
+//                 if (response.ok) {
+//                     if (data.user.userType !== "superadmin") {
+//                         toast("You have no authorization to view this page");
+//                         navigate("/signin");
+//                     } else {
+//                         console.log("You are an authorized user");
+//                     }
+//                 } else {
+//                     toast("Failed to verify user");
+//                     navigate("/signin");
+//                 }
+//             } catch (error) {
+//                 console.error("Error during authentication check:", error);
+//                 toast("An error occurred during authentication");
+//                 navigate("/signin");
+//             }
+//         };
+
+//         checkAuthentication();
+//     }, [navigate]);
+
+//     // Fetch all charger data
+//     useEffect(() => {
+//         const fetchAllChargerData = async () => {
+//             const rooturi = import.meta.env.VITE_ROOT_URI;
+//             const apikey = import.meta.env.VITE_API_KEY;
+
+//             try {
+//                 const response = await fetch(`${rooturi}/admin/listofcharges`, {
+//                     method: "GET",
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'apiauthkey': apikey,
+//                     },
+//                 });
+
+//                 const result = await response.json();
+//                 const data = Array.isArray(result.data) ? result.data : [];
+//                 setchargerids(data.map(item => item.uid));
+//                 setLoading(false);
+//             } catch (error) {
+//                 console.error("Error fetching charger data:", error);
+//                 toast("Failed to fetch charger data");
+//                 setchargerids([]);
+//                 setLoading(false);
+//             }
+//         };
+
+//         fetchAllChargerData();
+//     }, []);
+
+
+//    // Handle form submission
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+
+//         const dataToSubmit = {
+//             hubname,
+//             hubchargers,
+//             hubtariff,
+//             hublocation,
+//             adminid,
+//         };
+
+//         const rooturi = import.meta.env.VITE_ROOT_URI;
+//         const apikey = import.meta.env.VITE_API_KEY;
+
+//         try {
+//             const response = await fetch(`${rooturi}/admin/addhubs`, {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'apiauthkey': apikey,
+//                 },
+//                 body: JSON.stringify(dataToSubmit),
+//             });
+
+//             if (response.ok) {
+//                 toast("Hub added successfully!");
+//             } else {
+//                 toast("Failed to add hub");
+//             }
+//         } catch (error) {
+//             console.error("Error during hub submission:", error);
+//             toast("An error occurred while adding the hub");
+//         }
+//     };
+//     const [ipAddress, setIpAddress] = useState('');
+//     //ip tracking facility
+//     useEffect(() => {
+//       // Fetch the IP address from the API
+//       const fetchIpAddress = async () => {
+//         const rooturi = import.meta.env.VITE_ROOT_URI;
+//         const apikey = import.meta.env.VITE_API_KEY;
+//           try {
+//               const response = await fetch("https://api.ipify.org?format=json");
+//               const data = await response.json();
+//               console.log(data)
+//               // Set the IP address in state
+//               if(data){
+//                 setIpAddress(data.ip);
+//                 const currentDateTime = new Date().toISOString();
+//                 const pathfinder = "addhub.jsx"
+//                 const resp = await fetch(`${rooturi}/admin/getip`,{
+//                     method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'apiauthkey': apikey,
+//                 },
+//                 body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
+//                 })
+//               }
+
+
+//           } catch (error) {
+//               console.error("Error fetching IP address:", error);
+//           }
+//       };
+
+//       fetchIpAddress();
+//   }, []); 
+
+//   const backtohome = (event) => {
+//     event.preventDefault(); // Prevent default action
+//     navigate("/"); // Navigate to home
+// }
+//     return (
+//         <section className="bg-white dark:bg-gray-900">
+//             <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
+//                 <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
+//                     <img
+//                         alt=""
+//                         src="https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png"
+//                         className="absolute inset-0 h-full w-full object-cover"
+//                     />
+//                 </aside>
+
+//                 <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
+//                     <div className="max-w-xl lg:max-w-3xl">
+//                         <a className="block text-blue-600" href="/">
+//                             <span className="sr-only">Home</span>
+//                             {/* SVG icon omitted for brevity */}
+//                         </a>
+
+//                         <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
+//                             Welcome to Add hub section 🦑
+//                         </h1>
+
+//                         <p className="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
+//                             Through this section you can add data for hubs.
+//                         </p>
+
+//                         <form onSubmit={handleSubmit} className="mt-8 grid grid-cols-6 gap-6">
+//                             <div className="col-span-6 sm:col-span-3">
+//                                 <label
+//                                     htmlFor="hubname"
+//                                     className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+//                                 >
+//                                     hubname
+//                                 </label>
+
+//                                 <input
+//                                     type="text"
+//                                     id="hubname"
+//                                     name="hubname"
+//                                     value={hubname}
+//                                     onChange={(e) => sethubname(e.target.value)}
+//                                     className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+//                                 />
+//                             </div>
+
+//                             <div className="col-span-6 sm:col-span-3">
+//                                 <label
+//                                     htmlFor="hubchargers"
+//                                     className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+//                                 >
+//                                     hubchargers
+//                                 </label>
+
+//                                 <select
+//                                     id="hubchargers"
+//                                     name="hubchargers"
+//                                     multiple
+//                                     value={hubchargers}
+//                                     onChange={(e) => {
+//                                         const options = Array.from(e.target.options);
+//                                         const selectedValues = options
+//                                             .filter(option => option.selected)
+//                                             .map(option => option.value);
+//                                         sethubcharges(selectedValues);
+//                                     }}
+//                                     className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+//                                 >
+//                                     {chargerids.map(chargerId => (
+//                                         <option key={chargerId} value={chargerId}>
+//                                             {chargerId}
+//                                         </option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+
+//                             <div className="col-span-6">
+//                                 <label htmlFor="hubtariff" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+//                                     hubtariff
+//                                 </label>
+
+//                                 <input
+//                                     type="text"
+//                                     id="hubtariff"
+//                                     name="hubtariff"
+//                                     value={hubtariff}
+//                                     onChange={(e) => sethubtariff(e.target.value)}
+//                                     className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+//                                 />
+//                             </div>
+
+//                             <div className="col-span-6 sm:col-span-3">
+//                                 <label
+//                                     htmlFor="hublocation"
+//                                     className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+//                                 >
+//                                     hublocation
+//                                 </label>
+
+//                                 <input
+//                                     type="text"
+//                                     id="hublocation"
+//                                     name="hublocation"
+//                                     value={hublocation}
+//                                     onChange={(e) => sethublocation(e.target.value)}
+//                                     className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+//                                 />
+//                             </div>
+
+//                             <div className="col-span-6 sm:col-span-3">
+//                                 <label
+//                                     htmlFor="adminid"
+//                                     className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+//                                 >
+//                                     adminid
+//                                 </label>
+
+//                                 <input
+//                                     type="text"
+//                                     id="adminid"
+//                                     name="adminid"
+//                                     value={adminid}
+//                                     onChange={(e) => setadminid(e.target.value)}
+//                                     className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+//                                 />
+//                             </div>
+
+//                             <div className="col-span-6">
+//                                 <button
+//                                     type="submit"
+//                                     className="inline-block w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring active:bg-blue-500"
+//                                 >
+//                                     Add Hub
+//                                 </button>
+//                             </div>
+//                             <button 
+//     className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+//     onClick={(event) => backtohome(event)}
+// >
+//     <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+//     <span className="relative z-10">HOME</span>
+// </button>
+//                         </form>
+//                     </div>
+//                 </main>
+//             </div>
+//         </section>
+//     );
+// };
+
+// export default AddHub;
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const AddHub = () => {
@@ -9,305 +322,213 @@ const AddHub = () => {
     const [hublocation, sethublocation] = useState('');
     const [adminid, setadminid] = useState('');
     const [chargerids, setchargerids] = useState([]);
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Use effect to check for user authentication
+    /* ================= AUTH ================= */
     useEffect(() => {
         const checkAuthentication = async () => {
             const rooturi = import.meta.env.VITE_ROOT_URI;
             const apikey = import.meta.env.VITE_API_KEY;
 
             try {
-                const gettoken = localStorage.getItem("token");
-                if (!gettoken) {
-                    navigate("/signin");
-                    return;
-                }
+                const token = localStorage.getItem("token");
+                if (!token) return navigate("/signin");
 
-                const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+                const res = await fetch(`${rooturi}/userauth/verifyuser`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
-                    body: JSON.stringify({ token: gettoken })
+                    headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
+                    body: JSON.stringify({ token })
                 });
 
-                const data = await response.json();
-                if (response.ok) {
-                    if (data.user.userType !== "superadmin") {
-                        toast("You have no authorization to view this page");
-                        navigate("/signin");
-                    } else {
-                        console.log("You are an authorized user");
-                    }
-                } else {
-                    toast("Failed to verify user");
+                const data = await res.json();
+                if (!res.ok || data.user.userType !== "superadmin") {
+                    toast("Unauthorized");
                     navigate("/signin");
                 }
-            } catch (error) {
-                console.error("Error during authentication check:", error);
-                toast("An error occurred during authentication");
+            } catch {
+                toast("Authentication failed");
                 navigate("/signin");
             }
         };
-
         checkAuthentication();
     }, [navigate]);
 
-    // Fetch all charger data
+    /* ================= CHARGERS ================= */
     useEffect(() => {
         const fetchAllChargerData = async () => {
             const rooturi = import.meta.env.VITE_ROOT_URI;
             const apikey = import.meta.env.VITE_API_KEY;
 
             try {
-                const response = await fetch(`${rooturi}/admin/listofcharges`, {
-                    method: "GET",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
+                const res = await fetch(`${rooturi}/admin/listofcharges`, {
+                    headers: { apiauthkey: apikey }
                 });
-
-                const result = await response.json();
-                const data = Array.isArray(result.data) ? result.data : [];
-                setchargerids(data.map(item => item.uid));
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching charger data:", error);
-                toast("Failed to fetch charger data");
-                setchargerids([]);
-                setLoading(false);
+                const result = await res.json();
+                setchargerids(Array.isArray(result.data) ? result.data.map(i => i.uid) : []);
+            } catch {
+                toast("Failed to load chargers");
             }
         };
-
         fetchAllChargerData();
     }, []);
 
-    
-   // Handle form submission
+    /* ================= SUBMIT ================= */
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const dataToSubmit = {
-            hubname,
-            hubchargers,
-            hubtariff,
-            hublocation,
-            adminid,
-        };
 
         const rooturi = import.meta.env.VITE_ROOT_URI;
         const apikey = import.meta.env.VITE_API_KEY;
 
         try {
-            const response = await fetch(`${rooturi}/admin/addhubs`, {
+            const res = await fetch(`${rooturi}/admin/addhubs`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiauthkey': apikey,
-                },
-                body: JSON.stringify(dataToSubmit),
+                headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
+                body: JSON.stringify({
+                    hubname,
+                    hubchargers,
+                    hubtariff,
+                    hublocation,
+                    adminid,
+                }),
             });
 
-            if (response.ok) {
-                toast("Hub added successfully!");
-            } else {
-                toast("Failed to add hub");
-            }
-        } catch (error) {
-            console.error("Error during hub submission:", error);
-            toast("An error occurred while adding the hub");
+            res.ok ? toast.success("Hub added successfully") : toast.error("Failed to add hub");
+        } catch {
+            toast.error("Server error");
         }
     };
-    const [ipAddress, setIpAddress] = useState('');
-    //ip tracking facility
-    useEffect(() => {
-      // Fetch the IP address from the API
-      const fetchIpAddress = async () => {
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-        const apikey = import.meta.env.VITE_API_KEY;
-          try {
-              const response = await fetch("https://api.ipify.org?format=json");
-              const data = await response.json();
-              console.log(data)
-              // Set the IP address in state
-              if(data){
-                setIpAddress(data.ip);
-                const currentDateTime = new Date().toISOString();
-                const pathfinder = "addhub.jsx"
-                const resp = await fetch(`${rooturi}/admin/getip`,{
-                    method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiauthkey': apikey,
-                },
-                body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
-                })
-              }
-          
 
-          } catch (error) {
-              console.error("Error fetching IP address:", error);
-          }
-      };
-  
-      fetchIpAddress();
-  }, []); 
-  
-  const backtohome = (event) => {
-    event.preventDefault(); // Prevent default action
-    navigate("/"); // Navigate to home
-}
+    const backtohome = () => navigate("/");
+
+    /* ================= UI ================= */
     return (
-        <section className="bg-white dark:bg-gray-900">
-            <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-                <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
-                    <img
-                        alt=""
-                        src="https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png"
-                        className="absolute inset-0 h-full w-full object-cover"
-                    />
-                </aside>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center p-6">
+            <div className="w-full max-w-3xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
 
-                <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
-                    <div className="max-w-xl lg:max-w-3xl">
-                        <a className="block text-blue-600" href="/">
-                            <span className="sr-only">Home</span>
-                            {/* SVG icon omitted for brevity */}
-                        </a>
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-white/20">
+                    <h1 className="text-3xl font-extrabold text-white">
+                        ⚡ Add Charging Hub
+                    </h1>
+                    <p className="text-gray-300 mt-1 text-sm">
+                        Create and manage EV charging hubs
+                    </p>
+                </div>
 
-                        <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-                            Welcome to Add hub section 🦑
-                        </h1>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <p className="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
-                            Through this section you can add data for hubs.
-                        </p>
+                    <Input label="Hub Name" value={hubname} onChange={sethubname} />
+                    <Input label="Admin ID" value={adminid} onChange={setadminid} />
 
-                        <form onSubmit={handleSubmit} className="mt-8 grid grid-cols-6 gap-6">
-                            <div className="col-span-6 sm:col-span-3">
-                                <label
-                                    htmlFor="hubname"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    hubname
-                                </label>
+                    <Input label="Hub Tariff" value={hubtariff} onChange={sethubtariff} />
+                    <Input label="Hub Location" value={hublocation} onChange={sethublocation} />
 
-                                <input
-                                    type="text"
-                                    id="hubname"
-                                    name="hubname"
-                                    value={hubname}
-                                    onChange={(e) => sethubname(e.target.value)}
-                                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                />
+                    {/* Multi Select */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-bold text-gray-200 mb-1">
+
+                        </label>
+                        {/* Select Chargers */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-bold text-gray-200 mb-2">
+                                Select Chargers
+                            </label>
+
+                            <div className="rounded-xl border border-white/20 bg-black/30 max-h-56 overflow-y-auto divide-y divide-white/10">
+
+                                {chargerids.length === 0 ? (
+                                    <p className="text-gray-400 text-sm p-4 text-center">
+                                        No chargers available
+                                    </p>
+                                ) : (
+                                    chargerids.map((id) => {
+                                        const isSelected = hubchargers.includes(id);
+
+                                        return (
+                                            <div
+                                                key={id}
+                                                onClick={(e) => {
+                                                    if (e.ctrlKey || e.metaKey) {
+                                                        sethubcharges(prev =>
+                                                            prev.includes(id)
+                                                                ? prev.filter(item => item !== id)
+                                                                : [...prev, id]
+                                                        );
+                                                    } else {
+                                                        sethubcharges([id]);
+                                                    }
+                                                }}
+                                                className={`
+              cursor-pointer px-4 py-3 flex items-center justify-between
+              transition
+              ${isSelected
+                                                        ? 'bg-gradient-to-r from-teal-500/30 to-emerald-500/30 text-white'
+                                                        : 'text-gray-300 hover:bg-white/5'
+                                                    }
+            `}
+                                            >
+                                                <span className="font-mono text-sm">{id}</span>
+
+                                                {isSelected && (
+                                                    <span className="text-xs font-bold bg-teal-500 text-black px-2 py-0.5 rounded-full">
+                                                        SELECTED
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                )}
                             </div>
 
-                            <div className="col-span-6 sm:col-span-3">
-                                <label
-                                    htmlFor="hubchargers"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    hubchargers
-                                </label>
-
-                                <select
-                                    id="hubchargers"
-                                    name="hubchargers"
-                                    multiple
-                                    value={hubchargers}
-                                    onChange={(e) => {
-                                        const options = Array.from(e.target.options);
-                                        const selectedValues = options
-                                            .filter(option => option.selected)
-                                            .map(option => option.value);
-                                        sethubcharges(selectedValues);
-                                    }}
-                                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                >
-                                    {chargerids.map(chargerId => (
-                                        <option key={chargerId} value={chargerId}>
-                                            {chargerId}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="col-span-6">
-                                <label htmlFor="hubtariff" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                    hubtariff
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="hubtariff"
-                                    name="hubtariff"
-                                    value={hubtariff}
-                                    onChange={(e) => sethubtariff(e.target.value)}
-                                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                />
-                            </div>
-
-                            <div className="col-span-6 sm:col-span-3">
-                                <label
-                                    htmlFor="hublocation"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    hublocation
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="hublocation"
-                                    name="hublocation"
-                                    value={hublocation}
-                                    onChange={(e) => sethublocation(e.target.value)}
-                                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                />
-                            </div>
-
-                            <div className="col-span-6 sm:col-span-3">
-                                <label
-                                    htmlFor="adminid"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    adminid
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="adminid"
-                                    name="adminid"
-                                    value={adminid}
-                                    onChange={(e) => setadminid(e.target.value)}
-                                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                />
-                            </div>
-
-                            <div className="col-span-6">
-                                <button
-                                    type="submit"
-                                    className="inline-block w-full rounded-md bg-blue-600 px-5 py-3 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring active:bg-blue-500"
-                                >
-                                    Add Hub
-                                </button>
-                            </div>
-                            <button 
-    className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
-    onClick={(event) => backtohome(event)}
->
-    <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
-    <span className="relative z-10">HOME</span>
-</button>
-                        </form>
+                            <p className="mt-2 text-xs text-gray-400">
+                                Hold <span className="font-bold">Ctrl / Cmd</span> to select multiple chargers
+                            </p>
+                        </div>
                     </div>
-                </main>
+                    {/* Submit */}
+                    <div className="md:col-span-2">
+                        <button
+                            type="submit"
+                            className="w-full py-3 text-lg font-extrabold text-white rounded-xl
+                         bg-gradient-to-r from-teal-500 via-emerald-500 to-green-600
+                         hover:scale-[1.02] transition shadow-lg"
+                        >
+                            ➕ Add Hub
+                        </button>
+                    </div>
+                </form>
+
+                {/* Footer */}
+                <div className="px-8 py-6 border-t border-white/20 flex justify-center">
+                    <button
+                        onClick={backtohome}
+                        className="px-6 py-2 rounded-full font-bold text-white
+                       bg-gradient-to-r from-teal-400 to-cyan-500
+                       hover:scale-105 transition shadow-lg"
+                    >
+                        ⬅ Home
+                    </button>
+                </div>
             </div>
-        </section>
+        </div>
     );
 };
+
+/* ================= INPUT COMPONENT ================= */
+const Input = ({ label, value, onChange }) => (
+    <div>
+        <label className="block text-sm font-bold text-gray-200 mb-1">
+            {label}
+        </label>
+        <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full rounded-lg bg-black/40 border border-white/20
+                 px-4 py-2 text-white font-semibold
+                 focus:outline-none focus:ring-2 focus:ring-teal-400"
+        />
+    </div>
+);
 
 export default AddHub;

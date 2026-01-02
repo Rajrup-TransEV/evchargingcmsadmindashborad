@@ -1,283 +1,464 @@
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { toast } from 'react-toastify';
+
+// const AddWallet = () => {
+//     const [userid, setuserid] = useState('');
+//     const [walletid, setwalletid] = useState('');
+//     const [price, setprice] = useState(''); // Keep price as a string
+//     const [chargeruid,setchargerid]=useState('');
+//     const [loading, setLoading] = useState(false);
+//     const navigate = useNavigate();
+//  //use effect to directly check for if user logged in or not
+//  useEffect(() => {
+//     const checkAuthentication = async () => {
+     
+//       // Take API key value from env
+//       const rooturi = import.meta.env.VITE_ROOT_URI;
+//       const apikey = import.meta.env.VITE_API_KEY;
+      
+//       try {
+//         const gettoken = localStorage.getItem("token");
+//         console.log(gettoken)
+//         if (!gettoken) {
+//           navigate("/signin");
+//           return;
+//         }
+        
+//         const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'apiauthkey': apikey,
+//           },
+//           body: JSON.stringify({ token: gettoken })
+//         });
+        
+//         const data = await response.json();
+//         console.log(data)        
+//         if (response.ok) {
+
+//           if (data.user.userType !== "superadmin") {
+//             toast("You have no authorization to view this page");
+//             navigate("/signin");
+//           } else {
+//             console.log("You are an authorized user");
+//           }
+//         } else {
+//           toast("Failed to verify user");
+//           navigate("/signin");
+//         }
+//       } catch (error) {
+//         console.error("Error during authentication check:", error);
+//         toast("An error occurred during authentication");
+//         navigate("/signin");
+//       }
+//     };
+
+//     checkAuthentication();
+//   }, [navigate]); // Dependency array includes navigate to avoid stale closure
+//     const loadScript = (src) => {
+//         return new Promise((resolve) => {
+//             const script = document.createElement("script");
+//             script.src = src;
+//             script.onload = () => {
+//                 resolve(true);
+//             };
+//             script.onerror = () => {
+//                 resolve(false);
+//             };
+//             document.body.appendChild(script);
+//         });
+//     };
+
+//     const PaymentComponent = () => {
+//         useEffect(() => {
+//             loadScript("https://checkout.razorpay.com/v1/checkout.js");
+//         }, []);
+//         const sendPaymentToApi = async (razorpay_payment_id) => {
+//             try {
+//                 const rooturi = import.meta.env.VITE_ROOT_URI;
+//                 const apikey = import.meta.env.VITE_API_KEY;
+    
+//                 const response = await fetch(`${rooturi}/admin/verifypayment`, {
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'apiauthkey': apikey,
+//                     },
+//                     body: JSON.stringify({
+//                         razorpay_payment_id,
+//                         userid,
+//                         walletid,
+//                         chargeruid,
+//                         price,
+//                     }),
+//                 });
+    
+//                 if (!response.ok) throw new Error('Payment data submission failed');
+    
+//                 const result = await response.json();
+//                 toast.success(`Payment submitted successfully: ${result.message}`);
+//             } catch (error) {
+//                 toast.error(`Error: ${error.message}`);
+//             }
+//         };
+    
+//         const displayRazorpay = async () => {
+//             try {
+//                 const rooturi = import.meta.env.VITE_ROOT_URI;
+//                 const apikey = import.meta.env.VITE_API_KEY;
+
+//                 // Prepare data to send to the API
+//                 const requestData = {
+//                     userid,
+//                     walletid,
+//                     price: price, // Keep as string
+//                 };
+
+//                 const result = await fetch(`${rooturi}/admin/initwalletrecharge`, { 
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'apiauthkey': apikey,
+//                     },
+//                     body: JSON.stringify(requestData),
+//                 });
+
+//                 if (!result.ok) throw new Error('Failed to create order');
+
+//                 const data = await result.json();
+//                 console.log(data);
+//                 const options = {
+//                     key: "rzp_test_nzmqxQYhvCH9rD", // Enter the Key ID generated from the Dashboard
+//                     amount: Number(price) * 100, // Convert string to number and multiply by 100
+//                     currency: "INR",
+//                     name: "Transev",
+//                     description: "Test Transaction",
+//                     image: "https://cdn.statically.io/img/transmogriffy.com/wp-content/uploads/2022/03/TWLD5456.jpg?w=1280&quality=100&f=auto",
+//                     order_id: data.uid,
+//                     handler: function (response) {
+//                         console.log(response)
+//                         toast.success(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+//                         // Call your backend to verify payment here
+//                         sendPaymentToApi(response.razorpay_payment_id);
+                       
+//                     },
+//                 };
+
+//                 const paymentObject = new window.Razorpay(options);
+//                 paymentObject.open();
+//             } catch (error) {
+//                 toast.error(`Error: ${error.message}`);
+//             }
+//         };
+
+//         const [ipAddress, setIpAddress] = useState('');
+//         //ip tracking facility
+//         useEffect(() => {
+//           // Fetch the IP address from the API
+//           const fetchIpAddress = async () => {
+//             const rooturi = import.meta.env.VITE_ROOT_URI;
+//             const apikey = import.meta.env.VITE_API_KEY;
+//               try {
+//                   const response = await fetch("https://api.ipify.org?format=json");
+//                   const data = await response.json();
+//                   console.log(data)
+//                   // Set the IP address in state
+//                   if(data){
+//                     setIpAddress(data.ip);
+//                     const currentDateTime = new Date().toISOString();
+//                     const pathfinder = "addwalletdata.jsx"
+//                     const resp = await fetch(`${rooturi}/admin/getip`,{
+//                         method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'apiauthkey': apikey,
+//                     },
+//                     body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
+//                     })
+//                   }
+              
+    
+//               } catch (error) {
+//                   console.error("Error fetching IP address:", error);
+//               }
+//           };
+      
+//           fetchIpAddress();
+//       }, []); // Empty dependency array means this runs once after the initial render
+      
+
+
+//         return (
+//             <button 
+//                 onClick={displayRazorpay} 
+//                 className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200"
+//             >
+//                 Pay Now
+//             </button>
+//         );
+//     };
+
+//     const handleSubmit = (e) => {
+//         e.preventDefault();
+//         // PaymentComponent will handle payment display
+//     };
+
+
+// const backtohome = (event) => {
+//   event.preventDefault(); // Prevent default action
+//   navigate("/"); // Navigate to home
+// }
+//     return (
+//         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+//             <h2 className="text-2xl font-bold mb-6">Add Wallet</h2>
+//             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="userid">
+//                         User ID
+//                     </label>
+//                     <input 
+//                         type="text" 
+//                         id="userid" 
+//                         value={userid} 
+//                         onChange={(e) => setuserid(e.target.value)} 
+//                         required 
+//                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+//                     />
+//                 </div>
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="walletid">
+//                         Wallet ID
+//                     </label>
+//                     <input 
+//                         type="text" 
+//                         id="walletid" 
+//                         value={walletid} 
+//                         onChange={(e) => setwalletid(e.target.value)} 
+//                         required 
+//                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+//                     />
+//                 </div>
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="chargerid">
+//                     Chargerid for which you want to init the payment
+//                     </label>
+//                     <input 
+//                         type="text" 
+//                         id="chargeruid" 
+//                         value={chargeruid} 
+//                         onChange={(e) => setchargerid(e.target.value)} 
+//                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+//                     />
+//                 </div>
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+//                         Price
+//                     </label>
+//                     <input 
+//                         type="text" 
+//                         id="price" 
+//                         value={price} 
+//                         onChange={(e) => setprice(e.target.value)} 
+//                         required 
+//                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+//                     />
+//                 </div>
+//                 <PaymentComponent />
+//             </form>
+//             <div className="py-11">
+//                 <button 
+//         className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+//         onClick={(event) => backtohome(event)}
+//     >
+//         <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+//         <span className="relative z-10">HOME</span>
+//     </button>
+// </div>
+//         </div>
+//     );
+// };
+
+// export default AddWallet;
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const AddWallet = () => {
-    const [userid, setuserid] = useState('');
-    const [walletid, setwalletid] = useState('');
-    const [price, setprice] = useState(''); // Keep price as a string
-    const [chargeruid,setchargerid]=useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
- //use effect to directly check for if user logged in or not
- useEffect(() => {
+  const [userid, setuserid] = useState('');
+  const [walletid, setwalletid] = useState('');
+  const [price, setprice] = useState('');
+  const [chargeruid, setchargerid] = useState('');
+  const navigate = useNavigate();
+
+  /* ================= AUTH CHECK ================= */
+  useEffect(() => {
     const checkAuthentication = async () => {
-     
-      // Take API key value from env
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
-      
+
       try {
         const gettoken = localStorage.getItem("token");
-        console.log(gettoken)
-        if (!gettoken) {
-          navigate("/signin");
-          return;
-        }
-        
+        if (!gettoken) return navigate("/signin");
+
         const response = await fetch(`${rooturi}/userauth/verifyuser`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apiauthkey': apikey,
+            apiauthkey: apikey,
           },
           body: JSON.stringify({ token: gettoken })
         });
-        
-        const data = await response.json();
-        console.log(data)        
-        if (response.ok) {
 
-          if (data.user.userType !== "superadmin") {
-            toast("You have no authorization to view this page");
-            navigate("/signin");
-          } else {
-            console.log("You are an authorized user");
-          }
-        } else {
-          toast("Failed to verify user");
+        const data = await response.json();
+        if (!response.ok || data.user.userType !== "superadmin") {
+          toast("Unauthorized access");
           navigate("/signin");
         }
-      } catch (error) {
-        console.error("Error during authentication check:", error);
-        toast("An error occurred during authentication");
+      } catch {
+        toast("Authentication failed");
         navigate("/signin");
       }
     };
-
     checkAuthentication();
-  }, [navigate]); // Dependency array includes navigate to avoid stale closure
-    const loadScript = (src) => {
-        return new Promise((resolve) => {
-            const script = document.createElement("script");
-            script.src = src;
-            script.onload = () => {
-                resolve(true);
-            };
-            script.onerror = () => {
-                resolve(false);
-            };
-            document.body.appendChild(script);
-        });
+  }, [navigate]);
+
+  /* ================= PAYMENT ================= */
+  const loadScript = (src) =>
+    new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const PaymentComponent = () => {
+    useEffect(() => {
+      loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    }, []);
+
+    const sendPaymentToApi = async (razorpay_payment_id) => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+
+      await fetch(`${rooturi}/admin/verifypayment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apiauthkey: apikey,
+        },
+        body: JSON.stringify({
+          razorpay_payment_id,
+          userid,
+          walletid,
+          chargeruid,
+          price,
+        }),
+      });
     };
 
-    const PaymentComponent = () => {
-        useEffect(() => {
-            loadScript("https://checkout.razorpay.com/v1/checkout.js");
-        }, []);
-        const sendPaymentToApi = async (razorpay_payment_id) => {
-            try {
-                const rooturi = import.meta.env.VITE_ROOT_URI;
-                const apikey = import.meta.env.VITE_API_KEY;
-    
-                const response = await fetch(`${rooturi}/admin/verifypayment`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
-                    body: JSON.stringify({
-                        razorpay_payment_id,
-                        userid,
-                        walletid,
-                        chargeruid,
-                        price,
-                    }),
-                });
-    
-                if (!response.ok) throw new Error('Payment data submission failed');
-    
-                const result = await response.json();
-                toast.success(`Payment submitted successfully: ${result.message}`);
-            } catch (error) {
-                toast.error(`Error: ${error.message}`);
-            }
-        };
-    
-        const displayRazorpay = async () => {
-            try {
-                const rooturi = import.meta.env.VITE_ROOT_URI;
-                const apikey = import.meta.env.VITE_API_KEY;
+    const displayRazorpay = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-                // Prepare data to send to the API
-                const requestData = {
-                    userid,
-                    walletid,
-                    price: price, // Keep as string
-                };
+      const result = await fetch(`${rooturi}/admin/initwalletrecharge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apiauthkey: apikey,
+        },
+        body: JSON.stringify({ userid, walletid, price }),
+      });
 
-                const result = await fetch(`${rooturi}/admin/initwalletrecharge`, { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
-                    body: JSON.stringify(requestData),
-                });
+      const data = await result.json();
 
-                if (!result.ok) throw new Error('Failed to create order');
+      const options = {
+        key: "rzp_test_nzmqxQYhvCH9rD",
+        amount: Number(price) * 100,
+        currency: "INR",
+        name: "Transev Wallet",
+        description: "Wallet Recharge",
+        image: "https://cdn.statically.io/img/transmogriffy.com/wp-content/uploads/2022/03/TWLD5456.jpg",
+        order_id: data.uid,
+        handler: (response) => {
+          toast.success("Payment Successful");
+          sendPaymentToApi(response.razorpay_payment_id);
+        },
+      };
 
-                const data = await result.json();
-                console.log(data);
-                const options = {
-                    key: "rzp_test_nzmqxQYhvCH9rD", // Enter the Key ID generated from the Dashboard
-                    amount: Number(price) * 100, // Convert string to number and multiply by 100
-                    currency: "INR",
-                    name: "Transev",
-                    description: "Test Transaction",
-                    image: "https://cdn.statically.io/img/transmogriffy.com/wp-content/uploads/2022/03/TWLD5456.jpg?w=1280&quality=100&f=auto",
-                    order_id: data.uid,
-                    handler: function (response) {
-                        console.log(response)
-                        toast.success(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
-                        // Call your backend to verify payment here
-                        sendPaymentToApi(response.razorpay_payment_id);
-                       
-                    },
-                };
-
-                const paymentObject = new window.Razorpay(options);
-                paymentObject.open();
-            } catch (error) {
-                toast.error(`Error: ${error.message}`);
-            }
-        };
-
-        const [ipAddress, setIpAddress] = useState('');
-        //ip tracking facility
-        useEffect(() => {
-          // Fetch the IP address from the API
-          const fetchIpAddress = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
-              try {
-                  const response = await fetch("https://api.ipify.org?format=json");
-                  const data = await response.json();
-                  console.log(data)
-                  // Set the IP address in state
-                  if(data){
-                    setIpAddress(data.ip);
-                    const currentDateTime = new Date().toISOString();
-                    const pathfinder = "addwalletdata.jsx"
-                    const resp = await fetch(`${rooturi}/admin/getip`,{
-                        method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiauthkey': apikey,
-                    },
-                    body: JSON.stringify({ip:data.ip,datetime:currentDateTime,path:pathfinder})
-                    })
-                  }
-              
-    
-              } catch (error) {
-                  console.error("Error fetching IP address:", error);
-              }
-          };
-      
-          fetchIpAddress();
-      }, []); // Empty dependency array means this runs once after the initial render
-      
-
-
-        return (
-            <button 
-                onClick={displayRazorpay} 
-                className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200"
-            >
-                Pay Now
-            </button>
-        );
+      new window.Razorpay(options).open();
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // PaymentComponent will handle payment display
-    };
-
-
-const backtohome = (event) => {
-  event.preventDefault(); // Prevent default action
-  navigate("/"); // Navigate to home
-}
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <h2 className="text-2xl font-bold mb-6">Add Wallet</h2>
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="userid">
-                        User ID
-                    </label>
-                    <input 
-                        type="text" 
-                        id="userid" 
-                        value={userid} 
-                        onChange={(e) => setuserid(e.target.value)} 
-                        required 
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="walletid">
-                        Wallet ID
-                    </label>
-                    <input 
-                        type="text" 
-                        id="walletid" 
-                        value={walletid} 
-                        onChange={(e) => setwalletid(e.target.value)} 
-                        required 
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="chargerid">
-                    Chargerid for which you want to init the payment
-                    </label>
-                    <input 
-                        type="text" 
-                        id="chargeruid" 
-                        value={chargeruid} 
-                        onChange={(e) => setchargerid(e.target.value)} 
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
-                        Price
-                    </label>
-                    <input 
-                        type="text" 
-                        id="price" 
-                        value={price} 
-                        onChange={(e) => setprice(e.target.value)} 
-                        required 
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    />
-                </div>
-                <PaymentComponent />
-            </form>
-            <div className="py-11">
-                <button 
-        className="relative inline-block text-white font-bold py-2 px-4 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
-        onClick={(event) => backtohome(event)}
-    >
-        <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
-        <span className="relative z-10">HOME</span>
-    </button>
-</div>
-        </div>
+      <button
+        onClick={displayRazorpay}
+        className="w-full mt-6 py-3 text-lg font-extrabold text-white rounded-xl
+                   bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600
+                   hover:scale-[1.02] transition-all shadow-lg"
+      >
+        🚀 Pay & Add Wallet
+      </button>
     );
+  };
+
+  const backtohome = () => navigate("/");
+
+  /* ================= UI ================= */
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center p-6">
+      <div className="w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
+
+        {/* Header */}
+        <div className="px-8 py-6 border-b border-white/20">
+          <h1 className="text-3xl font-extrabold text-white tracking-wide">
+            💳 Add Wallet Balance
+          </h1>
+          <p className="text-gray-300 text-sm mt-1">
+            Secure wallet recharge for EV charging
+          </p>
+        </div>
+
+        {/* Form */}
+        <form className="px-8 py-6 space-y-5">
+          {[
+            { label: "User ID", value: userid, setter: setuserid },
+            { label: "Wallet ID", value: walletid, setter: setwalletid },
+            { label: "Charger UID (optional)", value: chargeruid, setter: setchargerid },
+            { label: "Amount (₹)", value: price, setter: setprice },
+          ].map((f, i) => (
+            <div key={i}>
+              <label className="block text-sm font-bold text-gray-200 mb-1">
+                {f.label}
+              </label>
+              <input
+                value={f.value}
+                onChange={(e) => f.setter(e.target.value)}
+                className="w-full rounded-lg bg-black/40 border border-white/20
+                           px-4 py-2 text-white font-semibold
+                           focus:outline-none focus:ring-2 focus:ring-teal-400"
+              />
+            </div>
+          ))}
+
+          <PaymentComponent />
+        </form>
+
+        {/* Footer */}
+        <div className="px-8 py-6 border-t border-white/20 flex justify-center">
+          <button
+            onClick={backtohome}
+            className="px-6 py-2 rounded-full font-bold text-white
+                       bg-gradient-to-r from-teal-400 to-emerald-500
+                       hover:scale-105 transition shadow-lg"
+          >
+            ⬅ Home
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default AddWallet;
