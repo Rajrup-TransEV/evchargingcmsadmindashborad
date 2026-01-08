@@ -248,7 +248,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          <li className="mb-1 last:mb-0">
+                          {/* <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="https://cruip.com/mosaic/"
@@ -260,7 +260,7 @@ function Sidebar({
                                 Charger Operation controls
                               </span>
                             </NavLink>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </React.Fragment>
@@ -328,7 +328,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          <li className="mb-1 last:mb-0">
+                          {/* <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="https://cruip.com/mosaic/"
@@ -340,8 +340,8 @@ function Sidebar({
                                 Profile
                               </span>
                             </NavLink>
-                          </li>
-                          <li className="mb-1 last:mb-0">
+                          </li> */}
+                          {/* <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="https://cruip.com/mosaic/"
@@ -405,7 +405,7 @@ function Sidebar({
                                 Meetups - Post
                               </span>
                             </NavLink>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </React.Fragment>

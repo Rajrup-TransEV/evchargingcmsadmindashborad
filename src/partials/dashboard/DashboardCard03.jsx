@@ -1,17 +1,203 @@
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
+// import { toast } from 'react-toastify';
+// import React, { useState, useEffect } from 'react';
+// import { Link } from 'react-router-dom';
+// import LineChart from '../../charts/LineChart01';
+// import { chartAreaGradient } from '../../charts/ChartjsConfig';
+// import EditMenu from '../../components/DropdownEditMenu';
+
+// // Import utilities
+// import { tailwindConfig, hexToRGB } from '../../utils/Utils';
+
+// function DashboardCard03() {
+//   const navigate = useNavigate();
+//   const [todayrev,settodayrev]=useState()
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const checkAuthentication = async () => {
+//       const rooturi = import.meta.env.VITE_ROOT_URI;
+//       const apikey = import.meta.env.VITE_API_KEY;
+
+//       try {
+//         const gettoken = localStorage.getItem("token");
+//         if (!gettoken) {
+//           navigate("/signin");
+//           return;
+//         }
+
+//         const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'apiauthkey': apikey,
+//           },
+//           body: JSON.stringify({ token: gettoken })
+//         });
+
+//         const data = await response.json();
+//         if (response.ok) {
+//           if (data.user.userType !== "superadmin") {
+//             toast("You have no authorization to view this page");
+//             navigate("/signin");
+//           } else {
+//             console.log("You are an authorized user");
+//             navigate("/")
+//           }
+//         } else {
+//           toast("Failed to verify user");
+//           navigate("/signin");
+//         }
+//       } catch (error) {
+//         console.error("Error during authentication check:", error);
+//         toast("An error occurred during authentication");
+//         navigate("/signin");
+//       }
+//     };
+
+//     checkAuthentication();
+//   }, [navigate]);
+
+//   useEffect(() => {
+//     const fetchyearlyrevData = async () => {
+//       const rooturi = import.meta.env.VITE_ROOT_URI;
+//       const apikey = import.meta.env.VITE_API_KEY;
+
+//       try {
+//         const response = await fetch(`${rooturi}/admin/yearlyrev`, {
+//           method: "GET",
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'apiauthkey': apikey,
+//           },
+//         });
+
+//         const result = await response.json();
+//         const data =result.data
+//         settodayrev(data);
+//         setLoading(false);
+//       } catch (error) {
+//         console.error("Error fetching  data:", error);
+//         toast("Failed to fetch charger data");
+//         // setuserData([]);
+//         settodayrev()
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchyearlyrevData();
+//   }, []);
+//   // const chartData = {
+//   //   labels: [
+//   //     '12-01-2022', '01-01-2023', '02-01-2023',
+//   //     '03-01-2023', '04-01-2023', '05-01-2023',
+//   //     '06-01-2023', '07-01-2023', '08-01-2023',
+//   //     '09-01-2023', '10-01-2023', '11-01-2023',
+//   //     '12-01-2023', '01-01-2024', '02-01-2024',
+//   //     '03-01-2024', '04-01-2024', '05-01-2024',
+//   //     '06-01-2024', '07-01-2024', '08-01-2024',
+//   //     '09-01-2024', '10-01-2024', '11-01-2024',
+//   //     '12-01-2024', '01-01-2025',
+//   //   ],
+//   //   datasets: [
+//   //     // Indigo line
+//   //     {
+//   //       data: [
+//   //         540, 466, 540, 466, 385, 432, 334,
+//   //         334, 289, 289, 200, 289, 222, 289,
+//   //         289, 403, 554, 304, 289, 270, 134,
+//   //         270, 829, 344, 388, 364,
+//   //       ],
+//   //       fill: true,
+//   //       backgroundColor: function(context) {
+//   //         const chart = context.chart;
+//   //         const {ctx, chartArea} = chart;
+//   //         return chartAreaGradient(ctx, chartArea, [
+//   //           { stop: 0, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0)` },
+//   //           { stop: 1, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0.2)` }
+//   //         ]);
+//   //       },       
+//   //       borderColor: tailwindConfig().theme.colors.violet[500],
+//   //       borderWidth: 2,
+//   //       pointRadius: 0,
+//   //       pointHoverRadius: 3,
+//   //       pointBackgroundColor: tailwindConfig().theme.colors.violet[500],
+//   //       pointHoverBackgroundColor: tailwindConfig().theme.colors.violet[500],
+//   //       pointBorderWidth: 0,
+//   //       pointHoverBorderWidth: 0,          
+//   //       clip: 20,
+//   //       tension: 0.2,
+//   //     },
+//   //     // Gray line
+//   //     {
+//   //       data: [
+//   //         689, 562, 477, 477, 477, 477, 458,
+//   //         314, 430, 378, 430, 498, 642, 350,
+//   //         145, 145, 354, 260, 188, 188, 300,
+//   //         300, 282, 364, 660, 554,
+//   //       ],
+//   //       borderColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
+//   //       borderWidth: 2,
+//   //       pointRadius: 0,
+//   //       pointHoverRadius: 3,
+//   //       pointBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
+//   //       pointHoverBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
+//   //       pointBorderWidth: 0,
+//   //       pointHoverBorderWidth: 0,
+//   //       clip: 20,
+//   //       tension: 0.2,
+//   //     },
+//   //   ],
+//   // };
+
+//   return (
+//     <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
+//       <div className="px-5 pt-5">
+//         <header className="flex justify-between items-start mb-2">
+//           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">This year revenue</h2>
+//           {/* Menu button */}
+//           <EditMenu align="right" className="relative inline-flex">
+//             <li>
+//               <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
+//                 Option 1
+//               </Link>
+//             </li>
+//             <li>
+//               <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
+//                 Option 2
+//               </Link>
+//             </li>
+//             <li>
+//               <Link className="font-medium text-sm text-red-500 hover:text-red-600 flex py-1 px-3" to="#0">
+//                 Remove
+//               </Link>
+//             </li>
+//           </EditMenu>
+//         </header>
+//         <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Sales</div>
+//         <div className="flex items-start">
+//           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">RS {todayrev}</div>
+//           {/* <div className="text-sm font-medium text-green-700 px-1.5 bg-green-500/20 rounded-full">+49%</div> */}
+//         </div>
+//       </div>
+//       {/* Chart built with Chart.js 3 */}
+//       <div className="grow max-sm:max-h-[128px] xl:max-h-[128px]">
+//         {/* Change the height attribute to adjust the chart height */}
+//         {/* <LineChart data={chartData} width={389} height={128} /> */}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default DashboardCard03;
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import LineChart from '../../charts/LineChart01';
-import { chartAreaGradient } from '../../charts/ChartjsConfig';
 import EditMenu from '../../components/DropdownEditMenu';
-
-// Import utilities
-import { tailwindConfig, hexToRGB } from '../../utils/Utils';
 
 function DashboardCard03() {
   const navigate = useNavigate();
-  const [todayrev,settodayrev]=useState()
+  const [todayrev, settodayrev] = useState();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +206,9 @@ function DashboardCard03() {
       const apikey = import.meta.env.VITE_API_KEY;
 
       try {
-        const gettoken = localStorage.getItem("token");
+        const gettoken = localStorage.getItem('token');
         if (!gettoken) {
-          navigate("/signin");
+          navigate('/signin');
           return;
         }
 
@@ -30,28 +216,26 @@ function DashboardCard03() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apiauthkey': apikey,
+            apiauthkey: apikey,
           },
-          body: JSON.stringify({ token: gettoken })
+          body: JSON.stringify({ token: gettoken }),
         });
 
         const data = await response.json();
+
         if (response.ok) {
-          if (data.user.userType !== "superadmin") {
-            toast("You have no authorization to view this page");
-            navigate("/signin");
-          } else {
-            console.log("You are an authorized user");
-            navigate("/")
+          if (data.user.userType !== 'superadmin') {
+            toast('You have no authorization to view this page');
+            navigate('/signin');
           }
         } else {
-          toast("Failed to verify user");
-          navigate("/signin");
+          toast('Failed to verify user');
+          navigate('/signin');
         }
       } catch (error) {
-        console.error("Error during authentication check:", error);
-        toast("An error occurred during authentication");
-        navigate("/signin");
+        console.error(error);
+        toast('Authentication error');
+        navigate('/signin');
       }
     };
 
@@ -65,125 +249,103 @@ function DashboardCard03() {
 
       try {
         const response = await fetch(`${rooturi}/admin/yearlyrev`, {
-          method: "GET",
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'apiauthkey': apikey,
+            apiauthkey: apikey,
           },
         });
 
         const result = await response.json();
-        const data =result.data
-        settodayrev(data);
+        settodayrev(result.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching  data:", error);
-        toast("Failed to fetch charger data");
-        // setuserData([]);
-        settodayrev()
+        console.error(error);
+        toast('Failed to fetch yearly revenue');
         setLoading(false);
       }
     };
 
     fetchyearlyrevData();
   }, []);
-  // const chartData = {
-  //   labels: [
-  //     '12-01-2022', '01-01-2023', '02-01-2023',
-  //     '03-01-2023', '04-01-2023', '05-01-2023',
-  //     '06-01-2023', '07-01-2023', '08-01-2023',
-  //     '09-01-2023', '10-01-2023', '11-01-2023',
-  //     '12-01-2023', '01-01-2024', '02-01-2024',
-  //     '03-01-2024', '04-01-2024', '05-01-2024',
-  //     '06-01-2024', '07-01-2024', '08-01-2024',
-  //     '09-01-2024', '10-01-2024', '11-01-2024',
-  //     '12-01-2024', '01-01-2025',
-  //   ],
-  //   datasets: [
-  //     // Indigo line
-  //     {
-  //       data: [
-  //         540, 466, 540, 466, 385, 432, 334,
-  //         334, 289, 289, 200, 289, 222, 289,
-  //         289, 403, 554, 304, 289, 270, 134,
-  //         270, 829, 344, 388, 364,
-  //       ],
-  //       fill: true,
-  //       backgroundColor: function(context) {
-  //         const chart = context.chart;
-  //         const {ctx, chartArea} = chart;
-  //         return chartAreaGradient(ctx, chartArea, [
-  //           { stop: 0, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0)` },
-  //           { stop: 1, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0.2)` }
-  //         ]);
-  //       },       
-  //       borderColor: tailwindConfig().theme.colors.violet[500],
-  //       borderWidth: 2,
-  //       pointRadius: 0,
-  //       pointHoverRadius: 3,
-  //       pointBackgroundColor: tailwindConfig().theme.colors.violet[500],
-  //       pointHoverBackgroundColor: tailwindConfig().theme.colors.violet[500],
-  //       pointBorderWidth: 0,
-  //       pointHoverBorderWidth: 0,          
-  //       clip: 20,
-  //       tension: 0.2,
-  //     },
-  //     // Gray line
-  //     {
-  //       data: [
-  //         689, 562, 477, 477, 477, 477, 458,
-  //         314, 430, 378, 430, 498, 642, 350,
-  //         145, 145, 354, 260, 188, 188, 300,
-  //         300, 282, 364, 660, 554,
-  //       ],
-  //       borderColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-  //       borderWidth: 2,
-  //       pointRadius: 0,
-  //       pointHoverRadius: 3,
-  //       pointBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-  //       pointHoverBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-  //       pointBorderWidth: 0,
-  //       pointHoverBorderWidth: 0,
-  //       clip: 20,
-  //       tension: 0.2,
-  //     },
-  //   ],
-  // };
 
   return (
-    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
-      <div className="px-5 pt-5">
-        <header className="flex justify-between items-start mb-2">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">This year revenue</h2>
-          {/* Menu button */}
+    <div
+      className="relative overflow-hidden flex flex-col col-span-full sm:col-span-6 xl:col-span-4
+      rounded-2xl border border-gray-200/60 dark:border-gray-700/60
+      bg-gradient-to-br from-indigo-50 via-white to-purple-50
+      dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
+      shadow-lg hover:shadow-xl transition-all duration-300"
+    >
+      {/* Glow decoration */}
+      <div className="absolute -top-24 -right-24 w-56 h-56 bg-purple-400/20 rounded-full blur-3xl"></div>
+
+      <div className="relative px-6 pt-6 pb-5">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              Yearly Revenue
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Total earnings for the current year
+            </p>
+          </div>
+
           <EditMenu align="right" className="relative inline-flex">
             <li>
-              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
-                Option 1
+              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 px-3 py-1">
+                View
               </Link>
             </li>
             <li>
-              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
-                Option 2
+              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 px-3 py-1">
+                Export
               </Link>
             </li>
             <li>
-              <Link className="font-medium text-sm text-red-500 hover:text-red-600 flex py-1 px-3" to="#0">
+              <Link className="font-medium text-sm text-red-500 hover:text-red-600 px-3 py-1">
                 Remove
               </Link>
             </li>
           </EditMenu>
         </header>
-        <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Sales</div>
-        <div className="flex items-start">
-          <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">RS {todayrev}</div>
-          {/* <div className="text-sm font-medium text-green-700 px-1.5 bg-green-500/20 rounded-full">+49%</div> */}
-        </div>
+
+        {/* Revenue Section */}
+        {loading ? (
+          <div className="space-y-3">
+            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-10 w-44 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          </div>
+        ) : (
+          <>
+            <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+              Revenue
+            </div>
+
+            <div className="flex items-end gap-3">
+              <div className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                ₹{todayrev}
+              </div>
+
+              <span
+                className="mb-1 px-2 py-0.5 text-xs font-medium rounded-full
+                bg-green-100 text-green-700
+                dark:bg-green-500/20 dark:text-green-400"
+              >
+                Yearly
+              </span>
+            </div>
+          </>
+        )}
       </div>
-      {/* Chart built with Chart.js 3 */}
-      <div className="grow max-sm:max-h-[128px] xl:max-h-[128px]">
-        {/* Change the height attribute to adjust the chart height */}
-        {/* <LineChart data={chartData} width={389} height={128} /> */}
+
+      {/* Bottom accent */}
+      <div className="mt-auto px-6 pb-4">
+        <div
+          className="h-[3px] w-full rounded-full
+          bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-40"
+        ></div>
       </div>
     </div>
   );
