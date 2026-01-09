@@ -168,9 +168,6 @@
 // }
 
 // export default Dashboard;
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
@@ -192,34 +189,44 @@ function Dashboard() {
   const navigate = useNavigate();
   const [ipAddress, setIpAddress] = useState('');
 
+  /* ================= FORCE DARK THEME ================= */
+  useEffect(() => {
+    document.documentElement.classList.add('dark'); // always dark
+    document.documentElement.classList.remove('light');
+    localStorage.setItem('theme', 'dark');
+  }, []);
+
   /* ================= AUTH ================= */
   useEffect(() => {
     const checkAuthentication = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return navigate("/signin");
+        const token = localStorage.getItem('token');
+        if (!token) return navigate('/signin');
 
         const res = await fetch(`${rooturi}/userauth/verifyuser`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apiauthkey': apikey,
+            apiauthkey: apikey,
           },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token }),
         });
 
         const data = await res.json();
-        if (!res.ok || data.user.userType !== "superadmin") {
-          toast("Unauthorized access");
-          navigate("/signin");
+
+        if (!res.ok || data.user.userType !== 'superadmin') {
+          toast.error('Unauthorized access');
+          navigate('/signin');
         }
       } catch {
-        toast("Authentication failed");
-        navigate("/signin");
+        toast.error('Authentication failed');
+        navigate('/signin');
       }
     };
+
     checkAuthentication();
   }, [navigate]);
 
@@ -227,7 +234,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchIp = async () => {
       try {
-        const res = await fetch("https://api.ipify.org?format=json");
+        const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         setIpAddress(data.ip);
       } catch {}
@@ -236,18 +243,17 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black">
+    <div className="relative flex h-screen overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black text-gray-200">
 
       {/* Background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.25),transparent_60%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.25),transparent_60%)] pointer-events-none"></div>
 
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      {/* Content */}
       <div className="relative flex flex-col flex-1 overflow-y-auto z-10">
 
-        {/* Header */}
+        {/* Header (still used, but remove toggle inside Header.jsx if exists) */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main className="grow">
@@ -256,24 +262,20 @@ function Dashboard() {
             {/* ===== Top Section ===== */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
 
-              {/* Title */}
               <div>
                 <h1 className="text-3xl font-bold text-white tracking-tight">
                   Admin Dashboard
                 </h1>
-                <div className="inline-flex mt-2 px-3 py-1 rounded-full bg-white/10 text-sm text-gray-300 backdrop-blur">
-                  🌐 IP Address: <span className="ml-2 font-medium text-indigo-400">{ipAddress}</span>
+                <div className="inline-flex mt-2 px-3 py-1 rounded-full bg-white/10 text-sm text-gray-300">
+                  🌐 IP Address:
+                  <span className="ml-2 font-medium text-indigo-400">{ipAddress}</span>
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center gap-3">
                 <FilterButton align="right" />
                 <Datepicker align="right" />
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition">
-                  <svg width="16" height="16" fill="currentColor">
-                    <path d="M8 1v14M1 8h14" />
-                  </svg>
+                <button className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition">
                   Add View
                 </button>
               </div>
@@ -282,18 +284,14 @@ function Dashboard() {
 
             {/* ===== Cards Grid ===== */}
             <div className="grid grid-cols-12 gap-6">
-
-              {/* Revenue cards */}
               <DashboardCard01 />
               <DashboardCard02 />
               <DashboardCard03 />
-
-              {/* Tables */}
               <DashboardCard07 />
               <DashboardCard10 />
               <DashboardCard13 />
-
             </div>
+
           </div>
         </main>
       </div>
