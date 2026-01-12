@@ -254,7 +254,10 @@ const FaqCreate = () => {
       const response = await fetch(`${rooturi}/users/faqcreate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-        body: JSON.stringify({ faqquestion: faqQuestion, faqdescription: faqDescription })
+        body: JSON.stringify({
+          faqquestion: faqQuestion,
+          faqdescription: faqDescription
+        })
       });
 
       const data = await response.json();
@@ -269,86 +272,149 @@ const FaqCreate = () => {
     }
   };
 
-  const backToHome = (e) => { e.preventDefault(); navigate("/"); };
+  const backToHome = (e) => {
+    e.preventDefault();
+    navigate("/");
+  };
 
   return (
-    <section className="min-h-screen bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 flex items-center">
-      <div className="max-w-6xl w-full mx-auto grid lg:grid-cols-12 gap-12 items-center">
-        {/* Left image */}
-        <div className="lg:col-span-6 hidden lg:block">
+    <section className="min-h-screen bg-gradient-to-br from-[#020617] via-[#020617] to-[#020617] flex items-center px-4 py-10">
+      <div className="max-w-6xl w-full mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+        {/* Left Illustration */}
+        <div className="lg:col-span-6 w-full flex justify-center lg:justify-end">
           <img
             src="https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png"
             alt="FAQ Illustration"
-            className="rounded-2xl shadow-2xl w-full object-cover"
+            className="rounded-3xl border border-gray-700 shadow-[0_30px_80px_rgba(0,0,0,0.6)] w-full max-w-md object-contain"
           />
         </div>
 
-        {/* Right form */}
-        <div className="lg:col-span-6 bg-white rounded-3xl shadow-2xl p-10 sm:p-14">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-6 text-center">
-            Create <span className="text-blue-600">FAQ</span>
-          </h1>
+        {/* Right Form */}
+        <div className="lg:col-span-6 bg-[#020617]/80 backdrop-blur-xl border border-gray-700 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.6)] p-8 sm:p-12 w-full">
+
+          {/* Title */}
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight text-white">
+              Create FAQ
+            </h1>
+            <p className="text-gray-400 mt-2 text-sm">
+              Add frequently asked questions for platform users
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+
             {/* FAQ Question */}
-            <div className="relative">
+            <div className="relative w-full">
               <input
                 type="text"
                 id="faqquestion"
                 value={faqQuestion}
                 onChange={(e) => setFaqQuestion(e.target.value)}
-                className="peer w-full rounded-xl border border-gray-300 px-4 pt-6 pb-2 text-gray-900 text-sm placeholder-transparent focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                className="peer w-full rounded-xl bg-[#020617] border border-gray-700 px-4 pt-6 pb-2 text-gray-100 text-sm placeholder-transparent focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 outline-none transition"
                 placeholder="FAQ Question"
                 required
               />
               <label
                 htmlFor="faqquestion"
-                className="absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-600 peer-focus:text-sm"
+                className="absolute left-4 top-2 text-gray-400 text-sm transition-all
+                  peer-placeholder-shown:top-6
+                  peer-placeholder-shown:text-gray-500
+                  peer-placeholder-shown:text-base
+                  peer-focus:top-2
+                  peer-focus:text-teal-400
+                  peer-focus:text-sm"
               >
                 FAQ Question
               </label>
             </div>
 
             {/* FAQ Description */}
-            <div className="relative">
+            <div className="relative w-full">
               <textarea
                 id="faqdescription"
                 value={faqDescription}
                 onChange={(e) => setFaqDescription(e.target.value)}
                 rows={5}
-                className="peer w-full rounded-xl border border-gray-300 px-4 pt-6 pb-2 text-gray-900 text-sm placeholder-transparent focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                className="peer w-full rounded-xl bg-[#020617] border border-gray-700 px-4 pt-6 pb-2 text-gray-100 text-sm placeholder-transparent focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 outline-none transition resize-none"
                 placeholder="FAQ Description"
                 required
-              ></textarea>
+              />
               <label
                 htmlFor="faqdescription"
-                className="absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-600 peer-focus:text-sm"
+                className="absolute left-4 top-2 text-gray-400 text-sm transition-all
+                  peer-placeholder-shown:top-6
+                  peer-placeholder-shown:text-gray-500
+                  peer-placeholder-shown:text-base
+                  peer-focus:top-2
+                  peer-focus:text-teal-400
+                  peer-focus:text-sm"
               >
                 FAQ Description
               </label>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-center">
+            {/* Create Button */}
+            <div className="flex justify-center pt-4">
               <button
                 type="submit"
-                className="relative inline-block text-white font-bold py-3 px-10 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+                className="relative px-12 py-3 rounded-full font-bold text-white overflow-hidden group transition-transform hover:scale-105"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+                <span className="absolute inset-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-600 group-hover:brightness-110 transition"></span>
                 <span className="relative z-10">Create FAQ</span>
               </button>
             </div>
 
             {/* Home Button */}
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center mt-2">
               <button
                 onClick={backToHome}
-                className="relative inline-block text-white font-bold py-3 px-10 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
+                className="text-sm text-gray-400 hover:text-white transition underline-offset-4 hover:underline"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
-                <span className="relative z-10">HOME</span>
+                ← Back to Home
               </button>
             </div>
+
+            {/* Ultra Slick Glass FAQ Hints */}
+            <div className="mt-8">
+              <div className="backdrop-blur-2xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 rounded-3xl p-6 shadow-lg shadow-black/40 hover:shadow-xl transition-all duration-300">
+                <h2 className="text-gray-300 text-sm uppercase tracking-wide mb-4 text-center">
+                  Sample FAQ Hints
+                </h2>
+
+                <div className="space-y-4">
+                  {/* Single Question */}
+                  <div className="flex flex-col gap-1">
+                    <p className="text-teal-400 font-semibold text-sm hover:text-teal-300 cursor-default transition-colors">
+                      Q: What is an EV Charging Station?
+                    </p>
+                    <p className="text-gray-400 text-xs ml-2 leading-relaxed">
+                      A: A device that provides electrical power to recharge electric vehicles.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p className="text-teal-400 font-semibold text-sm hover:text-teal-300 cursor-default transition-colors">
+                      Q: Are the chargers available 24/7?
+                    </p>
+                    <p className="text-gray-400 text-xs ml-2 leading-relaxed">
+                      A: Yes, unless temporarily unavailable due to maintenance or updates.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p className="text-teal-400 font-semibold text-sm hover:text-teal-300 cursor-default transition-colors">
+                      Q: Can I pay via app or card?
+                    </p>
+                    <p className="text-gray-400 text-xs ml-2 leading-relaxed">
+                      A: Payments are accepted via our mobile app or at the station directly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </form>
         </div>
       </div>

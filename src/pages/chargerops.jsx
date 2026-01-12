@@ -1,7 +1,13 @@
 // import React, { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { toast } from "react-toastify";
-// import { FiEdit, FiTrash2, FiSettings, FiHome, FiSearch } from "react-icons/fi";
+// import {
+//   FiEdit,
+//   FiTrash2,
+//   FiSettings,
+//   FiHome,
+//   FiSearch,
+// } from "react-icons/fi";
 
 // const ChargerOperationsView = () => {
 //   const navigate = useNavigate();
@@ -16,6 +22,7 @@
 //     const checkAuth = async () => {
 //       const rooturi = import.meta.env.VITE_ROOT_URI;
 //       const apikey = import.meta.env.VITE_API_KEY;
+
 //       try {
 //         const token = localStorage.getItem("token");
 //         if (!token) return navigate("/signin");
@@ -31,14 +38,15 @@
 
 //         const data = await res.json();
 //         if (!res.ok || data.user.userType !== "superadmin") {
-//           toast("Unauthorized");
+//           toast.error("Unauthorized");
 //           navigate("/signin");
 //         }
 //       } catch {
-//         toast("Auth error");
+//         toast.error("Authentication error");
 //         navigate("/signin");
 //       }
 //     };
+
 //     checkAuth();
 //   }, [navigate]);
 
@@ -47,18 +55,21 @@
 //     const fetchChargers = async () => {
 //       const rooturi = import.meta.env.VITE_ROOT_URI;
 //       const apikey = import.meta.env.VITE_API_KEY;
+
 //       try {
 //         const res = await fetch(`${rooturi}/admin/listofcharges`, {
 //           headers: { apiauthkey: apikey },
 //         });
+
 //         const result = await res.json();
 //         setChargerData(Array.isArray(result.data) ? result.data : []);
 //       } catch {
-//         toast("Failed to fetch data");
+//         toast.error("Failed to fetch charger list");
 //       } finally {
 //         setLoading(false);
 //       }
 //     };
+
 //     fetchChargers();
 //   }, []);
 
@@ -71,14 +82,18 @@
 
 //   const indexOfLast = currentPage * itemsPerPage;
 //   const indexOfFirst = indexOfLast - itemsPerPage;
-//   const currentChargers = filteredChargers.slice(indexOfFirst, indexOfLast);
-//   const totalPages = Math.ceil(filteredChargers.length / itemsPerPage);
+//   const currentChargers = filteredChargers.slice(
+//     indexOfFirst,
+//     indexOfLast
+//   );
 
-//   /* ================= ACTIONS ================= */
+//   /* ================= DELETE ================= */
 //   const handleDelete = async (uid) => {
 //     if (!window.confirm("Delete this charger?")) return;
+
 //     const rooturi = import.meta.env.VITE_ROOT_URI;
 //     const apikey = import.meta.env.VITE_API_KEY;
+
 //     try {
 //       const res = await fetch(`${rooturi}/admin/deletechargerunits`, {
 //         method: "POST",
@@ -88,10 +103,13 @@
 //         },
 //         body: JSON.stringify({ uid }),
 //       });
+
 //       if (res.ok) {
-//         toast.success("Deleted");
-//         setChargerData((p) => p.filter((c) => c.uid !== uid));
-//       } else toast.error("Delete failed");
+//         toast.success("Charger deleted");
+//         setChargerData((prev) => prev.filter((c) => c.uid !== uid));
+//       } else {
+//         toast.error("Delete failed");
+//       }
 //     } catch {
 //       toast.error("Delete error");
 //     }
@@ -102,9 +120,7 @@
 //     <div className="min-h-screen p-6 bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#020617] text-gray-200">
 //       {/* Header */}
 //       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-//         <h1 className="text-3xl font-extrabold text-gray-100">
-//           Charger Dashboard
-//         </h1>
+//         <h1 className="text-3xl font-extrabold">Charger Dashboard</h1>
 
 //         <div className="flex items-center gap-3">
 //           <div className="relative">
@@ -127,20 +143,39 @@
 //       </div>
 
 //       {/* TABLE */}
-//       <div className="hidden md:block overflow-x-auto rounded-xl bg-[#020617]/90 backdrop-blur border border-gray-700 shadow-2xl">
+//       <div className="overflow-x-auto rounded-xl bg-[#020617]/90 backdrop-blur border border-gray-700 shadow-2xl">
 //         <table className="min-w-full text-xs border-collapse">
-//           {/* HEADER */}
-//           <thead className="sticky top-0 bg-[#020617] z-10 border-b border-gray-700">
+//           <thead className="bg-[#020617] border-b border-gray-700">
 //             <tr>
 //               {[
-//                 "ID","UID","Name","Serial","Host","Segment","Subsegment","Type",
-//                 "Total Cap.","Parking","Connectors","Conn. Type","Conn. Cap.",
-//                 "Lat","Long","Address","Use Type","24/7","Image",
-//                 "Buyer","Created","Settings","Update","Delete"
+//                 "ID",
+//                 "UID",
+//                 "Name",
+//                 "Serial",
+//                 "Host",
+//                 "Segment",
+//                 "Subsegment",
+//                 "Type",
+//                 "Total Cap.",
+//                 "Parking",
+//                 "Connectors",
+//                 "Conn. Type",
+//                 "Conn. Cap.",
+//                 "Lat",
+//                 "Long",
+//                 "Address",
+//                 "Use Type",
+//                 "24/7",
+//                 "Image",
+//                 "Buyer",
+//                 "Created",
+//                 "Settings",
+//                 "Update",
+//                 "Delete",
 //               ].map((h) => (
 //                 <th
 //                   key={h}
-//                   className="px-3 py-3 uppercase tracking-wider font-bold text-gray-300 border-r border-gray-700 whitespace-nowrap"
+//                   className="px-3 py-3 font-bold border-r border-gray-700 whitespace-nowrap"
 //                 >
 //                   {h}
 //                 </th>
@@ -148,17 +183,16 @@
 //             </tr>
 //           </thead>
 
-//           {/* BODY */}
 //           <tbody>
 //             {loading ? (
 //               <tr>
-//                 <td colSpan="24" className="py-8 text-center text-gray-400">
+//                 <td colSpan="24" className="py-8 text-center">
 //                   Loading...
 //                 </td>
 //               </tr>
 //             ) : currentChargers.length === 0 ? (
 //               <tr>
-//                 <td colSpan="24" className="py-8 text-center text-gray-400">
+//                 <td colSpan="24" className="py-8 text-center">
 //                   No chargers found
 //                 </td>
 //               </tr>
@@ -168,41 +202,82 @@
 //                   key={ch.uid}
 //                   className="odd:bg-[#020617] even:bg-[#0b1220] hover:bg-[#111827]"
 //                 >
-//                   {[
-//                     ch.id,
-//                     <span className="text-blue-400 cursor-pointer">{ch.uid}</span>,
-//                     ch.ChargerName,
-//                     ch.Chargerserialnum,
-//                     ch.Chargerhost,
-//                     ch.Segment,
-//                     ch.Subsegment,
-//                     ch.Chargertype,
-//                     ch.Total_Capacity,
-//                     ch.parking,
-//                     ch.number_of_connectors,
-//                     ch.Connector_type,
-//                     ch.connector_total_capacity,
-//                     ch.lattitude,
-//                     ch.longitute,
-//                     ch.full_address,
-//                     ch.charger_use_type,
-//                     ch.twenty_four_seven_open_status,
-//                     ch.charger_image ? (
-//                       <img src={ch.charger_image} className="w-10 h-10 rounded border border-gray-700" />
-//                     ) : "—",
-//                     ch.chargerbuyer,
-//                     ch.created_at,
-//                     <FiSettings onClick={() => navigate(`/settings/${ch.uid}`)} />,
-//                     <FiEdit onClick={() => navigate(`/updatechargerdetails/${ch.uid}`)} />,
-//                     <FiTrash2 onClick={() => handleDelete(ch.uid)} />,
-//                   ].map((cell, i) => (
-//                     <td
-//                       key={i}
-//                       className="px-3 py-2 border-r border-gray-800 whitespace-nowrap"
+//                   <td className="px-3 py-2">{ch.id}</td>
+
+//                   {/* ✅ CLICKABLE UID */}
+//                   <td className="px-3 py-2">
+//                     <span
+//                       onClick={() =>
+//                         // navigate(`/charger-details/${ch.uid}`)
+//                         navigate(`/chargerdetails/${ch.uid}`)
+
+//                       }
+//                       className="text-blue-400 cursor-pointer hover:underline font-medium"
+//                       title="View charger details"
 //                     >
-//                       {cell}
-//                     </td>
-//                   ))}
+//                       {ch.uid}
+//                     </span>
+//                   </td>
+
+//                   <td className="px-3 py-2">{ch.ChargerName}</td>
+//                   <td className="px-3 py-2">{ch.Chargerserialnum}</td>
+//                   <td className="px-3 py-2">{ch.Chargerhost}</td>
+//                   <td className="px-3 py-2">{ch.Segment}</td>
+//                   <td className="px-3 py-2">{ch.Subsegment}</td>
+//                   <td className="px-3 py-2">{ch.Chargertype}</td>
+//                   <td className="px-3 py-2">{ch.Total_Capacity}</td>
+//                   <td className="px-3 py-2">{ch.parking}</td>
+//                   <td className="px-3 py-2">{ch.number_of_connectors}</td>
+//                   <td className="px-3 py-2">{ch.Connector_type}</td>
+//                   <td className="px-3 py-2">
+//                     {ch.connector_total_capacity}
+//                   </td>
+//                   <td className="px-3 py-2">{ch.lattitude}</td>
+//                   <td className="px-3 py-2">{ch.longitute}</td>
+//                   <td className="px-3 py-2">{ch.full_address}</td>
+//                   <td className="px-3 py-2">
+//                     {ch.charger_use_type}
+//                   </td>
+//                   <td className="px-3 py-2">
+//                     {ch.twenty_four_seven_open_status}
+//                   </td>
+//                   <td className="px-3 py-2">
+//                     {ch.charger_image ? (
+//                       <img
+//                         src={ch.charger_image}
+//                         alt="charger"
+//                         className="w-10 h-10 rounded border border-gray-700"
+//                       />
+//                     ) : (
+//                       "—"
+//                     )}
+//                   </td>
+//                   <td className="px-3 py-2">{ch.chargerbuyer}</td>
+//                   <td className="px-3 py-2">{ch.created_at}</td>
+
+//                   <td className="px-3 py-2 cursor-pointer">
+//                     <FiSettings
+//                       onClick={() =>
+//                         navigate(`/settings/${ch.uid}`)
+//                       }
+//                     />
+//                   </td>
+
+//                   <td className="px-3 py-2 cursor-pointer">
+//                     <FiEdit
+//                       onClick={() =>
+//                         navigate(
+//                           `/updatechargerdetails/${ch.uid}`
+//                         )
+//                       }
+//                     />
+//                   </td>
+
+//                   <td className="px-3 py-2 cursor-pointer">
+//                     <FiTrash2
+//                       onClick={() => handleDelete(ch.uid)}
+//                     />
+//                   </td>
 //                 </tr>
 //               ))
 //             )}
@@ -214,6 +289,7 @@
 // };
 
 // export default ChargerOperationsView;
+
 
 
 import React, { useState, useEffect } from "react";
@@ -319,40 +395,43 @@ const ChargerOperationsView = () => {
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#020617] text-gray-200">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-wide text-white">
-            Charger Operations
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Monitor, update and manage charger units
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search UID or Name"
-              className="pl-10 pr-4 py-2 w-64 bg-[#020617] border border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-teal-500 outline-none"
-            />
+      <div className="mb-8 pb-4 border-b border-gray-800">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-white">
+              Charger Operations
+            </h1>
+            <p className="text-sm text-gray-400 mt-1">
+              Monitor, update and manage EV charging infrastructure
+            </p>
           </div>
 
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-600 transition font-semibold shadow"
-          >
-            <FiHome /> Home
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by UID or Name"
+                className="pl-10 pr-4 py-2.5 w-64 rounded-xl bg-[#020617] border border-gray-700 text-sm focus:ring-2 focus:ring-teal-500 outline-none"
+              />
+            </div>
+
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 font-semibold shadow-lg transition"
+            >
+              <FiHome /> Home
+            </button>
+          </div>
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="overflow-x-auto rounded-2xl bg-[#020617]/90 backdrop-blur border border-gray-700 shadow-xl">
-        <table className="min-w-full text-xs">
-          <thead className="sticky top-0 bg-[#020617] border-b border-gray-700 z-10">
+      <div className="overflow-x-auto rounded-3xl bg-[#020617]/80 backdrop-blur-xl border border-gray-700 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        {/* <table className="min-w-full text-xs"> */}
+        <table className="min-w-full text-xs table-fixed">
+          <thead className="sticky top-0 bg-[#020617] border-b border-gray-700 shadow z-10">
             <tr>
               {[
                 "ID",
@@ -391,33 +470,33 @@ const ChargerOperationsView = () => {
           </thead>
 
           <colgroup>
-          <col className="w-16" />
-          <col className="w-48" />
-          <col className="w-56" />
-          <col className="w-56" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-48" />
-          <col className="w-48" />
-          <col className="w-56" />
-          <col className="w-32" />
-          <col className="w-32" />
-          <col className="w-[28rem]" />
-          <col className="w-48" />
-          <col className="w-40" />
-          <col className="w-32" />
-          <col className="w-40" />
-          <col className="w-40" />
-          <col className="w-24" />
-          <col className="w-24" />
-          <col className="w-24" />
-        </colgroup>
+            <col className="w-16" />
+            <col className="w-48" />
+            <col className="w-56" />
+            <col className="w-56" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-48" />
+            <col className="w-48" />
+            <col className="w-56" />
+            <col className="w-32" />
+            <col className="w-32" />
+            <col className="w-[28rem]" />
+            <col className="w-48" />
+            <col className="w-40" />
+            <col className="w-32" />
+            <col className="w-40" />
+            <col className="w-40" />
+            <col className="w-24" />
+            <col className="w-24" />
+            <col className="w-24" />
+          </colgroup>
 
-        <tbody>
+          <tbody>
             {loading ? (
               <tr>
                 <td colSpan="24" className="py-10 text-center text-gray-400">
@@ -434,13 +513,31 @@ const ChargerOperationsView = () => {
               currentChargers.map((ch) => (
                 <tr
                   key={ch.uid}
-                  className="border-b border-gray-800 hover:bg-[#111827] transition"
+                  className="border-b border-gray-800 hover:bg-[#0f172a] transition duration-200 align-top"
                 >
+
+
                   <td className="px-3 py-2">{ch.id}</td>
-                  <td className="px-3 py-2 text-blue-400 font-medium cursor-pointer">
-                    {ch.uid}
+                  <td className="px-4 py-4">
+                    <span
+                      onClick={() => navigate(`/chargerdetails/${ch.uid}`)}
+                      className="text-blue-400 font-semibold cursor-pointer hover:underline"
+                    >
+                      {ch.uid}
+                    </span>
                   </td>
-                  <td className="px-3 py-2">{ch.ChargerName}</td>
+
+
+                  <td className="px-4 py-4">
+                    <div className="font-semibold text-gray-100">
+                      {ch.ChargerName || "—"}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      {ch.Chargerserialnum}
+                    </div>
+                  </td>
+
+
                   <td className="px-3 py-2">{ch.Chargerserialnum}</td>
                   <td className="px-3 py-2">{ch.Chargerhost}</td>
                   <td className="px-3 py-2">{ch.Segment}</td>
@@ -457,38 +554,54 @@ const ChargerOperationsView = () => {
                     {ch.full_address}
                   </td>
                   <td className="px-3 py-2">{ch.charger_use_type}</td>
-                  <td className="px-3 py-2">{ch.twenty_four_seven_open_status}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${ch.twenty_four_seven_open_status === "Yes"
+                        ? "bg-green-500/15 text-green-400"
+                        : "bg-red-500/15 text-red-400"
+                        }`}
+                    >
+                      {ch.twenty_four_seven_open_status || "—"}
+                    </span>
+                  </td>
+
+
+                  <td className="px-4 py-4">
                     {ch.charger_image ? (
                       <img
                         src={ch.charger_image}
                         alt="charger"
-                        className="w-10 h-10 rounded-lg object-cover border border-gray-700"
+                        className="w-11 h-11 rounded-xl object-cover border border-gray-700 shadow"
                       />
                     ) : (
-                      "—"
+                      <span className="text-gray-500">—</span>
                     )}
                   </td>
+
                   <td className="px-3 py-2">{ch.chargerbuyer}</td>
                   <td className="px-3 py-2">{ch.created_at}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4 text-center">
                     <FiSettings
-                      className="cursor-pointer hover:text-teal-400"
+                      className="mx-auto text-lg cursor-pointer text-gray-400 hover:text-teal-400 transition"
                       onClick={() => navigate(`/settings/${ch.uid}`)}
                     />
                   </td>
-                  <td className="px-3 py-2">
+
+                  <td className="px-4 py-4 text-center">
                     <FiEdit
-                      className="cursor-pointer hover:text-blue-400"
+                      className="mx-auto text-lg cursor-pointer text-gray-400 hover:text-blue-400 transition"
                       onClick={() => navigate(`/updatechargerdetails/${ch.uid}`)}
                     />
                   </td>
-                  <td className="px-3 py-2">
+
+                  <td className="px-4 py-4 text-center">
                     <FiTrash2
-                      className="cursor-pointer hover:text-red-500"
+                      className="mx-auto text-lg cursor-pointer text-gray-400 hover:text-red-500 transition"
                       onClick={() => handleDelete(ch.uid)}
                     />
                   </td>
+
+
                 </tr>
               ))
             )}
@@ -503,11 +616,10 @@ const ChargerOperationsView = () => {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                currentPage === i + 1
-                  ? "bg-teal-600 text-white"
-                  : "bg-[#020617] border border-gray-700 hover:bg-[#111827]"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${currentPage === i + 1
+                ? "bg-teal-600 text-white"
+                : "bg-[#020617] border border-gray-700 hover:bg-[#111827]"
+                }`}
             >
               {i + 1}
             </button>

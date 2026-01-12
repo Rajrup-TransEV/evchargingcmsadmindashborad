@@ -201,11 +201,12 @@
 // };
 
 // export default ChargerDetails;
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
-/* ---------- UI Helper Components (DESIGN ONLY) ---------- */
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+/* ---------- UI Helper Components ---------- */
 const Section = ({ title }) => (
   <h2 className="text-xl font-extrabold text-teal-300 border-b border-white/20 pb-1 mb-3">
     {title}
@@ -220,7 +221,7 @@ const Info = ({ label, value }) => (
     </span>
   </div>
 );
-/* ------------------------------------------------------- */
+/* ---------------------------------------- */
 
 const ChargerDetails = () => {
   const navigate = useNavigate();
@@ -247,16 +248,18 @@ const ChargerDetails = () => {
             "Content-Type": "application/json",
             apiauthkey: apikey,
           },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token }),
         });
 
         const data = await res.json();
+
         if (!res.ok || data.user.userType !== "superadmin") {
-          toast("You are not authorized");
+          toast.error("You are not authorized");
           navigate("/signin");
         }
       } catch (err) {
         console.error(err);
+        toast.error("Authentication failed");
         navigate("/signin");
       }
     };
@@ -266,6 +269,8 @@ const ChargerDetails = () => {
 
   /* ---------- FETCH CHARGER DETAILS ---------- */
   useEffect(() => {
+    if (!uid) return;
+
     const fetchSingleData = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
@@ -277,20 +282,21 @@ const ChargerDetails = () => {
             "Content-Type": "application/json",
             apiauthkey: apikey,
           },
-          body: JSON.stringify({ chargeruid: uid })
+          body: JSON.stringify({ chargeruid: uid }),
         });
 
-        if (res.ok) {
-          const result = await res.json();
-          setChargerData(result.chargerdata);
-          setQrcode(result.qrdata);
-          setChargerImage(result.chargerimageurl);
-        } else {
-          toast("Failed to fetch charger details");
+        if (!res.ok) {
+          toast.error("Failed to fetch charger details");
+          return;
         }
+
+        const result = await res.json();
+        setChargerData(result.chargerdata);
+        setQrcode(result.qrdata);
+        setChargerImage(result.chargerimageurl);
       } catch (err) {
         console.error(err);
-        toast("Error fetching data");
+        toast.error("Error fetching charger data");
       } finally {
         setLoading(false);
       }
@@ -299,7 +305,7 @@ const ChargerDetails = () => {
     fetchSingleData();
   }, [uid]);
 
-  /* ---------- IP TRACKING (FIXED) ---------- */
+  /* ---------- IP TRACKING ---------- */
   useEffect(() => {
     const fetchIpAddress = async () => {
       const rooturi = import.meta.env.VITE_ROOT_URI;
@@ -319,25 +325,28 @@ const ChargerDetails = () => {
             body: JSON.stringify({
               ip: data.ip,
               datetime: new Date().toISOString(),
-              path: "chargerdetails.jsx"
-            })
+              path: "chargerdetails.jsx",
+            }),
           });
         }
       } catch (err) {
-        console.error("Error fetching IP address:", err);
+        console.error("IP tracking failed", err);
       }
     };
 
     fetchIpAddress();
   }, []);
 
-  const backtohome = (e) => {
-    e.preventDefault();
+  const backtohome = () => {
     navigate("/");
   };
 
   if (loading) {
-    return <div className="text-center mt-20 text-xl font-bold">Loading...</div>;
+    return (
+      <div className="text-center mt-20 text-xl font-bold text-white">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -351,7 +360,6 @@ const ChargerDetails = () => {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
-
         {/* HOME BUTTON */}
         <button
           onClick={backtohome}
@@ -369,8 +377,7 @@ const ChargerDetails = () => {
 
         {chargerData && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            {/* LEFT CARD */}
+            {/* LEFT */}
             <div className="bg-white/10 rounded-xl p-6 shadow-xl space-y-4">
               <Section title="Basic Information" />
               <Info label="Charger Name" value={chargerData.ChargerName} />
@@ -382,7 +389,7 @@ const ChargerDetails = () => {
               <Info label="Connector Type" value={chargerData.Connector_type} />
             </div>
 
-            {/* RIGHT CARD */}
+            {/* RIGHT */}
             <div className="bg-white/10 rounded-xl p-6 shadow-xl space-y-4">
               <Section title="Location & Usage" />
 
@@ -412,7 +419,11 @@ const ChargerDetails = () => {
             <h2 className="text-2xl font-extrabold text-white mb-4">
               QR Code
             </h2>
-            <img src={qrCode} alt="QR Code" className="mx-auto rounded-lg shadow-lg" />
+            <img
+              src={qrCode}
+              alt="QR Code"
+              className="mx-auto rounded-lg shadow-lg"
+            />
           </div>
         )}
       </div>
