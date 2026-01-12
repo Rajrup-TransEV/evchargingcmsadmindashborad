@@ -299,112 +299,142 @@ const TD = () => {
   if (loading) return <div className="h-screen flex items-center justify-center text-xl">Loading…</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Transaction Management</h1>
-            <p className="text-sm text-slate-500">User UID: {uid}</p>
-          </div>
-          <button onClick={exportCSV} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl shadow">
-            Export CSV
+  <div className="min-h-screen bg-[#0B0F14] px-6 py-10 text-gray-200">
+    <div className="max-w-7xl mx-auto">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-gray-100">
+            Transaction Details
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            User UID: <span className="font-mono">{uid}</span>
+          </p>
+        </div>
+
+        <button
+          onClick={exportCSV}
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+        >
+          Export CSV
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 mb-6 flex flex-col md:flex-row gap-4">
+        <input
+          className="bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          placeholder="Search Payment ID or User ID"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <select
+          className="bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
+        <table className="min-w-full text-sm">
+          <thead className="bg-[#0F172A] text-gray-400 border-b border-gray-800">
+            <tr>
+              {[
+                ["paymentid", "Payment ID"],
+                ["walletid", "Wallet"],
+                ["userid", "User"],
+                ["price", "Amount"],
+                ["chargeruid", "Charger"],
+              ].map(([key, label]) => (
+                <th
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  className="px-5 py-4 text-left font-medium cursor-pointer hover:text-gray-200 transition"
+                >
+                  {label}
+                </th>
+              ))}
+              <th className="px-5 py-4 text-left font-medium">Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedData.length ? (
+              paginatedData.map((tx) => (
+                <tr
+                  key={tx.uid}
+                  className="border-t border-gray-800 hover:bg-[#0F172A] transition"
+                >
+                  <td className="px-5 py-4 font-mono text-gray-300">
+                    {tx.paymentid}
+                  </td>
+                  <td className="px-5 py-4">{tx.walletid}</td>
+                  <td className="px-5 py-4">{tx.userid}</td>
+                  <td className="px-5 py-4 font-semibold text-blue-400">
+                    ₹{tx.price}
+                  </td>
+                  <td className="px-5 py-4">{tx.chargeruid}</td>
+                  <td className="px-5 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        (tx.status || "completed") === "failed"
+                          ? "bg-red-500/10 text-red-400"
+                          : (tx.status || "completed") === "pending"
+                          ? "bg-yellow-500/10 text-yellow-400"
+                          : "bg-green-500/10 text-green-400"
+                      }`}
+                    >
+                      {tx.status || "Completed"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center py-12 text-gray-500">
+                  No transactions found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
+        <p className="text-sm text-gray-500">
+          Showing {paginatedData.length} of {filteredData.length} records
+        </p>
+
+        <div className="flex gap-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 rounded-lg border border-gray-700 text-sm disabled:opacity-40 hover:bg-gray-800 transition"
+          >
+            Prev
+          </button>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 rounded-lg border border-gray-700 text-sm disabled:opacity-40 hover:bg-gray-800 transition"
+          >
+            Next
           </button>
         </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-4">
-          <input
-            className="border rounded-xl px-4 py-2 w-full md:w-1/3"
-            placeholder="Search Payment ID or User ID"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select
-            className="border rounded-xl px-4 py-2"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-100 text-slate-700">
-              <tr>
-                {[
-                  ["paymentid", "Payment ID"],
-                  ["walletid", "Wallet"],
-                  ["userid", "User"],
-                  ["price", "Amount"],
-                  ["chargeruid", "Charger"],
-                ].map(([key, label]) => (
-                  <th key={key} onClick={() => handleSort(key)} className="px-5 py-4 cursor-pointer text-left">
-                    {label}
-                  </th>
-                ))}
-                <th className="px-5 py-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.length ? (
-                paginatedData.map((tx) => (
-                  <tr key={tx.uid} className="border-t hover:bg-slate-50">
-                    <td className="px-5 py-4 font-medium">{tx.paymentid}</td>
-                    <td className="px-5 py-4">{tx.walletid}</td>
-                    <td className="px-5 py-4">{tx.userid}</td>
-                    <td className="px-5 py-4 font-semibold text-indigo-600">₹{tx.price}</td>
-                    <td className="px-5 py-4">{tx.chargeruid}</td>
-                    <td className="px-5 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        (tx.status || "completed") === "failed"
-                          ? "bg-red-100 text-red-700"
-                          : (tx.status || "completed") === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}>
-                        {tx.status || "Completed"}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-500">No records found</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <p className="text-sm text-slate-500">Showing {paginatedData.length} of {filteredData.length} records</p>
-          <div className="flex gap-2">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-40"
-            >
-              Prev
-            </button>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
       </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default TD;

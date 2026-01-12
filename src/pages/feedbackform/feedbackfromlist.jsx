@@ -313,182 +313,191 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const FeedbackFormList = () => {
-    const navigate = useNavigate();
-    const [feedbackData, setFeedbackData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+  const navigate = useNavigate();
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
-    useEffect(() => {
-        const checkAuthentication = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
+  // Authentication
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) { navigate("/signin"); return; }
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return navigate("/signin");
 
-                const response = await fetch(`${rooturi}/userauth/verifyuser`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-                    body: JSON.stringify({ token })
-                });
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
+          body: JSON.stringify({ token })
+        });
 
-                const data = await response.json();
-                if (response.ok && data.user.userType !== "superadmin") {
-                    toast("You have no authorization to view this page");
-                    navigate("/signin");
-                }
-            } catch (error) {
-                console.error(error);
-                toast("Authentication error");
-                navigate("/signin");
-            }
-        };
-        checkAuthentication();
-    }, [navigate]);
-
-    useEffect(() => {
-        const fetchFeedbackData = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
-            try {
-                const response = await fetch(`${rooturi}/users/liofdbck`, {
-                    method: "GET",
-                    headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey }
-                });
-                const result = await response.json();
-                setFeedbackData(Array.isArray(result.data) ? result.data : []);
-                setLoading(false);
-            } catch (error) {
-                console.error(error);
-                toast("Failed to fetch feedback data");
-                setFeedbackData([]);
-                setLoading(false);
-            }
-        };
-        fetchFeedbackData();
-    }, []);
-
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentItems = feedbackData.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(feedbackData.length / itemsPerPage);
-
-    const handleUidClick = (uid) => navigate(`/feedbackdetails/${uid}`);
-    const handleDelete = async (uid) => {
-        if (!window.confirm("Are you sure you want to delete this feedback?")) return toast.info("Delete canceled");
-
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-        const apikey = import.meta.env.VITE_API_KEY;
-        try {
-            const response = await fetch(`${rooturi}/users/fedbkdel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-                body: JSON.stringify({ uid })
-            });
-            if (response.ok) {
-                toast.success("Feedback deleted successfully");
-                setFeedbackData(prev => prev.filter(f => f.uid !== uid));
-            } else toast.error("Failed to delete feedback");
-        } catch (error) {
-            console.error(error);
-            toast.error("Error deleting feedback");
+        const data = await response.json();
+        if (!response.ok || data.user.userType !== "superadmin") {
+          toast("Unauthorized access");
+          navigate("/signin");
         }
+      } catch (error) {
+        console.error(error);
+        toast("Authentication error");
+        navigate("/signin");
+      }
     };
+    checkAuthentication();
+  }, [navigate]);
 
-    const backToHome = (e) => { e.preventDefault(); navigate("/"); };
+  // Fetch feedback data
+  useEffect(() => {
+    const fetchFeedbackData = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-    return (
-        <div className="min-h-screen bg-gray-100 p-8">
-            <h1 className="text-4xl font-extrabold text-gray-800 mb-6 text-center">Feedback Form List</h1>
+      try {
+        const response = await fetch(`${rooturi}/users/liofdbck`, {
+          method: "GET",
+          headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey }
+        });
+        const result = await response.json();
+        setFeedbackData(Array.isArray(result.data) ? result.data : []);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        toast("Failed to fetch feedback data");
+        setFeedbackData([]);
+        setLoading(false);
+      }
+    };
+    fetchFeedbackData();
+  }, []);
 
-            <div className="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            {['ID', 'UID', 'Username', 'Email', 'Rating', 'Message', 'Type', 'Admin UID', 'Survey Status', 'Actions'].map((heading) => (
-                                <th key={heading} className="px-5 py-3 text-left font-bold text-gray-900 uppercase tracking-wider">
-                                    {heading}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {loading ? (
-                            <tr>
-                                <td colSpan="10" className="py-6 text-center text-gray-500 font-semibold">Loading...</td>
-                            </tr>
-                        ) : currentItems.length > 0 ? (
-                            currentItems.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50 transition duration-200">
-                                    <td className="px-5 py-3 font-medium text-gray-700">{item.id}</td>
-                                    <td className="px-5 py-3 font-semibold text-blue-600 cursor-pointer hover:underline" onClick={() => handleUidClick(item.uid)}>{item.uid}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.username}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.email}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.ratingnumber}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.feedbackmessage}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.feedbacktype}</td>
-                                    <td className="px-5 py-3 text-gray-700">{item.associatedadminid}</td>
-                                    <td className="px-5 py-3">
-                                        {item.isserveytook ? 
-                                            <span className="px-2 py-1 text-xs font-semibold text-white bg-green-500 rounded-full">Participated</span> :
-                                            <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">Not Participated</span>
-                                        }
-                                    </td>
-                                    <td className="px-5 py-3">
-                                        <button className="text-red-600 font-bold hover:underline" onClick={() => handleDelete(item.uid)}>Delete</button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="10" className="py-6 text-center text-gray-500 font-semibold">No data available</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = feedbackData.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(feedbackData.length / itemsPerPage);
 
-            {/* Pagination */}
-            <div className="mt-6 flex justify-center items-center gap-2">
-                <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md disabled:bg-gray-300 transition duration-300"
-                >
-                    Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`w-9 h-9 rounded-full text-center font-semibold transition duration-300 ${currentPage === i + 1 ? 'bg-blue-600 text-white shadow-lg' : 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-200'}`}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-                <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md disabled:bg-gray-300 transition duration-300"
-                >
-                    Next
-                </button>
-            </div>
+  const handleUidClick = (uid) => navigate(`/feedbackdetails/${uid}`);
+  const handleDelete = async (uid) => {
+    if (!window.confirm("Are you sure you want to delete this feedback?")) return toast.info("Delete canceled");
 
-            {/* Home Button */}
-            <div className="mt-8 flex justify-center">
-                <button
-                    className="relative inline-block text-white font-bold py-3 px-6 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
-                    onClick={backToHome}
-                >
-                    <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
-                    <span className="relative z-10">HOME</span>
-                </button>
-            </div>
+    const rooturi = import.meta.env.VITE_ROOT_URI;
+    const apikey = import.meta.env.VITE_API_KEY;
+    try {
+      const response = await fetch(`${rooturi}/users/fedbkdel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
+        body: JSON.stringify({ uid })
+      });
+      if (response.ok) {
+        toast.success("Feedback deleted successfully");
+        setFeedbackData(prev => prev.filter(f => f.uid !== uid));
+      } else toast.error("Failed to delete feedback");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error deleting feedback");
+    }
+  };
+
+  const backToHome = (e) => { e.preventDefault(); navigate("/"); };
+
+  return (
+    <section className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#020617] p-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-white mb-2">Feedback Form List</h1>
+          <p className="text-gray-400 text-sm">View all user feedback submissions</p>
         </div>
-    );
+
+        {/* Table Container */}
+        <div className="overflow-x-auto rounded-3xl bg-[#020617]/60 backdrop-blur-xl border border-gray-700 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+          <table className="min-w-full text-sm text-gray-300">
+            <thead className="bg-[#020617]/80 border-b border-gray-700">
+              <tr>
+                {['ID','UID','Username','Email','Rating','Message','Type','Admin UID','Survey Status','Actions'].map((head) => (
+                  <th key={head} className="px-5 py-3 text-left font-semibold uppercase tracking-wider">{head}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="10" className="py-8 text-center text-gray-500 font-semibold">Loading...</td>
+                </tr>
+              ) : currentItems.length > 0 ? currentItems.map((item) => (
+                <tr key={item.id} className="hover:bg-[#111827] transition duration-200">
+                  <td className="px-5 py-3">{item.id}</td>
+                  <td className="px-5 py-3 text-teal-400 font-semibold cursor-pointer hover:underline" onClick={() => handleUidClick(item.uid)}>{item.uid}</td>
+                  <td className="px-5 py-3">{item.username}</td>
+                  <td className="px-5 py-3">{item.email}</td>
+                  <td className="px-5 py-3">{item.ratingnumber}</td>
+                  <td className="px-5 py-3">{item.feedbackmessage}</td>
+                  <td className="px-5 py-3">{item.feedbacktype}</td>
+                  <td className="px-5 py-3">{item.associatedadminid}</td>
+                  <td className="px-5 py-3">
+                    {item.isserveytook ?
+                      <span className="px-2 py-1 text-xs font-semibold text-white bg-green-500 rounded-full">Participated</span> :
+                      <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">Not Participated</span>
+                    }
+                  </td>
+                  <td className="px-5 py-3">
+                    <button className="bg-red-600 px-3 py-1 rounded-full hover:bg-red-500 text-white font-semibold transition" onClick={() => handleDelete(item.uid)}>Delete</button>
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan="10" className="py-8 text-center text-gray-500 font-semibold">No data available</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center gap-2 p-4">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 disabled:opacity-50 transition"
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded-md transition ${currentPage === i + 1 ? 'bg-teal-500 text-white shadow-lg' : 'bg-gray-700 hover:bg-gray-600'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 disabled:opacity-50 transition"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Home Button */}
+        <div className="mt-8 flex justify-center">
+          <button
+            className="bg-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-md hover:bg-teal-600 transition duration-300"
+            onClick={backToHome}
+          >
+            Back to Home
+          </button>
+        </div>
+
+      </div>
+    </section>
+  );
 };
 
 export default FeedbackFormList;

@@ -304,6 +304,7 @@
 // }
 
 // export default Contactlist
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -400,33 +401,40 @@ const ContactList = () => {
   const backToHome = (e) => { e.preventDefault(); navigate("/"); };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <section className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#020617] p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Contact <span className="text-blue-600">List</span>
-        </h1>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-gray-700">
-            <thead className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-white mb-2">
+            Contact <span className="text-teal-400">List</span>
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Manage all contact form submissions
+          </p>
+        </div>
+
+        {/* Table Container */}
+        <div className="overflow-x-auto rounded-3xl bg-[#020617]/60 backdrop-blur-xl border border-gray-700 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+          <table className="min-w-full text-sm text-gray-300">
+            <thead className="bg-[#020617]/80 border-b border-gray-700">
               <tr>
-                {['ID', 'UID', 'First Name', 'Last Name', 'Email', 'Message', 'Delete'].map((head) => (
-                  <th key={head} className="px-6 py-3 text-left text-sm font-medium">{head}</th>
+                {['ID', 'UID', 'First Name', 'Last Name', 'Email', 'Message', 'Delete'].map(head => (
+                  <th key={head} className="px-6 py-3 text-left font-semibold">{head}</th>
                 ))}
               </tr>
             </thead>
-
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-6 text-gray-500">Loading...</td>
+                  <td colSpan="7" className="py-8 text-center text-gray-500">Loading...</td>
                 </tr>
               ) : currentContacts.length > 0 ? (
                 currentContacts.map((contact, idx) => (
-                  <tr key={contact.uid} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
+                  <tr key={contact.uid} className={`transition hover:bg-[#111827] ${idx % 2 === 0 ? 'bg-[#020617]/40' : 'bg-[#020617]/20'}`}>
                     <td className="px-6 py-4">{contact.id}</td>
                     <td className="px-6 py-4">
-                      <button onClick={() => handleView(contact.uid)} className="text-blue-600 hover:underline">
+                      <button onClick={() => handleView(contact.uid)} className="text-teal-400 hover:underline">
                         {contact.uid}
                       </button>
                     </td>
@@ -437,7 +445,7 @@ const ContactList = () => {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleDelete(contact.uid)}
-                        className="bg-red-600 text-white px-4 py-1 rounded-full hover:bg-red-700 transition"
+                        className="bg-red-600 text-white px-4 py-1 rounded-full hover:bg-red-500 transition"
                       >
                         Delete
                       </button>
@@ -446,42 +454,40 @@ const ContactList = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center py-6 text-gray-500">No contacts available</td>
+                  <td colSpan="7" className="py-8 text-center text-gray-500">No contacts available</td>
                 </tr>
               )}
             </tbody>
           </table>
 
           {/* Pagination */}
-          <div className="flex justify-end gap-2 p-4 bg-gray-100">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 rounded-md bg-white border hover:bg-blue-100 transition disabled:opacity-50"
-            >
-              Prev
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => (
+          {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center gap-2 p-4">
               <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded-md transition ${
-                  currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-white border hover:bg-blue-100'
-                }`}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 disabled:opacity-50 transition"
               >
-                {i + 1}
+                Prev
               </button>
-            ))}
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded-md bg-white border hover:bg-blue-100 transition disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded-md transition ${currentPage === i + 1 ? 'bg-teal-500 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 disabled:opacity-50 transition"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Home Button */}
@@ -490,12 +496,13 @@ const ContactList = () => {
             onClick={backToHome}
             className="relative inline-block text-white font-bold py-3 px-10 rounded-full overflow-hidden group transition-transform duration-300 transform hover:scale-105"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
+            <span className="absolute inset-0 bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 transform scale-110 group-hover:scale-100 transition duration-300"></span>
             <span className="relative z-10">HOME</span>
           </button>
         </div>
+
       </div>
-    </div>
+    </section>
   );
 };
 

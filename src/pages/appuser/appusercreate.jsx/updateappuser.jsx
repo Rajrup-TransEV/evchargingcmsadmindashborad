@@ -292,186 +292,187 @@
 // }
 
 // export default UpdateAppUser
-import React, { useState,useEffect } from 'react';
-import { useNavigate,useParams } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const UpdateAppUser = () => {
-    const navigate = useNavigate()
-    const { uid } = useParams();
-    const[userprofilepicture,setuserprofilepicture]=useState(null);
-    const[username,setusername]=useState('');
-    const[email,setemail]=useState('');
-    const [loading, setLoading] = useState(false);
-    const [ipAddress, setIpAddress] = useState('');
+  const navigate = useNavigate();
+  const { uid } = useParams();
+  const [userprofilepicture, setuserprofilepicture] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [username, setusername] = useState('');
+  const [email, setemail] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const checkAuthentication = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
+  // Auth check
+  useEffect(() => {
+    const checkAuth = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) { navigate("/signin"); return; }
 
-            try {
-                const gettoken = localStorage.getItem("token");
-                if (!gettoken) { navigate("/signin"); return; }
-
-                const response = await fetch(`${rooturi}/userauth/verifyuser`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-                    body: JSON.stringify({ token: gettoken })
-                });
-
-                const data = await response.json();
-                if (!response.ok || data.user.userType !== "superadmin") {
-                    toast("You have no authorization to view this page");
-                    navigate("/signin");
-                }
-            } catch (error) {
-                console.error(error);
-                toast("Authentication failed");
-                navigate("/signin");
-            }
-        };
-        checkAuthentication();
-    }, [navigate]);
-
-    useEffect(() => {
-        const fetchIpAddress = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
-            try {
-                const response = await fetch("https://api.ipify.org?format=json");
-                const data = await response.json();
-                if(data){
-                    setIpAddress(data.ip);
-                    const currentDateTime = new Date().toISOString();
-                    await fetch(`${rooturi}/admin/getip`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-                        body: JSON.stringify({ip:data.ip, datetime:currentDateTime, path:"updateappuser.jsx"})
-                    });
-                }
-            } catch (error) { console.error(error); }
-        };
-        fetchIpAddress();
-    }, []);
-
-    const handleFileUpload = (e) => {
-        const selectedFile = e.target.files[0];
-        if (selectedFile) setuserprofilepicture(selectedFile);
+        const response = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
+          body: JSON.stringify({ token })
+        });
+        const data = await response.json();
+        if (!response.ok || data.user.userType !== "superadmin") {
+          toast("You have no authorization to view this page");
+          navigate("/signin");
+        }
+      } catch (error) {
+        console.error(error);
+        toast("Authentication failed");
+        navigate("/signin");
+      }
     };
+    checkAuth();
+  }, [navigate]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const apikey = import.meta.env.VITE_API_KEY;
-            const rooturi = import.meta.env.VITE_ROOT_URI;
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setuserprofilepicture(file);
+      const reader = new FileReader();
+      reader.onload = () => setPreviewImage(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
-            if (!userprofilepicture) { toast("Please select a profile picture"); setLoading(false); return; }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-            const reader = new FileReader();
-            reader.readAsDataURL(userprofilepicture);
+      if (!userprofilepicture) { toast("Please select a profile picture"); setLoading(false); return; }
 
-            reader.onload = async () => {
-                const imageBase64 = reader.result.split(',')[1];
-                const response = await fetch(`${rooturi}/users/updateprofile`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
-                    body: JSON.stringify({ uid, username, email, userprofilepicture: imageBase64 })
-                });
+      const reader = new FileReader();
+      reader.readAsDataURL(userprofilepicture);
+      reader.onload = async () => {
+        const imageBase64 = reader.result.split(',')[1];
+        const response = await fetch(`${rooturi}/users/updateprofile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apiauthkey': apikey },
+          body: JSON.stringify({ uid, username, email, userprofilepicture: imageBase64 })
+        });
+        if (response.ok) toast.success("Profile updated successfully!");
+        else toast.error("Failed to update profile");
+      };
+      reader.onerror = () => toast.error("Error reading file");
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while updating profile");
+    } finally { setLoading(false); }
+  };
 
-                if (response.ok) {
-                    toast.success("Profile updated successfully!");
-                    setuserprofilepicture(null);
-                } else toast.error("Failed to update profile");
-            };
-            reader.onerror = () => { toast.error("Error reading file"); setLoading(false); };
-        } catch (error) {
-            console.error(error);
-            toast.error("An error occurred while updating your profile");
-        } finally { setLoading(false); }
-    };
+  const backtohome = (e) => { e.preventDefault(); navigate("/"); }
 
-    const backtohome = (e) => { e.preventDefault(); navigate("/"); }
+  return (
+    <section className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-6 relative overflow-hidden">
+      
+      {/* Animated background circles */}
+      <div className="absolute -top-20 -left-20 w-72 h-72 bg-blue-500/30 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-pink-500/30 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
 
-    return (
-<section className="min-h-screen bg-gray-900 flex flex-col justify-center items-center p-6">
-    <div className="bg-gray-800 rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden lg:flex">
-        {/* Left Image */}
-        <div className="hidden lg:block lg:w-1/2">
-            <img
-                src="https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png"
-                alt="Decorative"
-                className="h-full w-full object-cover"
-            />
-        </div>
+      {/* Floating Glass Card */}
+      <div className="relative z-10 w-full max-w-md p-10 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl overflow-hidden">
+        
+        {/* Animated gradient border */}
+        <div className="absolute inset-0 rounded-3xl border-4 border-transparent bg-gradient-to-r from-blue-500 via-teal-400 to-pink-500 bg-clip-border animate-gradient-x pointer-events-none"></div>
 
-        {/* Form Section */}
-        <div className="w-full lg:w-1/2 p-10 sm:p-16">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-6">
-                Update App User
-            </h1>
-            <p className="text-gray-300 mb-8">
-                Make changes to user details and upload a new profile picture.
-            </p>
+        <div className="relative z-10 text-center">
+          <h1 className="text-3xl font-extrabold text-white mb-3">Update App User</h1>
+          <p className="text-gray-300 mb-6">Edit user details and upload a profile picture</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label className="block text-gray-200 font-semibold mb-2">Username</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={e => setusername(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-lg"
-                        placeholder="Enter username"
-                        required
-                    />
-                </div>
+          {/* Profile Picture Preview */}
+          {previewImage && (
+            <div className="flex justify-center mb-6">
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="w-28 h-28 rounded-full border-4 border-gradient-to-r from-blue-400 via-teal-400 to-pink-500 shadow-xl object-cover transition-transform hover:scale-110"
+              />
+            </div>
+          )}
 
-                <div>
-                    <label className="block text-gray-200 font-semibold mb-2">Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={e => setemail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-lg"
-                        placeholder="Enter email"
-                        required
-                    />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-5 text-left">
+            <div>
+              <label className="text-gray-200 font-semibold mb-1 block">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setusername(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-lg transition"
+                placeholder="Enter username"
+                required
+              />
+            </div>
 
-                <div>
-                    <label className="block text-gray-200 font-semibold mb-2">Profile Picture</label>
-                    <input
-                        type="file"
-                        onChange={handleFileUpload}
-                        className="w-full text-white"
-                        accept="image/*"
-                        required
-                    />
-                </div>
+            <div>
+              <label className="text-gray-200 font-semibold mb-1 block">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setemail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-lg transition"
+                placeholder="Enter email"
+                required
+              />
+            </div>
 
-                <button
-                    type="submit"
-                    className={`w-full py-3 rounded-xl font-bold text-white text-lg shadow-xl transition-transform duration-300 transform hover:scale-105 ${
-                        loading ? 'bg-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
-                    }`}
-                    disabled={loading}
-                >
-                    {loading ? 'Processing...' : 'Save Profile Details'}
-                </button>
-            </form>
+            <div>
+              <label className="text-gray-200 font-semibold mb-1 block">Profile Picture</label>
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                accept="image/*"
+                className="w-full text-white"
+                required
+              />
+            </div>
 
             <button
-                onClick={backtohome}
-                className="mt-8 w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 shadow-lg hover:scale-105 transition-transform"
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-xl font-bold text-white text-lg shadow-xl transition-transform transform hover:scale-105 ${
+                loading ? 'bg-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 via-teal-400 to-pink-500'
+              }`}
             >
-                HOME
+              {loading ? 'Processing...' : 'Save Profile Details'}
             </button>
+
+            <button
+              onClick={backtohome}
+              className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 shadow-lg hover:scale-105 transition-transform"
+            >
+              HOME
+            </button>
+          </form>
         </div>
-    </div>
-</section>
-    );
+      </div>
+
+      {/* Tailwind Animations */}
+      <style>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        @keyframes gradient-x { 0% { background-position: 0% } 50% { background-position: 100% } 100% { background-position: 0% } }
+        .animate-gradient-x { background-size: 300% 300%; animation: gradient-x 6s ease infinite; }
+      `}</style>
+    </section>
+  );
 };
 
 export default UpdateAppUser;
