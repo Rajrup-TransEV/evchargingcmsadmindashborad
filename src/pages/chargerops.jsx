@@ -338,6 +338,7 @@
 
 // export default ChargerOperationsView;
 
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -359,6 +360,15 @@ const ChargerOperationsView = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const searchTimer = useRef(null);
+  const [filters, setFilters] = useState({
+    segment: "",
+    subsegment: "",
+    protocol: "",
+    connector_type: "",
+    charger_type: "",
+    use_type: "",
+    open_247: "",
+  });
 
   /* ================= AUTH ================= */
   useEffect(() => {
@@ -426,8 +436,11 @@ const ChargerOperationsView = () => {
       try {
         setLoading(true);
 
-        // EMPTY SEARCH → FULL LIST
-        if (!searchQuery.trim()) {
+        const hasSearch = searchQuery.trim();
+        const hasFilters = Object.values(filters).some(Boolean);
+
+        // No search + no filters → original list
+        if (!hasSearch && !hasFilters) {
           const res = await fetch(`${rooturi}/admin/listofcharges`, {
             headers: { apiauthkey: apikey },
           });
@@ -438,28 +451,26 @@ const ChargerOperationsView = () => {
           return;
         }
 
-        // SEARCH MODE
+        const queryString = buildQueryParams();
+
         const res = await fetch(
-          `${rooturi}/admin/searchallchargers?q=${encodeURIComponent(
-            searchQuery
-          )}&limit=200&offset=0`,
-          {
-            headers: { apiauthkey: apikey },
-          }
+          `${rooturi}/admin/searchallchargers?${queryString}`,
+          { headers: { apiauthkey: apikey } }
         );
 
         const result = await res.json();
         setChargerData(Array.isArray(result.data) ? result.data : []);
         setCurrentPage(1);
       } catch {
-        toast.error("Search failed");
+        toast.error("Search / filter failed");
       } finally {
         setLoading(false);
       }
     }, 400);
 
     return () => clearTimeout(searchTimer.current);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
+
 
   /* ================= PAGINATION ================= */
   const indexOfLast = currentPage * itemsPerPage;
@@ -494,6 +505,33 @@ const ChargerOperationsView = () => {
       toast.error("Delete request failed");
     }
   };
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setCurrentPage(1);
+  };
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+
+    if (searchQuery.trim()) {
+      params.append("q", searchQuery.trim());
+    }
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value);
+    });
+
+    params.append("limit", 200);
+    params.append("offset", 0);
+
+    return params.toString();
+  };
+  const uniqueValues = (key) => {
+    return [...new Set(chargerData.map((c) => c[key]).filter(Boolean))];
+  };
 
   /* ================= UI ================= */
   return (
@@ -523,6 +561,115 @@ const ChargerOperationsView = () => {
           </button>
         </div>
       </div>
+      {/* FILTER SECTION */}
+{/* FILTER SECTION */}
+<div className="mb-5 border border-gray-700 rounded-xl bg-[#020617] p-4">
+  <div className="mb-3 flex items-center justify-between">
+    <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+      Filters
+    </h3>
+
+    <button
+      onClick={() =>
+        setFilters({
+          segment: "",
+          subsegment: "",
+          protocol: "",
+          connector_type: "",
+          charger_type: "",
+          use_type: "",
+          open_247: "",
+        })
+      }
+      className="text-xs text-gray-400 hover:text-red-400 transition"
+    >
+      Clear all
+    </button>
+  </div>
+
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {/* Segment */}
+    <div>
+      <label className="block mb-1 text-xs text-gray-400">
+        Segment
+      </label>
+      <select
+        name="segment"
+        value={filters.segment}
+        onChange={handleFilterChange}
+        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+      >
+        <option value="">All</option>
+        {uniqueValues("Segment").map((v) => (
+          <option key={v} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Protocol */}
+    <div>
+      <label className="block mb-1 text-xs text-gray-400">
+        Protocol
+      </label>
+      <select
+        name="protocol"
+        value={filters.protocol}
+        onChange={handleFilterChange}
+        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+      >
+        <option value="">All</option>
+        {uniqueValues("protocol").map((v) => (
+          <option key={v} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Connector Type */}
+    <div>
+      <label className="block mb-1 text-xs text-gray-400">
+        Connector
+      </label>
+      <select
+        name="connector_type"
+        value={filters.connector_type}
+        onChange={handleFilterChange}
+        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+      >
+        <option value="">All</option>
+        {uniqueValues("Connector_type").map((v) => (
+          <option key={v} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* 24/7 Open */}
+    <div>
+      <label className="block mb-1 text-xs text-gray-400">
+        24 / 7 Open
+      </label>
+      <select
+        name="open_247"
+        value={filters.open_247}
+        onChange={handleFilterChange}
+        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+      >
+        <option value="">All</option>
+        {uniqueValues("twenty_four_seven_open_status").map((v) => (
+          <option key={v} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+</div>
+
 
       {/* TABLE */}
       <div className="overflow-x-auto border border-gray-700 rounded-xl">
