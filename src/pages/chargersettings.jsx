@@ -909,7 +909,7 @@ const ChargerSettings = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success(`Charger successfully ${connectorStatus === 'Available' ? 'disengaged' : 'engaged'}`);
-        await fetchChargerStatus(); // Refresh status after the operation
+        await fetchChargerStatus(); //Refresh status after the operation
       } else {
         toast.error('Operation failed');
       }
