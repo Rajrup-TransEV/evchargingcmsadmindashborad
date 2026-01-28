@@ -539,7 +539,7 @@ const ChargerOperationsView = () => {
       {/* HEADER */}
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">
-          Charger Operations
+          All Chargers
         </h1>
 
         <div className="flex gap-3">
@@ -561,114 +561,113 @@ const ChargerOperationsView = () => {
           </button>
         </div>
       </div>
+
       {/* FILTER SECTION */}
-{/* FILTER SECTION */}
-<div className="mb-5 border border-gray-700 rounded-xl bg-[#020617] p-4">
-  <div className="mb-3 flex items-center justify-between">
-    <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-      Filters
-    </h3>
+      <div className="mb-5 border border-gray-700 rounded-xl bg-[#020617] p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+            Filters
+          </h3>
+          <button
+            onClick={() =>
+              setFilters({
+                segment: "",
+                subsegment: "",
+                protocol: "",
+                connector_type: "",
+                charger_type: "",
+                use_type: "",
+                open_247: "",
+              })
+            }
+            className="text-xs text-gray-400 hover:text-red-400 transition"
+          >
+            Clear all
+          </button>
+        </div>
 
-    <button
-      onClick={() =>
-        setFilters({
-          segment: "",
-          subsegment: "",
-          protocol: "",
-          connector_type: "",
-          charger_type: "",
-          use_type: "",
-          open_247: "",
-        })
-      }
-      className="text-xs text-gray-400 hover:text-red-400 transition"
-    >
-      Clear all
-    </button>
-  </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Segment */}
+          <div>
+            <label className="block mb-1 text-xs text-gray-400">
+              Segment
+            </label>
+            <select
+              name="segment"
+              value={filters.segment}
+              onChange={handleFilterChange}
+              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="">All</option>
+              {uniqueValues("Segment").map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-    {/* Segment */}
-    <div>
-      <label className="block mb-1 text-xs text-gray-400">
-        Segment
-      </label>
-      <select
-        name="segment"
-        value={filters.segment}
-        onChange={handleFilterChange}
-        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-      >
-        <option value="">All</option>
-        {uniqueValues("Segment").map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </div>
+          {/* Protocol */}
+          <div>
+            <label className="block mb-1 text-xs text-gray-400">
+              Protocol
+            </label>
+            <select
+              name="protocol"
+              value={filters.protocol}
+              onChange={handleFilterChange}
+              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="">All</option>
+              {uniqueValues("protocol").map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
 
-    {/* Protocol */}
-    <div>
-      <label className="block mb-1 text-xs text-gray-400">
-        Protocol
-      </label>
-      <select
-        name="protocol"
-        value={filters.protocol}
-        onChange={handleFilterChange}
-        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-      >
-        <option value="">All</option>
-        {uniqueValues("protocol").map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </div>
+          {/* Connector Type */}
+          <div>
+            <label className="block mb-1 text-xs text-gray-400">
+              Connector
+            </label>
+            <select
+              name="connector_type"
+              value={filters.connector_type}
+              onChange={handleFilterChange}
+              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="">All</option>
+              {uniqueValues("Connector_type").map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
 
-    {/* Connector Type */}
-    <div>
-      <label className="block mb-1 text-xs text-gray-400">
-        Connector
-      </label>
-      <select
-        name="connector_type"
-        value={filters.connector_type}
-        onChange={handleFilterChange}
-        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-      >
-        <option value="">All</option>
-        {uniqueValues("Connector_type").map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    {/* 24/7 Open */}
-    <div>
-      <label className="block mb-1 text-xs text-gray-400">
-        24 / 7 Open
-      </label>
-      <select
-        name="open_247"
-        value={filters.open_247}
-        onChange={handleFilterChange}
-        className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-      >
-        <option value="">All</option>
-        {uniqueValues("twenty_four_seven_open_status").map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </div>
-  </div>
-</div>
+          {/* 24/7 Open */}
+          <div>
+            <label className="block mb-1 text-xs text-gray-400">
+              24 / 7 Open
+            </label>
+            <select
+              name="open_247"
+              value={filters.open_247}
+              onChange={handleFilterChange}
+              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="">All</option>
+              {uniqueValues("twenty_four_seven_open_status").map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
 
 
       {/* TABLE */}
@@ -677,8 +676,8 @@ const ChargerOperationsView = () => {
           <thead className="bg-[#020617] border-b border-gray-700">
             <tr>
               {[
-                "ID",
-                "User ID",
+                "System ID",
+                "Admin ID",
                 "Charger UID",
                 "Charger Name",
                 "Charger Serial Number",
@@ -694,7 +693,7 @@ const ChargerOperationsView = () => {
                 "Latitude",
                 "Longitude",
                 "Full Address",
-                "Use Type",
+                "Charger Use Type",
                 "24/7 Open",
                 "Image",
                 "Buyer",
