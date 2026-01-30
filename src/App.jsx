@@ -84,7 +84,7 @@ function App() {
         <Route exact path="/listofhubs" element={<ListofHubData />} />
         <Route exact path="/hubdetails/:uid" element={<HubDetails />} />
         <Route exact path="/updatehub" element={<UpdateHub />} />
-        <Route exact path='/addwallet' element={<AddWallet />} />
+        {/* <Route exact path='/addwallet' element={<AddWallet />} /> */}
         <Route exact path='/totalrevenue' element={<TotalRevenue />} />
         <Route exact path='/updateprofiles' element={<UpdateProfile />} />
         <Route exact path='/addminbal' element={<AddMinimumBalance />} />
