@@ -272,6 +272,15 @@ function Dashboard() {
                 </div>
               </div>
 
+              {/* <div className="flex items-center gap-3">
+                <FilterButton align="right" />
+                <Datepicker align="right" />
+                <button className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  Add View
+                </button>
+              </div>
+
+            </div> */}
               <div className="flex items-center gap-3">
                 <FilterButton align="right" />
                 <Datepicker align="right" />
@@ -281,7 +290,6 @@ function Dashboard() {
               </div>
 
             </div>
-
             {/* ===== Cards Grid ===== */}
             <div className="grid grid-cols-12 gap-6">
               <DashboardCard01 />
