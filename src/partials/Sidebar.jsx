@@ -311,7 +311,7 @@ function Sidebar({
                               }
                             >
                               <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                              Create User
+                              Create Admin
                               </span>
                             </NavLink>
                           </li>
@@ -324,7 +324,7 @@ function Sidebar({
                               }
                             >
                               <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                Users - Lists
+                                Admin - Lists
                               </span>
                             </NavLink>
                           </li>

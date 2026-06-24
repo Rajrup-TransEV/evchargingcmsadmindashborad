@@ -168,6 +168,7 @@
 // }
 
 // export default Dashboard;
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
@@ -181,7 +182,6 @@ import DashboardCard03 from '../partials/dashboard/DashboardCard03';
 import DashboardCard07 from '../partials/dashboard/DashboardCard07';
 import DashboardCard10 from '../partials/dashboard/DashboardCard10';
 import DashboardCard13 from '../partials/dashboard/DashboardCard13';
-
 import { toast } from 'react-toastify';
 
 function Dashboard() {
@@ -242,6 +242,7 @@ function Dashboard() {
     fetchIp();
   }, []);
 
+
   return (
     <div className="relative flex h-screen overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black text-gray-200">
 
@@ -272,15 +273,6 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* <div className="flex items-center gap-3">
-                <FilterButton align="right" />
-                <Datepicker align="right" />
-                <button className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition">
-                  Add View
-                </button>
-              </div>
-
-            </div> */}
               <div className="flex items-center gap-3">
                 <FilterButton align="right" />
                 <Datepicker align="right" />
@@ -290,6 +282,7 @@ function Dashboard() {
               </div>
 
             </div>
+
             {/* ===== Cards Grid ===== */}
             <div className="grid grid-cols-12 gap-6">
               <DashboardCard01 />

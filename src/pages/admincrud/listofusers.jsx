@@ -438,7 +438,7 @@ const ListofUsers = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-extrabold text-white">
-          👥 Admin Users List
+          Active Admin List
         </h1>
 
         <button
