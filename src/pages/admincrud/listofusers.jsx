@@ -297,16 +297,37 @@
 // };
 
 // export default ListofUsers;
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../../partials/Sidebar';
+import { 
+  FiUsers, 
+  FiUser, 
+  FiMail, 
+  FiPhone, 
+  FiShield, 
+  FiBriefcase,
+  FiTrash2,
+  FiEye,
+  FiPlus,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCalendar,
+  FiClock,
+  FiUserCheck
+} from 'react-icons/fi';
 
 const ListofUsers = () => {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setuserData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
   const [ipAddress, setIpAddress] = useState('');
 
   /* ================= AUTH ================= */
@@ -330,11 +351,11 @@ const ListofUsers = () => {
 
         const data = await res.json();
         if (!res.ok || data.user.userType !== "superadmin") {
-          toast("Unauthorized access");
+          toast.error("Unauthorized access");
           navigate("/signin");
         }
       } catch {
-        toast("Authentication failed");
+        toast.error("Authentication failed");
         navigate("/signin");
       }
     };
@@ -359,7 +380,7 @@ const ListofUsers = () => {
         const result = await res.json();
         setuserData(Array.isArray(result.data) ? result.data : []);
       } catch {
-        toast("Failed to fetch users");
+        toast.error("Failed to fetch users");
         setuserData([]);
       } finally {
         setLoading(false);
@@ -370,6 +391,8 @@ const ListofUsers = () => {
 
   /* ================= DELETE ================= */
   const handleDelete = async (uid) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+
     const rooturi = import.meta.env.VITE_ROOT_URI;
     const apikey = import.meta.env.VITE_API_KEY;
 
@@ -384,7 +407,7 @@ const ListofUsers = () => {
       });
 
       if (res.ok) {
-        toast.success("User deleted");
+        toast.success("User deleted successfully");
         setuserData(prev => prev.filter(u => u.uid !== uid));
       } else {
         toast.error("Delete failed");
@@ -395,10 +418,17 @@ const ListofUsers = () => {
   };
 
   /* ================= PAGINATION ================= */
+  const filteredUsers = userData.filter(user => 
+    user.firstname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.lastname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const indexOfLastUser = currentPage * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = userData.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(userData.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const handleUidClick = (uid) => navigate(`/userdetails/${uid}`);
 
@@ -432,110 +462,293 @@ const ListofUsers = () => {
     fetchIpAddress();
   }, []);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-gray-900 p-6">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-extrabold text-white">
-          Active Admin List
-        </h1>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Admin Users</h1>
+          <div className="w-10" />
+        </header>
 
-        <button
-          onClick={() => navigate("/")}
-          className="rounded-full bg-gradient-to-r from-teal-400 to-indigo-600 px-6 py-2 text-white font-bold hover:scale-105 transition"
-        >
-          HOME
-        </button>
-      </div>
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Header */}
+          <div className="hidden lg:flex items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 p-2.5 rounded-xl text-white shadow-lg">
+                  <FiUsers className="w-6 h-6" />
+                </span>
+                Admin Users
+              </h1>
+              <p className="text-gray-500 mt-1">Manage all administrator accounts</p>
+            </div>
+          </div>
 
-      {/* TABLE CARD */}
-      <div className="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+          {/* Stats and Actions */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+                <FiUsers className="w-5 h-5 text-indigo-500" />
+                <span className="text-sm text-gray-600">Total:</span>
+                <span className="text-lg font-bold text-gray-800">{filteredUsers.length}</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+                <FiUserCheck className="w-5 h-5 text-emerald-500" />
+                <span className="text-sm text-gray-600">Active:</span>
+                <span className="text-lg font-bold text-gray-800">{filteredUsers.length}</span>
+              </div>
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-gray-200">
-            <thead className="sticky top-0 bg-black/50 backdrop-blur-xl">
-              <tr>
-                {[
-                  "ID", "UID", "First Name", "Last Name", "Email",
-                  "Password", "Address", "Phone", "Role",
-                  "Designation", "Created", "Updated", "Actions"
-                ].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-semibold text-teal-300">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 w-full sm:w-64"
+                />
+              </div>
+              <button
+                onClick={() => navigate('/createnewuser')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition transform"
+              >
+                <FiPlus className="w-5 h-5" />
+                New User
+              </button>
+            </div>
+          </div>
 
-            <tbody className="divide-y divide-white/10">
-              {loading ? (
-                <tr>
-                  <td colSpan="13" className="py-10 text-center">
-                    <span className="animate-pulse text-gray-400">Loading users...</span>
-                  </td>
-                </tr>
-              ) : currentUsers.length ? (
-                currentUsers.map(user => (
-                  <tr key={user.id} className="hover:bg-white/5 transition">
-                    <td className="px-4 py-3">{user.id}</td>
-
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleUidClick(user.uid)}
-                        className="rounded-full bg-indigo-600/20 px-3 py-1 text-indigo-300 hover:bg-indigo-600/40"
-                      >
-                        {user.uid}
-                      </button>
-                    </td>
-
-                    <td className="px-4 py-3">{user.firstname}</td>
-                    <td className="px-4 py-3">{user.lastname}</td>
-                    <td className="px-4 py-3">{user.email}</td>
-                    <td className="px-4 py-3">{user.password}</td>
-                    <td className="px-4 py-3">{user.address}</td>
-                    <td className="px-4 py-3">{user.phonenumber}</td>
-                    <td className="px-4 py-3">{user.role}</td>
-                    <td className="px-4 py-3">{user.designation}</td>
-                    <td className="px-4 py-3">{user.createdAt}</td>
-                    <td className="px-4 py-3">{user.updatedAt}</td>
-
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDelete(user.uid)}
-                        className="rounded-full bg-red-600/20 px-4 py-1 text-red-400 hover:bg-red-600/40"
-                      >
-                        Delete
-                      </button>
-                    </td>
+          {/* Table */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                  <tr>
+                    {[
+                      "ID", "User", "Email", "Phone", "Role", 
+                      "Designation", "Created", "Actions"
+                    ].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="13" className="py-10 text-center text-gray-400">
-                    No users found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
 
-        {/* PAGINATION */}
-        <div className="flex justify-end gap-2 p-4">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`w-9 h-9 rounded-full font-bold transition ${
-                currentPage === i + 1
-                  ? "bg-teal-500 text-black"
-                  : "bg-white/10 text-white hover:bg-white/20"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+                <tbody className="divide-y divide-gray-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="8" className="px-4 py-12 text-center">
+                        <div className="flex items-center justify-center gap-3 text-gray-500">
+                          <svg className="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading users...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : currentUsers.length ? (
+                    currentUsers.map((user, index) => (
+                      <tr key={user.id} className="hover:bg-indigo-50/50 transition-colors duration-150">
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {indexOfFirstUser + index + 1}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-semibold">
+                              {user.firstname?.[0]}{user.lastname?.[0]}
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-gray-800">
+                                {user.firstname} {user.lastname}
+                              </div>
+                              <button
+                                onClick={() => handleUidClick(user.uid)}
+                                className="text-xs text-indigo-500 hover:text-indigo-700 font-mono hover:underline"
+                              >
+                                {user.uid}
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FiMail className="w-4 h-4 text-gray-400" />
+                            {user.email}
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FiPhone className="w-4 h-4 text-gray-400" />
+                            {user.phonenumber || '—'}
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            user.role === 'admin' 
+                              ? 'bg-indigo-100 text-indigo-700'
+                              : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            <FiShield className="inline w-3 h-3 mr-1" />
+                            {user.role || '—'}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FiBriefcase className="w-4 h-4 text-gray-400" />
+                            {user.designation || '—'}
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <FiCalendar className="w-3 h-3 text-gray-400" />
+                              {formatDate(user.createdAt)}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+                              <FiClock className="w-3 h-3" />
+                              {user.createdAt ? new Date(user.createdAt).toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              }) : '—'}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleUidClick(user.uid)}
+                              className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                              title="View Details"
+                            >
+                              <FiEye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(user.uid)}
+                              className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                              title="Delete User"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="px-4 py-12 text-center">
+                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                          <FiUsers className="w-12 h-12 text-gray-300" />
+                          <p className="text-lg font-medium text-gray-500">No users found</p>
+                          <p className="text-sm">Try adjusting your search or create a new user</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 bg-gray-50 border-t border-gray-200">
+                <div className="text-sm text-gray-600">
+                  Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                  >
+                    <FiChevronLeft className="w-4 h-4" />
+                    Previous
+                  </button>
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-9 h-9 rounded-lg transition-all text-sm ${
+                            currentPage === pageNum
+                              ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-md"
+                              : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                  >
+                    Next
+                    <FiChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-4 text-center text-xs text-gray-400">
+            © {new Date().getFullYear()} Admin Panel. All rights reserved.
+          </div>
         </div>
       </div>
     </div>
