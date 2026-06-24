@@ -204,10 +204,12 @@
 // };
 
 // export default Login;
+
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Eye, EyeOff } from "lucide-react"; // Using lucide-react for icons
+import { Eye, EyeOff, X } from "lucide-react"; // Added X icon for close button
 
 const LoginScreen = () => {
   const [step, setStep] = useState(0); // For animation sequence
@@ -219,18 +221,19 @@ const LoginScreen = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showOtpField, setShowOtpField] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false); // New state for modal
 
   const navigate = useNavigate();
 
   // --- Animation sequence ---
   useEffect(() => {
     const timers = [
-      setTimeout(() => setStep(1), 500), // Greeting + subtitle
-      setTimeout(() => setStep(2), 1800), // Email
-      setTimeout(() => setStep(3), 2600), // Password
-      setTimeout(() => setStep(4), 3400), // Button
-      setTimeout(() => setStep(5), 4200), // Forgot password
+      setTimeout(() => setStep(1), 500),
+      setTimeout(() => setStep(2), 1800),
+      setTimeout(() => setStep(3), 2600),
+      setTimeout(() => setStep(4), 3400),
+      setTimeout(() => setStep(5), 4200),
     ];
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -240,6 +243,7 @@ const LoginScreen = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setShowErrorModal(false);
 
     try {
       const rooturi = import.meta.env.VITE_ROOT_URI;
@@ -260,13 +264,17 @@ const LoginScreen = () => {
         setShowOtpField(true);
         toast.success("OTP sent to your email. Please check your inbox.");
       } else {
-        setError(data.message || "Login failed");
-        toast.error(data.message || "Login failed");
+        const errorMessage = data.message || "Login failed. Please try again.";
+        setError(errorMessage);
+        setShowErrorModal(true); // Show modal on error
+        toast.error(errorMessage);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An error occurred during login");
-      toast.error("An error occurred during login");
+      const errorMessage = "Network error. Please check your connection.";
+      setError(errorMessage);
+      setShowErrorModal(true); // Show modal on network error
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -276,6 +284,8 @@ const LoginScreen = () => {
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setShowErrorModal(false);
+    
     try {
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
@@ -296,11 +306,17 @@ const LoginScreen = () => {
         navigate("/");
       } else {
         const data = await response.json();
-        toast.error(data.message || "OTP verification failed");
+        const errorMessage = data.message || "OTP verification failed";
+        setError(errorMessage);
+        setShowErrorModal(true);
+        toast.error(errorMessage);
       }
     } catch (err) {
       console.error("OTP verification error:", err);
-      toast.error("An error occurred during OTP verification");
+      const errorMessage = "Network error. Please check your connection.";
+      setError(errorMessage);
+      setShowErrorModal(true);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -310,9 +326,13 @@ const LoginScreen = () => {
     navigate("/forgotpassword");
   };
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+    setError(null);
   };
 
   return (
@@ -324,6 +344,65 @@ const LoginScreen = () => {
       }}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-slideUp">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-red-500 to-pink-500 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-white">Error</h3>
+              <button
+                onClick={closeErrorModal}
+                className="text-white hover:text-gray-200 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg
+                      className="h-6 w-6 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-800 font-medium">Login Failed</p>
+                  <p className="text-gray-600 text-sm mt-1">{error}</p>
+                  <p className="text-gray-500 text-xs mt-2">
+                    Please check your credentials and try again.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-100">
+              <button
+                onClick={closeErrorModal}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="z-10 w-full max-w-md p-10 bg-white/80 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col items-center">
         {/* Logo */}
@@ -369,7 +448,9 @@ const LoginScreen = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="mt-1 block w-full rounded-lg border border-gray-300 bg-white/70 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none sm:text-sm"
+              className={`mt-1 block w-full rounded-lg border ${
+                error && !showOtpField ? "border-red-500 focus:border-red-500 focus:ring-red-400" : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-400"
+              } bg-white/70 px-3 py-2 text-gray-900 placeholder-gray-400 focus:ring-2 focus:outline-none sm:text-sm`}
             />
           </div>
 
@@ -392,7 +473,9 @@ const LoginScreen = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="mt-1 block w-full rounded-lg border border-gray-300 bg-white/70 px-3 py-2 pr-10 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none sm:text-sm"
+                  className={`mt-1 block w-full rounded-lg border ${
+                    error && !showOtpField ? "border-red-500 focus:border-red-500 focus:ring-red-400" : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-400"
+                  } bg-white/70 px-3 py-2 pr-10 text-gray-900 placeholder-gray-400 focus:ring-2 focus:outline-none sm:text-sm`}
                 />
                 <button
                   type="button"
@@ -468,6 +551,34 @@ const LoginScreen = () => {
           )}
         </form>
       </div>
+
+      {/* Add custom styles for modal animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes slideUp {
+          from {
+            transform: translateY(30px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
