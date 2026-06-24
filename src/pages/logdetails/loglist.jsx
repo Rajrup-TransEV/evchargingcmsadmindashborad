@@ -312,10 +312,10 @@
 
 // export default LogRetentionlist;
 
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../../partials/Sidebar';
 
 const LogRetentionlist = () => {
   const navigate = useNavigate();
@@ -324,6 +324,7 @@ const LogRetentionlist = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(50);
   const [ipAddress, setIpAddress] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false); // State for sidebar toggle
 
   /* ---------------- AUTH ---------------- */
   useEffect(() => {
@@ -432,94 +433,184 @@ const LogRetentionlist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold text-white">
-          Log Retention List
-        </h1>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header with Hamburger Menu */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-black/30 backdrop-blur-sm border-b border-white/10">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+            aria-label="Toggle sidebar"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-white">Log Retention List</h1>
+          <div className="w-10" /> {/* Spacer for alignment */}
+        </header>
 
-        <button
-          onClick={() => navigate("/")}
-          className="px-6 py-2 rounded-full bg-gradient-to-r from-teal-400 to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition"
-        >
-          HOME
-        </button>
-      </div>
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-extrabold text-white">
+              Log Retention List
+            </h1>
+{/* 
+            <button
+              onClick={() => navigate("/")}
+              className="px-6 py-2 rounded-full bg-gradient-to-r from-teal-400 to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition transform hover:shadow-xl"
+            >
+              HOME
+            </button> */}
+          </div>
 
-      {/* TABLE */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-gray-300">
-            <thead className="sticky top-0 bg-black/60 backdrop-blur-md">
-              <tr>
-                {['ID', 'UID', 'TYPE', 'MESSAGE', 'FILE'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-bold text-white">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-white/10">
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-white">
-                    Loading...
-                  </td>
-                </tr>
-              ) : currentLogs.length ? (
-                currentLogs.map(log => (
-                  <tr key={log.id} className="hover:bg-white/5 transition">
-                    <td className="px-4 py-3 font-bold text-sky-400 cursor-pointer"
-                        onClick={() => navigate(`/logdetails/${log.id}`)}>
-                      {log.id}
-                    </td>
-                    <td className="px-4 py-3 text-lime-400">{log.uid}</td>
-                    <td className={`px-4 py-3 font-bold ${getMessageTypeClass(log.messagetype)}`}>
-                      {log.messagetype}
-                    </td>
-                    <td className="px-4 py-3 text-gray-200">
-                      {truncateMessage(log.messages)}
-                    </td>
-                    <td className="px-4 py-3 text-pink-400">
-                      {log.filelocation}
-                    </td>
+          {/* TABLE */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl overflow-hidden border border-white/10">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-gray-300">
+                <thead className="sticky top-0 bg-black/60 backdrop-blur-md">
+                  <tr>
+                    {['ID', 'UID', 'TYPE', 'MESSAGE', 'FILE'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left font-bold text-white border-b border-white/10">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-gray-400">
-                    No data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
 
-        {/* PAGINATION */}
-        <div className="flex justify-end gap-2 p-4 bg-black/40">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-            className="px-3 py-1 rounded bg-white/10 text-white disabled:opacity-40"
-          >
-            ◀
-          </button>
+                <tbody className="divide-y divide-white/10">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-6 text-white">
+                        <div className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : currentLogs.length ? (
+                    currentLogs.map(log => (
+                      <tr 
+                        key={log.id} 
+                        className="hover:bg-white/5 transition cursor-pointer"
+                        onClick={() => navigate(`/logdetails/${log.id}`)}
+                      >
+                        <td className="px-4 py-3 font-bold text-sky-400 hover:text-sky-300 transition">
+                          {log.id}
+                        </td>
+                        <td className="px-4 py-3 text-lime-400 font-mono text-xs">
+                          {log.uid}
+                        </td>
+                        <td className={`px-4 py-3 font-bold ${getMessageTypeClass(log.messagetype)}`}>
+                          <span className={`px-2 py-1 rounded-full text-xs uppercase ${
+                            log.messagetype === 'error' ? 'bg-red-500/20' :
+                            log.messagetype === 'success' ? 'bg-emerald-500/20' :
+                            log.messagetype === 'update' ? 'bg-orange-500/20' :
+                            log.messagetype === 'processing' ? 'bg-yellow-500/20' :
+                            'bg-sky-500/20'
+                          }`}>
+                            {log.messagetype}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-200 max-w-xs truncate">
+                          {truncateMessage(log.messages)}
+                        </td>
+                        <td className="px-4 py-3 text-pink-400 text-xs font-mono">
+                          {log.filelocation}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                          <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                          </svg>
+                          <p className="text-lg font-medium">No data available</p>
+                          <p className="text-sm">No logs found in the system</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-          <span className="px-4 py-1 font-bold text-white">
-            {currentPage} / {totalPages}
-          </span>
+            {/* PAGINATION */}
+            {logData.length > 0 && (
+              <div className="flex items-center justify-between p-4 bg-black/40 border-t border-white/10">
+                <div className="text-sm text-gray-400">
+                  Showing {indexOfFirst + 1} to {Math.min(indexOfLast, logData.length)} of {logData.length} entries
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    className="px-3 py-1 rounded-lg bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  >
+                    Previous
+                  </button>
 
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-            className="px-3 py-1 rounded bg-white/10 text-white disabled:opacity-40"
-          >
-            ▶
-          </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-1 rounded-lg transition ${
+                            currentPage === pageNum
+                              ? 'bg-gradient-to-r from-teal-400 to-blue-600 text-white font-bold'
+                              : 'bg-white/10 text-white hover:bg-white/20'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    className="px-3 py-1 rounded-lg bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-4 text-center text-xs text-gray-500">
+            © {new Date().getFullYear()} Admin Panel. All rights reserved.
+          </div>
         </div>
       </div>
     </div>

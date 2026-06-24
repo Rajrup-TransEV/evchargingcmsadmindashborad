@@ -337,27 +337,35 @@
 // };
 
 // export default ChargerOperationsView;
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Sidebar from "../partials/Sidebar";
 import {
   FiEdit,
   FiTrash2,
   FiSettings,
   FiHome,
   FiSearch,
+  FiFilter,
+  FiX,
+  FiChevronLeft,
+  FiChevronRight,
+  FiRefreshCw,
+  FiDownload,
+  FiEye,
 } from "react-icons/fi";
 
 const ChargerOperationsView = () => {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [chargerData, setChargerData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const searchTimer = useRef(null);
   const [filters, setFilters] = useState({
@@ -439,7 +447,6 @@ const ChargerOperationsView = () => {
         const hasSearch = searchQuery.trim();
         const hasFilters = Object.values(filters).some(Boolean);
 
-        // No search + no filters → original list
         if (!hasSearch && !hasFilters) {
           const res = await fetch(`${rooturi}/admin/listofcharges`, {
             headers: { apiauthkey: apikey },
@@ -470,7 +477,6 @@ const ChargerOperationsView = () => {
 
     return () => clearTimeout(searchTimer.current);
   }, [searchQuery, filters]);
-
 
   /* ================= PAGINATION ================= */
   const indexOfLast = currentPage * itemsPerPage;
@@ -505,6 +511,7 @@ const ChargerOperationsView = () => {
       toast.error("Delete request failed");
     }
   };
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({
@@ -513,6 +520,7 @@ const ChargerOperationsView = () => {
     }));
     setCurrentPage(1);
   };
+
   const buildQueryParams = () => {
     const params = new URLSearchParams();
 
@@ -529,306 +537,434 @@ const ChargerOperationsView = () => {
 
     return params.toString();
   };
+
   const uniqueValues = (key) => {
     return [...new Set(chargerData.map((c) => c[key]).filter(Boolean))];
   };
 
+  const clearAllFilters = () => {
+    setFilters({
+      segment: "",
+      subsegment: "",
+      protocol: "",
+      connector_type: "",
+      charger_type: "",
+      use_type: "",
+      open_247: "",
+    });
+    setSearchQuery("");
+    setCurrentPage(1);
+  };
+
+  const getActiveFilterCount = () => {
+    return Object.values(filters).filter(Boolean).length;
+  };
+
   /* ================= UI ================= */
   return (
-    <div className="min-h-screen p-6 bg-[#020617] text-gray-200">
-      {/* HEADER */}
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">
-          All Chargers
-        </h1>
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+      {/* Sidebar */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        variant="default"
+      />
 
-        <div className="flex gap-3">
-          <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-500" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search"
-              className="pl-9 pr-4 py-2 rounded-lg bg-[#020617] border border-gray-700"
-            />
-          </div>
-
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-black/30 backdrop-blur-sm border-b border-white/10">
           <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 bg-teal-600 rounded-lg"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
           >
-            <FiHome />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
-        </div>
-      </div>
+          <h1 className="text-xl font-bold text-white">All Chargers</h1>
+          <div className="w-10" />
+        </header>
 
-      {/* FILTER SECTION */}
-      <div className="mb-5 border border-gray-700 rounded-xl bg-[#020617] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Filters
-          </h3>
-          <button
-            onClick={() =>
-              setFilters({
-                segment: "",
-                subsegment: "",
-                protocol: "",
-                connector_type: "",
-                charger_type: "",
-                use_type: "",
-                open_247: "",
-              })
-            }
-            className="text-xs text-gray-400 hover:text-red-400 transition"
-          >
-            Clear all
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Segment */}
-          <div>
-            <label className="block mb-1 text-xs text-gray-400">
-              Segment
-            </label>
-            <select
-              name="segment"
-              value={filters.segment}
-              onChange={handleFilterChange}
-              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {/* Header */}
+          <div className="hidden lg:flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
+                <span className="bg-gradient-to-r from-teal-400 to-indigo-600 p-2 rounded-xl text-2xl">
+                  ⚡
+                </span>
+                All Chargers
+              </h1>
+              <p className="text-gray-400 mt-1">
+                Manage and monitor all EV charging stations
+              </p>
+            </div>
+            {/* <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-400 to-indigo-600 px-6 py-2.5 text-white font-bold hover:scale-105 transition transform hover:shadow-xl shadow-lg"
             >
-              <option value="">All</option>
-              {uniqueValues("Segment").map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
+              <FiHome /> Home
+            </button> */}
           </div>
 
-          {/* Protocol */}
-          <div>
-            <label className="block mb-1 text-xs text-gray-400">
-              Protocol
-            </label>
-            <select
-              name="protocol"
-              value={filters.protocol}
-              onChange={handleFilterChange}
-              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="">All</option>
-              {uniqueValues("protocol").map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
+          {/* Search and Filter Bar */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search chargers by name, serial, address..."
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all duration-200"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
+                  showFilters || getActiveFilterCount() > 0
+                    ? "bg-teal-500/20 border-teal-400/50 text-teal-400"
+                    : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <FiFilter />
+                <span>Filters</span>
+                {getActiveFilterCount() > 0 && (
+                  <span className="flex items-center justify-center w-5 h-5 text-xs font-bold bg-teal-500 text-white rounded-full">
+                    {getActiveFilterCount()}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  clearAllFilters();
+                }}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+              >
+                <FiRefreshCw />
+              </button>
+            </div>
           </div>
 
-          {/* Connector Type */}
-          <div>
-            <label className="block mb-1 text-xs text-gray-400">
-              Connector
-            </label>
-            <select
-              name="connector_type"
-              value={filters.connector_type}
-              onChange={handleFilterChange}
-              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="">All</option>
-              {uniqueValues("Connector_type").map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 24/7 Open */}
-          <div>
-            <label className="block mb-1 text-xs text-gray-400">
-              24 / 7 Open
-            </label>
-            <select
-              name="open_247"
-              value={filters.open_247}
-              onChange={handleFilterChange}
-              className="w-full bg-[#020617] border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="">All</option>
-              {uniqueValues("twenty_four_seven_open_status").map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-
-      {/* TABLE */}
-      <div className="overflow-x-auto border border-gray-700 rounded-xl">
-        <table className="min-w-full text-xs table-fixed">
-          <thead className="bg-[#020617] border-b border-gray-700">
-            <tr>
-              {[
-                "System ID",
-                "Admin ID",
-                "Charger UID",
-                "Charger Name",
-                "Charger Serial Number",
-                "Charger Host",
-                "Segment",
-                "Sub - Segment",
-                "Charger Type",
-                "Total Capacity",
-                "Parking",
-                "Connectors",
-                "Connector Type",
-                "Connector Capacity",
-                "Latitude",
-                "Longitude",
-                "Full Address",
-                "Charger Use Type",
-                "24/7 Open",
-                "Image",
-                "Buyer",
-                "Identity",
-                "Protocol",
-                "Created At",
-                "Settings",
-                "Edit",
-                "Delete",
-              ].map((h) => (
-                <th
-                  key={h}
-                  className="px-3 py-3 text-left font-semibold border-r border-gray-800"
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="mb-6 p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm animate-slideDown">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                  <FiFilter /> Advanced Filters
+                </h3>
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center gap-1"
                 >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
+                  <FiX className="w-3 h-3" /> Clear All
+                </button>
+              </div>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="27" className="py-8 text-center">
-                  Loading...
-                </td>
-              </tr>
-            ) : (
-              currentChargers.map((ch) => (
-                <tr
-                  key={ch.uid}
-                  className="border-b border-gray-800 hover:bg-[#0f172a]"
-                >
-                  <td className="px-3 py-2">{ch.id}</td>
-                  <td className="px-3 py-2">{ch.userId || "—"}</td>
-
-                  <td
-                    className="px-3 py-2 text-blue-400 cursor-pointer"
-                    onClick={() =>
-                      navigate(`/chargerdetails/${ch.uid}`)
-                    }
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Segment */}
+                <div>
+                  <label className="block mb-1.5 text-xs text-gray-400 font-medium">
+                    Segment
+                  </label>
+                  <select
+                    name="segment"
+                    value={filters.segment}
+                    onChange={handleFilterChange}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all"
                   >
-                    {ch.uid}
-                  </td>
+                    <option value="">All Segments</option>
+                    {uniqueValues("Segment").map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <td className="px-3 py-2">{ch.ChargerName}</td>
-                  <td className="px-3 py-2">{ch.Chargerserialnum}</td>
-                  <td className="px-3 py-2">{ch.Chargerhost}</td>
-                  <td className="px-3 py-2">{ch.Segment}</td>
-                  <td className="px-3 py-2">{ch.Subsegment}</td>
-                  <td className="px-3 py-2">{ch.Chargertype}</td>
-                  <td className="px-3 py-2">{ch.Total_Capacity}</td>
-                  <td className="px-3 py-2">{ch.parking}</td>
-                  <td className="px-3 py-2">{ch.number_of_connectors}</td>
-                  <td className="px-3 py-2">{ch.Connector_type}</td>
-                  <td className="px-3 py-2">
-                    {ch.connector_total_capacity}
-                  </td>
-                  <td className="px-3 py-2">{ch.lattitude}</td>
-                  <td className="px-3 py-2">{ch.longitute}</td>
-                  <td className="px-3 py-2 truncate">
-                    {ch.full_address}
-                  </td>
-                  <td className="px-3 py-2">
-                    {ch.charger_use_type || "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    {ch.twenty_four_seven_open_status || "—"}
-                  </td>
+                {/* Protocol */}
+                <div>
+                  <label className="block mb-1.5 text-xs text-gray-400 font-medium">
+                    Protocol
+                  </label>
+                  <select
+                    name="protocol"
+                    value={filters.protocol}
+                    onChange={handleFilterChange}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all"
+                  >
+                    <option value="">All Protocols</option>
+                    {uniqueValues("protocol").map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <td className="px-3 py-2">
-                    {ch.charger_image ? (
-                      <img
-                        src={ch.charger_image}
-                        className="w-10 h-10 rounded"
-                      />
-                    ) : (
-                      "—"
-                    )}
-                  </td>
+                {/* Connector Type */}
+                <div>
+                  <label className="block mb-1.5 text-xs text-gray-400 font-medium">
+                    Connector Type
+                  </label>
+                  <select
+                    name="connector_type"
+                    value={filters.connector_type}
+                    onChange={handleFilterChange}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all"
+                  >
+                    <option value="">All Connectors</option>
+                    {uniqueValues("Connector_type").map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <td className="px-3 py-2">{ch.chargerbuyer || "—"}</td>
-                  <td className="px-3 py-2">
-                    {ch.chargeridentity || "—"}
-                  </td>
-                  <td className="px-3 py-2">{ch.protocol || "—"}</td>
+                {/* 24/7 Open */}
+                <div>
+                  <label className="block mb-1.5 text-xs text-gray-400 font-medium">
+                    24/7 Availability
+                  </label>
+                  <select
+                    name="open_247"
+                    value={filters.open_247}
+                    onChange={handleFilterChange}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all"
+                  >
+                    <option value="">All</option>
+                    {uniqueValues("twenty_four_seven_open_status").map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
-                  <td className="px-3 py-2">
-                    {ch.createdAt
-                      ? new Date(ch.createdAt).toLocaleString()
-                      : "—"}
-                  </td>
-
-                  {/* ACTIONS */}
-                  <td className="px-3 py-2 text-center">
-                    <div
-                      title="Settings"
-                      onClick={() =>
-                        navigate(`/settings/${ch.uid}`)
-                      }
-                      className="inline-flex p-2 rounded-lg cursor-pointer bg-gray-800/40 hover:bg-teal-500/20 hover:text-teal-400 transition-all hover:scale-110"
-                    >
-                      <FiSettings />
-                    </div>
-                  </td>
-
-                  <td className="px-3 py-2 text-center">
-                    <div
-                      title="Edit Charger"
-                      onClick={() =>
-                        navigate(
-                          `/updatechargerdetails/${ch.uid}`
-                        )
-                      }
-                      className="inline-flex p-2 rounded-lg cursor-pointer bg-gray-800/40 hover:bg-blue-500/20 hover:text-blue-400 transition-all hover:scale-110"
-                    >
-                      <FiEdit />
-                    </div>
-                  </td>
-
-                  <td className="px-3 py-2 text-center">
-                    <div
-                      title="Delete Charger"
-                      onClick={() => handleDelete(ch.uid)}
-                      className="inline-flex p-2 rounded-lg cursor-pointer bg-gray-800/40 hover:bg-red-500/20 hover:text-red-400 transition-all hover:scale-110"
-                    >
-                      <FiTrash2 />
-                    </div>
-                  </td>
-                </tr>
-              ))
+          {/* Stats Bar */}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div className="text-gray-400">
+              Showing <span className="text-white font-semibold">{indexOfFirst + 1}</span> to{" "}
+              <span className="text-white font-semibold">
+                {Math.min(indexOfLast, chargerData.length)}
+              </span>{" "}
+              of <span className="text-white font-semibold">{chargerData.length}</span> chargers
+            </div>
+            {searchQuery && (
+              <div className="flex items-center gap-2 text-teal-400">
+                <span>Search results for: "{searchQuery}"</span>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <FiX className="w-4 h-4" />
+                </button>
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
+            <table className="min-w-full text-xs">
+              <thead className="bg-black/40 border-b border-white/10">
+                <tr>
+                  {[
+                    "ID",
+                    "Charger UID",
+                    "Name",
+                    "Serial",
+                    "Type",
+                    "Capacity",
+                    "Connectors",
+                    "Address",
+                    "Status",
+                    "Actions",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left font-semibold text-gray-300 uppercase tracking-wider text-[10px]"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="10" className="py-12 text-center">
+                      <div className="flex items-center justify-center gap-3 text-gray-400">
+                        <svg className="animate-spin h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading chargers...
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentChargers.length === 0 ? (
+                  <tr>
+                    <td colSpan="10" className="py-12 text-center">
+                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                        <FiSearch className="w-12 h-12 text-gray-600" />
+                        <p className="text-lg font-medium">No chargers found</p>
+                        <p className="text-sm">Try adjusting your search or filters</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentChargers.map((ch, index) => (
+                    <tr
+                      key={ch.uid}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors duration-150"
+                    >
+                      <td className="px-4 py-3 text-gray-400">{indexOfFirst + index + 1}</td>
+                      <td
+                        className="px-4 py-3 text-teal-400 cursor-pointer hover:text-teal-300 transition-colors font-mono"
+                        onClick={() => navigate(`/chargerdetails/${ch.uid}`)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <FiEye className="w-3 h-3" />
+                          {ch.uid?.substring(0, 8)}...
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-white">{ch.ChargerName}</td>
+                      <td className="px-4 py-3 text-gray-400 font-mono text-[10px]">
+                        {ch.Chargerserialnum}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
+                          ch.Chargertype === 'DC' ? 'bg-purple-500/20 text-purple-400' :
+                          ch.Chargertype === 'AC' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-teal-500/20 text-teal-400'
+                        }`}>
+                          {ch.Chargertype || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-white">{ch.Total_Capacity} kW</td>
+                      <td className="px-4 py-3 text-gray-300">{ch.number_of_connectors}</td>
+                      <td className="px-4 py-3 text-gray-400 max-w-[150px] truncate">
+                        {ch.full_address}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
+                          ch.twenty_four_seven_open_status === 'YES'
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {ch.twenty_four_seven_open_status === 'YES' ? '🟢 24/7' : '🔴 Limited'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => navigate(`/settings/${ch.uid}`)}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-teal-500/20 hover:text-teal-400 transition-all group"
+                            title="Settings"
+                          >
+                            <FiSettings className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/updatechargerdetails/${ch.uid}`)}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-400 transition-all group"
+                            title="Edit"
+                          >
+                            <FiEdit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(ch.uid)}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 transition-all group"
+                            title="Delete"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="text-sm text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft className="w-4 h-4" /> Previous
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-10 h-10 rounded-lg transition-all ${
+                          currentPage === pageNum
+                            ? "bg-gradient-to-r from-teal-400 to-indigo-600 text-white font-bold shadow-lg"
+                            : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next <FiChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Custom Animations */}
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

@@ -549,17 +549,20 @@
 
 // export default AddCharger;
 
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../partials/Sidebar'; // Adjust path as needed
 
 /* ================= UI HELPERS (DESIGN ONLY) ================= */
 
-const Section = ({ title }) => (
-  <div className="flex items-center gap-3 mt-10">
+const Section = ({ title, icon }) => (
+  <div className="flex items-center gap-3 mt-10 first:mt-0">
     <div className="h-8 w-1 rounded-full bg-gradient-to-b from-teal-400 to-indigo-600" />
-    <h2 className="text-xl font-bold text-white tracking-wide">{title}</h2>
+    <h2 className="text-xl font-bold text-white tracking-wide flex items-center gap-2">
+      {icon && <span className="text-teal-400">{icon}</span>}
+      {title}
+    </h2>
   </div>
 );
 
@@ -569,30 +572,52 @@ const Grid = ({ children }) => (
   </div>
 );
 
-const Input = ({ label, value, onChange, full = false }) => (
+const Input = ({ label, value, onChange, full = false, type = "text", placeholder = "", required = false }) => (
   <div className={full ? "md:col-span-2 lg:col-span-3" : ""}>
-    <label className="text-sm font-semibold text-gray-300">{label}</label>
+    <label className="text-sm font-semibold text-gray-300 flex items-center gap-1">
+      {label}
+      {required && <span className="text-red-400 text-xs">*</span>}
+    </label>
     <input
+      type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white focus:ring-2 focus:ring-teal-400 outline-none"
+      placeholder={placeholder}
+      className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-400 outline-none transition-all duration-200 hover:border-white/40"
     />
   </div>
 );
 
-const Select = ({ label, value, onChange }) => (
+const Select = ({ label, value, onChange, options = [], required = false }) => (
   <div>
-    <label className="text-sm font-semibold text-gray-300">{label}</label>
+    <label className="text-sm font-semibold text-gray-300 flex items-center gap-1">
+      {label}
+      {required && <span className="text-red-400 text-xs">*</span>}
+    </label>
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white focus:ring-2 focus:ring-teal-400"
+      className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white focus:ring-2 focus:ring-teal-400 outline-none transition-all duration-200 hover:border-white/40"
     >
-      <option value="">Select</option>
-      <option value="AC">AC</option>
-      <option value="DC">DC</option>
-      <option value="HYBRID">HYBRID</option>
+      <option value="">Select {label}</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>{opt}</option>
+      ))}
     </select>
+  </div>
+);
+
+const FileInput = ({ label, onChange, accept = "image/*" }) => (
+  <div>
+    <label className="text-sm font-semibold text-gray-300">{label}</label>
+    <div className="mt-2 relative">
+      <input
+        type="file"
+        onChange={onChange}
+        accept={accept}
+        className="w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-teal-400 file:to-indigo-600 file:text-white hover:file:opacity-90 transition-all duration-200"
+      />
+    </div>
   </div>
 );
 
@@ -600,6 +625,7 @@ const Select = ({ label, value, onChange }) => (
 
 const AddCharger = () => {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [Chargerserialnum, setChargerserialnum] = useState('');
   const [ChargerName, setChargerName] = useState('');
@@ -730,88 +756,285 @@ const AddCharger = () => {
         const data = await res.json();
         if (res.ok) {
           setOcppurl(data.ocppurl);
-          toast(data.message);
-        } else toast.error("Failed");
+          toast.success(data.message || "Charger created successfully!");
+          // Reset form after success
+          resetForm();
+        } else {
+          toast.error(data.message || "Failed to create charger");
+        }
       }
-    } catch {
-      toast.error("Error");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred while creating charger");
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setChargerserialnum('');
+    setChargerName('');
+    setChargerhost('');
+    setSegment('');
+    setSubsegment('');
+    setTotal_Capacity('');
+    setChargertype('');
+    setParking('');
+    setNumber_of_connectors('');
+    setConnector_type('');
+    setConnector_total_capacity('');
+    setLattitude('');
+    setLongitute('');
+    setFull_address('');
+    setCharger_use_type('');
+    setTwenty_four_seven_open_status('');
+    setCharger_image(null);
+    setChargerbuyer('');
+    setChargerIdentity('');
   };
 
   const handleFileUpload = (e) => setCharger_image(e.target.files[0]);
 
   /* ================= UI ================= */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-gray-900 px-6 py-10">
-      <div className="mx-auto max-w-7xl">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-extrabold text-white">⚡ Add EV Charger</h1>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-black/30 backdrop-blur-sm border-b border-white/10">
           <button
-            onClick={() => navigate('/')}
-            className="rounded-full bg-gradient-to-r from-teal-400 to-indigo-600 px-6 py-2 text-white font-bold hover:scale-105 transition"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+            aria-label="Toggle sidebar"
           >
-            HOME
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
-        </div>
+          <h1 className="text-xl font-bold text-white">⚡ Add EV Charger</h1>
+          <div className="w-10" />
+        </header>
 
-        <form onSubmit={handleSubmit} className="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 p-10 shadow-2xl">
-
-          <Section title="Charger Identity" />
-          <Grid>
-            <Input label="Serial Number" value={Chargerserialnum} onChange={setChargerserialnum} />
-            <Input label="Charger Name" value={ChargerName} onChange={setChargerName} />
-            <Input label="Charger Host" value={Chargerhost} onChange={setChargerhost} />
-            <Input label="Charger Identity" value={chargeridentity} onChange={setChargerIdentity} />
-          </Grid>
-
-          <Section title="Technical Details" />
-          <Grid>
-            <Select label="Charger Type" value={Chargertype} onChange={setChargertype} />
-            <Input label="Total Capacity" value={Total_Capacity} onChange={setTotal_Capacity} />
-            <Input label="Connectors" value={number_of_connectors} onChange={setNumber_of_connectors} />
-            <Input label="Connector Type" value={Connector_type} onChange={setConnector_type} />
-            <Input label="Connector Capacity" value={connector_total_capacity} onChange={setConnector_total_capacity} />
-          </Grid>
-
-          <Section title="Location" />
-          <Grid>
-            <Input label="Latitude" value={lattitude} onChange={setLattitude} />
-            <Input label="Longitude" value={longitute} onChange={setLongitute} />
-            <Input label="Parking" value={parking} onChange={setParking} />
-          </Grid>
-
-          <Input label="Full Address" value={full_address} onChange={setFull_address} full />
-
-          <Section title="Ownership & Usage" />
-          <Grid>
-            <Input label="Buyer" value={chargerbuyer} onChange={setChargerbuyer} />
-            <Input label="Use Type" value={charger_use_type} onChange={setCharger_use_type} />
-            <Input label="24x7 Open" value={twenty_four_seven_open_status} onChange={setTwenty_four_seven_open_status} />
-          </Grid>
-
-          <div className="mt-6">
-            <label className="text-gray-300 font-semibold">Charger Image</label>
-            <input type="file" onChange={handleFileUpload} className="mt-2 text-gray-300" />
-          </div>
-
-          <div className="mt-10 flex justify-end">
-            <button
-              disabled={loading}
-              className="rounded-full bg-gradient-to-r from-teal-400 via-indigo-500 to-purple-600 px-10 py-4 text-lg font-extrabold text-white shadow-xl hover:scale-105 transition"
-            >
-              {loading ? "Processing..." : "🚀 Save Charger"}
-            </button>
-          </div>
-
-          {ocppurl && (
-            <div className="mt-6 bg-black/40 p-4 rounded-xl text-teal-300 font-mono">
-              {ocppurl}
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
+                <span className="bg-gradient-to-r from-teal-400 to-indigo-600 p-2 rounded-xl">
+                  ⚡
+                </span>
+                Add EV Charger
+              </h1>
+              <p className="text-gray-400 mt-1">Fill in the details to register a new EV charger</p>
             </div>
-          )}
-        </form>
+            {/* <button
+              onClick={() => navigate('/')}
+              className="rounded-full bg-gradient-to-r from-teal-400 to-indigo-600 px-6 py-2.5 text-white font-bold hover:scale-105 transition transform hover:shadow-xl shadow-lg"
+            >
+              🏠 Home
+            </button> */}
+          </div>
+
+          <form onSubmit={handleSubmit} className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 md:p-10 shadow-2xl">
+
+            <Section title="Charger Identity" icon="🔑" />
+            <Grid>
+              <Input 
+                label="Serial Number" 
+                value={Chargerserialnum} 
+                onChange={setChargerserialnum} 
+                placeholder="e.g., CHG-2024-001"
+                required
+              />
+              <Input 
+                label="Charger Name" 
+                value={ChargerName} 
+                onChange={setChargerName} 
+                placeholder="e.g., Tesla Supercharger"
+                required
+              />
+              <Input 
+                label="Charger Host" 
+                value={Chargerhost} 
+                onChange={setChargerhost} 
+                placeholder="e.g., Host-001"
+              />
+              <Input 
+                label="Charger Identity" 
+                value={chargeridentity} 
+                onChange={setChargerIdentity} 
+                placeholder="e.g., ID-12345"
+                required
+              />
+            </Grid>
+
+            <Section title="Technical Details" icon="⚙️" />
+            <Grid>
+              <Select 
+                label="Charger Type" 
+                value={Chargertype} 
+                onChange={setChargertype}
+                options={['AC', 'DC', 'HYBRID']}
+                required
+              />
+              <Input 
+                label="Total Capacity (kW)" 
+                value={Total_Capacity} 
+                onChange={setTotal_Capacity} 
+                placeholder="e.g., 50"
+                type="number"
+                required
+              />
+              <Input 
+                label="Number of Connectors" 
+                value={number_of_connectors} 
+                onChange={setNumber_of_connectors} 
+                placeholder="e.g., 2"
+                type="number"
+                required
+              />
+              <Select 
+                label="Connector Type" 
+                value={Connector_type} 
+                onChange={setConnector_type}
+                options={['CCS2', 'CHAdeMO', 'Type 2', 'GB/T']}
+                required
+              />
+              <Input 
+                label="Connector Capacity (kW)" 
+                value={connector_total_capacity} 
+                onChange={setConnector_total_capacity} 
+                placeholder="e.g., 50"
+                type="number"
+                required
+              />
+            </Grid>
+
+            <Section title="Location Details" icon="📍" />
+            <Grid>
+              <Input 
+                label="Latitude" 
+                value={lattitude} 
+                onChange={setLattitude} 
+                placeholder="e.g., 28.6139"
+                required
+              />
+              <Input 
+                label="Longitude" 
+                value={longitute} 
+                onChange={setLongitute} 
+                placeholder="e.g., 77.2090"
+                required
+              />
+              <Input 
+                label="Parking" 
+                value={parking} 
+                onChange={setParking} 
+                placeholder="e.g., Yes/No"
+                required
+              />
+            </Grid>
+
+            <Input 
+              label="Full Address" 
+              value={full_address} 
+              onChange={setFull_address} 
+              placeholder="e.g., 123 Main Street, City, State, ZIP"
+              full 
+              required
+            />
+
+            <Section title="Ownership & Usage" icon="🏢" />
+            <Grid>
+              <Input 
+                label="Buyer/Operator" 
+                value={chargerbuyer} 
+                onChange={setChargerbuyer} 
+                placeholder="e.g., Tesla Inc."
+                required
+              />
+              <Select 
+                label="Use Type" 
+                value={charger_use_type} 
+                onChange={setCharger_use_type}
+                options={['PUBLIC', 'PRIVATE', 'SEMI-PUBLIC']}
+                required
+              />
+              <Select 
+                label="24x7 Open Status" 
+                value={twenty_four_seven_open_status} 
+                onChange={setTwenty_four_seven_open_status}
+                options={['YES', 'NO']}
+                required
+              />
+            </Grid>
+
+            <Section title="Media" icon="🖼️" />
+            <Grid>
+              <FileInput 
+                label="Charger Image" 
+                onChange={handleFileUpload} 
+                accept="image/*"
+              />
+              <div className="col-span-2">
+                {charger_image && (
+                  <div className="mt-4 p-4 bg-black/40 rounded-xl border border-white/20">
+                    <p className="text-sm text-gray-400">Selected file: 
+                      <span className="text-white ml-2">{charger_image.name}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Size: {(charger_image.size / 1024).toFixed(2)} KB
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Grid>
+
+            {ocppurl && (
+              <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                <p className="text-sm text-emerald-400 font-semibold">✅ Charger Created Successfully!</p>
+                <p className="text-sm text-gray-300 mt-2">
+                  <span className="font-mono text-teal-300">{ocppurl}</span>
+                </p>
+              </div>
+            )}
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-end">
+              <button
+                type="button"
+                onClick={() => navigate('/listofcharger')}
+                className="rounded-xl px-6 py-3 text-white font-semibold border border-white/20 hover:bg-white/10 transition-all duration-200"
+              >
+                📋 View Chargers
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-xl bg-gradient-to-r from-teal-400 via-indigo-500 to-purple-600 px-10 py-3 text-lg font-extrabold text-white shadow-xl hover:scale-105 transition transform disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  "🚀 Save Charger"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
