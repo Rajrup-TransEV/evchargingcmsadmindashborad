@@ -204,11 +204,10 @@
 // };
 
 // export default Login;
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react"; // Using lucide-react for icons
 
 const LoginScreen = () => {
   const [step, setStep] = useState(0); // For animation sequence
@@ -220,6 +219,7 @@ const LoginScreen = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showOtpField, setShowOtpField] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const navigate = useNavigate();
 
@@ -310,6 +310,11 @@ const LoginScreen = () => {
     navigate("/forgotpassword");
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center relative"
@@ -368,7 +373,7 @@ const LoginScreen = () => {
             />
           </div>
 
-          {/* Password */}
+          {/* Password with Eye Icon */}
           {!showOtpField && (
             <div
               className={`transition-all duration-1000 transform ${
@@ -380,14 +385,28 @@ const LoginScreen = () => {
               <label className="block text-sm font-medium text-gray-900">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white/70 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none sm:text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="mt-1 block w-full rounded-lg border border-gray-300 bg-white/70 px-3 py-2 pr-10 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none sm:text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800 focus:outline-none mt-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           )}
 
