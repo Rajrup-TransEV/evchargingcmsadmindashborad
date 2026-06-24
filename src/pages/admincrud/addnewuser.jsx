@@ -342,11 +342,30 @@
 // }
 
 // export default AddNewuser
+
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../../partials/Sidebar';
+import { 
+  FiUser, 
+  FiMail, 
+  FiPhone, 
+  FiLock, 
+  FiMapPin, 
+  FiBriefcase, 
+  FiUserPlus,
+  FiArrowLeft,
+  FiUsers,
+  FiShield,
+  FiCheckCircle,
+  FiEye,
+  FiEyeOff
+} from 'react-icons/fi';
 
 const AddNewuser = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
@@ -357,6 +376,7 @@ const AddNewuser = () => {
   const [designation, setDesignation] = useState('');
   const [loading, setLoading] = useState(false);
   const [ipAddress, setIpAddress] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -381,11 +401,11 @@ const AddNewuser = () => {
 
         const data = await response.json();
         if (!response.ok || data.user.userType !== "superadmin") {
-          toast("Unauthorized access");
+          toast.error("Unauthorized access");
           navigate("/signin");
         }
       } catch {
-        toast("Authentication error");
+        toast.error("Authentication error");
         navigate("/signin");
       }
     };
@@ -422,14 +442,58 @@ const AddNewuser = () => {
     fetchIpAddress();
   }, []);
 
+  /* ================= PREVENT AUTO-FILL ================= */
+  useEffect(() => {
+    // Clear any autofilled values on component mount
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      if (input.value && (input.type === 'email' || input.type === 'password')) {
+        input.value = '';
+      }
+    });
+  }, []);
+
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate required fields
+    if (!firstname || !lastname || !email || !password || !phonenumber || !role) {
+      toast.error("Please fill in all required fields");
+      setLoading(false);
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      setLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
     try {
       const rooturi = import.meta.env.VITE_ROOT_URI;
       const apikey = import.meta.env.VITE_API_KEY;
+
+      const payload = {
+        firstname: firstname.trim(),
+        lastname: lastname.trim(),
+        email: email.trim().toLowerCase(),
+        password: password,
+        address: address.trim(),
+        phonenumber: phonenumber.trim(),
+        role: role,
+        designation: designation.trim()
+      };
 
       const response = await fetch(`${rooturi}/admin/create/userprofilecreate`, {
         method: 'POST',
@@ -437,106 +501,339 @@ const AddNewuser = () => {
           'Content-Type': 'application/json',
           apiauthkey: apikey,
         },
-        body: JSON.stringify({
-          firstname,
-          lastname,
-          email,
-          password,
-          address,
-          phonenumber,
-          role,
-          designation
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
-      response.ok ? toast.success(data.message) : toast.error(data.message);
-    } catch {
-      toast.error("Unknown error occurred");
+
+      if (response.ok) {
+        toast.success(data.message || "User created successfully!");
+        // Reset form
+        setFirstname('');
+        setLastname('');
+        setEmail('');
+        setpassword('');
+        setAddress('');
+        setPhonenumber('');
+        setRole('');
+        setDesignation('');
+        // Clear any autofilled values
+        setTimeout(() => {
+          const inputs = document.querySelectorAll('input');
+          inputs.forEach(input => {
+            if (input.type === 'email' || input.type === 'password') {
+              input.value = '';
+            }
+          });
+        }, 100);
+      } else {
+        toast.error(data.message || "Failed to create user");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred while creating user");
     } finally {
       setLoading(false);
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-gray-900 px-6 py-10">
-      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-        {/* IMAGE PANEL */}
-        <div className="hidden lg:block rounded-3xl overflow-hidden shadow-2xl">
-          <img
-            src="https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png"
-            alt="Create User"
-            className="h-full w-full object-cover"
-          />
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Create CPO</h1>
+          <div className="w-10" />
+        </header>
 
-        {/* FORM PANEL */}
-        <div className="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-10">
-
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-extrabold text-white">
-              👤 Create New Admin User
-            </h1>
-
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center gap-4 mb-8">
             <button
-              onClick={() => navigate('/')}
-              className="rounded-full bg-gradient-to-r from-teal-400 to-indigo-600 px-6 py-2 text-white font-bold hover:scale-105 transition"
+              onClick={() => navigate('/listofusers')}
+              className="p-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200"
             >
-              HOME
+              <FiArrowLeft className="w-5 h-5" />
             </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 p-2.5 rounded-xl text-white shadow-lg">
+                  <FiUserPlus className="w-6 h-6" />
+                </span>
+                Create New CPO
+              </h1>
+              <p className="text-gray-500 mt-1">Add a new administrator with full access privileges</p>
+            </div>
           </div>
 
-          <p className="text-gray-300 mb-10">
-            Add a new admin user with full access privileges
-          </p>
-
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {[
-              ["First Name", firstname, setFirstname],
-              ["Last Name", lastname, setLastname],
-              ["Email", email, setEmail],
-              ["Password", password, setpassword],
-              ["Phone Number", phonenumber, setPhonenumber],
-              ["Address", address, setAddress],
-              ["Designation", designation, setDesignation],
-            ].map(([label, value, setter]) => (
-              <div key={label}>
-                <label className="text-sm font-semibold text-gray-300">
-                  {label}
-                </label>
-                <input
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  type={label === "Password" ? "password" : "text"}
-                  className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white focus:ring-2 focus:ring-teal-400 outline-none"
-                />
+          {/* Form */}
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-3xl bg-white shadow-xl border border-gray-100 p-6 md:p-10">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-emerald-100">
+                      <FiUsers className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Total CPO's</p>
+                      {/* <p className="text-lg font-bold text-gray-800">+1 New</p> */}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100">
+                      <FiShield className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Role</p>
+                      <p className="text-lg font-bold text-gray-800">Admin</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-purple-100">
+                      <FiCheckCircle className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Status</p>
+                      <p className="text-lg font-bold text-gray-800">Active</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
 
-            <div>
-              <label className="text-sm font-semibold text-gray-300">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 text-white focus:ring-2 focus:ring-teal-400"
-              >
-                <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-              </select>
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6" autoComplete="off">
+                {/* Personal Information Section */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-6 w-1 rounded-full bg-gradient-to-b from-indigo-400 to-purple-400" />
+                    <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Personal Information
+                    </h2>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiUser className="w-4 h-4 text-indigo-500" />
+                    First Name <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <input
+                    value={firstname}
+                    onChange={(e) => setFirstname(e.target.value)}
+                    type="text"
+                    placeholder="Enter first name"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiUser className="w-4 h-4 text-indigo-500" />
+                    Last Name <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <input
+                    value={lastname}
+                    onChange={(e) => setLastname(e.target.value)}
+                    type="text"
+                    placeholder="Enter last name"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+
+                {/* Contact Information Section */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-2 mb-4 mt-2">
+                    <div className="h-6 w-1 rounded-full bg-gradient-to-b from-indigo-400 to-purple-400" />
+                    <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Contact Information
+                    </h2>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiMail className="w-4 h-4 text-indigo-500" />
+                    Email Address <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    placeholder="Enter email address"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    required
+                    autoComplete="new-email"
+                    autoCorrect="off"
+                    spellCheck="false"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiLock className="w-4 h-4 text-indigo-500" />
+                    Password <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <div className="relative mt-2">
+                    <input
+                      value={password}
+                      onChange={(e) => setpassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                      required
+                      minLength={6}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <FiEyeOff className="w-5 h-5" />
+                      ) : (
+                        <FiEye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Minimum 6 characters</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiPhone className="w-4 h-4 text-indigo-500" />
+                    Phone Number <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <input
+                    value={phonenumber}
+                    onChange={(e) => setPhonenumber(e.target.value)}
+                    type="tel"
+                    placeholder="Enter phone number"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+
+                {/* Professional Information Section */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-2 mb-4 mt-2">
+                    <div className="h-6 w-1 rounded-full bg-gradient-to-b from-indigo-400 to-purple-400" />
+                    <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Professional Information
+                    </h2>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiBriefcase className="w-4 h-4 text-indigo-500" />
+                    Designation
+                  </label>
+                  <input
+                    value={designation}
+                    onChange={(e) => setDesignation(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Senior Administrator"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiShield className="w-4 h-4 text-indigo-500" />
+                    Role <span className="text-red-500 text-xs">*</span>
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    required
+                  >
+                    <option value="">Select Role</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                    <FiMapPin className="w-4 h-4 text-indigo-500" />
+                    Address
+                  </label>
+                  <input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    type="text"
+                    placeholder="Enter full address"
+                    className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                    autoComplete="off"
+                  />
+                </div>
+
+                {/* Form Actions */}
+                <div className="md:col-span-2 flex flex-col sm:flex-row gap-4 justify-end mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/listofusers')}
+                    className="px-8 py-3 rounded-xl text-gray-700 font-semibold border border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating User...
+                      </>
+                    ) : (
+                      <>
+                        <FiUserPlus className="w-5 h-5" />
+                        Create User
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <div className="md:col-span-2 flex justify-end mt-6">
-              <button
-                disabled={loading}
-                className="rounded-full bg-gradient-to-r from-teal-400 via-indigo-500 to-purple-600 px-10 py-4 text-lg font-extrabold text-white shadow-xl hover:scale-105 transition"
-              >
-                {loading ? "Processing..." : "🚀 Create User"}
-              </button>
-            </div>
-
-          </form>
+          </div>
         </div>
       </div>
     </div>
