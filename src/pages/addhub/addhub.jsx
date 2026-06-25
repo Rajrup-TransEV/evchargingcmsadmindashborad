@@ -311,224 +311,439 @@
 // };
 
 // export default AddHub;
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../../partials/Sidebar';
+import { 
+  FiPlus, 
+  FiHome, 
+  FiMapPin, 
+  FiZap, 
+  FiTag, 
+  FiUser, 
+  FiArrowLeft,
+  FiList,
+  FiCheck,
+  FiX,
+  FiRefreshCw,
+  FiInfo
+} from 'react-icons/fi';
 
 const AddHub = () => {
-    const [hubname, sethubname] = useState('');
-    const [hubchargers, sethubcharges] = useState([]);
-    const [hubtariff, sethubtariff] = useState('');
-    const [hublocation, sethublocation] = useState('');
-    const [adminid, setadminid] = useState('');
-    const [chargerids, setchargerids] = useState([]);
-    const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hubname, sethubname] = useState('');
+  const [hubchargers, sethubcharges] = useState([]);
+  const [hubtariff, sethubtariff] = useState('');
+  const [hublocation, sethublocation] = useState('');
+  const [adminid, setadminid] = useState('');
+  const [chargerids, setchargerids] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchCharger, setSearchCharger] = useState('');
+  const navigate = useNavigate();
 
-    /* ================= AUTH ================= */
-    useEffect(() => {
-        const checkAuthentication = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
+  /* ================= AUTH ================= */
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) return navigate("/signin");
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return navigate("/signin");
 
-                const res = await fetch(`${rooturi}/userauth/verifyuser`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
-                    body: JSON.stringify({ token })
-                });
+        const res = await fetch(`${rooturi}/userauth/verifyuser`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
+          body: JSON.stringify({ token })
+        });
 
-                const data = await res.json();
-                if (!res.ok || data.user.userType !== "superadmin") {
-                    toast("Unauthorized");
-                    navigate("/signin");
-                }
-            } catch {
-                toast("Authentication failed");
-                navigate("/signin");
-            }
-        };
-        checkAuthentication();
-    }, [navigate]);
-
-    /* ================= CHARGERS ================= */
-    useEffect(() => {
-        const fetchAllChargerData = async () => {
-            const rooturi = import.meta.env.VITE_ROOT_URI;
-            const apikey = import.meta.env.VITE_API_KEY;
-
-            try {
-                const res = await fetch(`${rooturi}/admin/listofcharges`, {
-                    headers: { apiauthkey: apikey }
-                });
-                const result = await res.json();
-                setchargerids(Array.isArray(result.data) ? result.data.map(i => i.uid) : []);
-            } catch {
-                toast("Failed to load chargers");
-            }
-        };
-        fetchAllChargerData();
-    }, []);
-
-    /* ================= SUBMIT ================= */
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const rooturi = import.meta.env.VITE_ROOT_URI;
-        const apikey = import.meta.env.VITE_API_KEY;
-
-        try {
-            const res = await fetch(`${rooturi}/admin/addhubs`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
-                body: JSON.stringify({
-                    hubname,
-                    hubchargers,
-                    hubtariff,
-                    hublocation,
-                    adminid,
-                }),
-            });
-
-            res.ok ? toast.success("Hub added successfully") : toast.error("Failed to add hub");
-        } catch {
-            toast.error("Server error");
+        const data = await res.json();
+        if (!res.ok || data.user.userType !== "superadmin") {
+          toast.error("Unauthorized access");
+          navigate("/signin");
         }
+      } catch {
+        toast.error("Authentication failed");
+        navigate("/signin");
+      }
     };
+    checkAuthentication();
+  }, [navigate]);
 
-    const backtohome = () => navigate("/");
+  /* ================= CHARGERS ================= */
+  useEffect(() => {
+    const fetchAllChargerData = async () => {
+      const rooturi = import.meta.env.VITE_ROOT_URI;
+      const apikey = import.meta.env.VITE_API_KEY;
 
-    /* ================= UI ================= */
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center p-6">
-            <div className="w-full max-w-3xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
+      try {
+        const res = await fetch(`${rooturi}/admin/listofcharges`, {
+          headers: { apiauthkey: apikey }
+        });
+        const result = await res.json();
+        setchargerids(Array.isArray(result.data) ? result.data.map(i => i.uid) : []);
+      } catch {
+        toast.error("Failed to load chargers");
+      }
+    };
+    fetchAllChargerData();
+  }, []);
 
-                {/* Header */}
-                <div className="px-8 py-6 border-b border-white/20">
-                    <h1 className="text-3xl font-extrabold text-white">
-                        ⚡ Add Charging Hub
-                    </h1>
-                    <p className="text-gray-300 mt-1 text-sm">
-                        Create and manage EV charging hubs
-                    </p>
-                </div>
+  /* ================= SUBMIT ================= */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    // Validate required fields
+    if (!hubname || !adminid || !hubtariff || !hublocation || hubchargers.length === 0) {
+      toast.error("Please fill in all required fields and select at least one charger");
+      setLoading(false);
+      return;
+    }
 
-                    <Input label="Hub Name" value={hubname} onChange={sethubname} />
-                    <Input label="Admin ID" value={adminid} onChange={setadminid} />
+    const rooturi = import.meta.env.VITE_ROOT_URI;
+    const apikey = import.meta.env.VITE_API_KEY;
 
-                    <Input label="Hub Tariff" value={hubtariff} onChange={sethubtariff} />
-                    <Input label="Hub Location" value={hublocation} onChange={sethublocation} />
+    try {
+      const res = await fetch(`${rooturi}/admin/addhubs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apiauthkey: apikey },
+        body: JSON.stringify({
+          hubname,
+          hubchargers,
+          hubtariff,
+          hublocation,
+          adminid,
+        }),
+      });
 
-                    {/* Multi Select */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-200 mb-1">
+      if (res.ok) {
+        toast.success("Hub added successfully!");
+        // Reset form
+        sethubname('');
+        sethubcharges([]);
+        sethubtariff('');
+        sethublocation('');
+        setadminid('');
+      } else {
+        toast.error("Failed to add hub");
+      }
+    } catch {
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                        </label>
-                        {/* Select Chargers */}
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-bold text-gray-200 mb-2">
-                                Select Chargers
-                            </label>
-
-                            <div className="rounded-xl border border-white/20 bg-black/30 max-h-56 overflow-y-auto divide-y divide-white/10">
-
-                                {chargerids.length === 0 ? (
-                                    <p className="text-gray-400 text-sm p-4 text-center">
-                                        No chargers available
-                                    </p>
-                                ) : (
-                                    chargerids.map((id) => {
-                                        const isSelected = hubchargers.includes(id);
-
-                                        return (
-                                            <div
-                                                key={id}
-                                                onClick={(e) => {
-                                                    if (e.ctrlKey || e.metaKey) {
-                                                        sethubcharges(prev =>
-                                                            prev.includes(id)
-                                                                ? prev.filter(item => item !== id)
-                                                                : [...prev, id]
-                                                        );
-                                                    } else {
-                                                        sethubcharges([id]);
-                                                    }
-                                                }}
-                                                className={`
-              cursor-pointer px-4 py-3 flex items-center justify-between
-              transition
-              ${isSelected
-                                                        ? 'bg-gradient-to-r from-teal-500/30 to-emerald-500/30 text-white'
-                                                        : 'text-gray-300 hover:bg-white/5'
-                                                    }
-            `}
-                                            >
-                                                <span className="font-mono text-sm">{id}</span>
-
-                                                {isSelected && (
-                                                    <span className="text-xs font-bold bg-teal-500 text-black px-2 py-0.5 rounded-full">
-                                                        SELECTED
-                                                    </span>
-                                                )}
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-
-                            <p className="mt-2 text-xs text-gray-400">
-                                Hold <span className="font-bold">Ctrl / Cmd</span> to select multiple chargers
-                            </p>
-                        </div>
-                    </div>
-                    {/* Submit */}
-                    <div className="md:col-span-2">
-                        <button
-                            type="submit"
-                            className="w-full py-3 text-lg font-extrabold text-white rounded-xl
-                         bg-gradient-to-r from-teal-500 via-emerald-500 to-green-600
-                         hover:scale-[1.02] transition shadow-lg"
-                        >
-                            ➕ Add Hub
-                        </button>
-                    </div>
-                </form>
-
-                {/* Footer */}
-                <div className="px-8 py-6 border-t border-white/20 flex justify-center">
-                    <button
-                        onClick={backtohome}
-                        className="px-6 py-2 rounded-full font-bold text-white
-                       bg-gradient-to-r from-teal-400 to-cyan-500
-                       hover:scale-105 transition shadow-lg"
-                    >
-                        ⬅ Home
-                    </button>
-                </div>
-            </div>
-        </div>
+  const handleChargerSelect = (id) => {
+    sethubcharges(prev =>
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
     );
-};
+  };
 
-/* ================= INPUT COMPONENT ================= */
-const Input = ({ label, value, onChange }) => (
-    <div>
-        <label className="block text-sm font-bold text-gray-200 mb-1">
-            {label}
-        </label>
-        <input
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg bg-black/40 border border-white/20
-                 px-4 py-2 text-white font-semibold
-                 focus:outline-none focus:ring-2 focus:ring-teal-400"
-        />
+  const selectAllChargers = () => {
+    if (hubchargers.length === chargerids.length) {
+      sethubcharges([]);
+    } else {
+      sethubcharges([...chargerids]);
+    }
+  };
+
+  const filteredChargers = chargerids.filter(id => 
+    id.toLowerCase().includes(searchCharger.toLowerCase())
+  );
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Add Charging Hub</h1>
+          <div className="w-10" />
+        </header>
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Header */}
+          <div className="hidden lg:flex items-center gap-4 mb-8">
+            <button
+              onClick={() => navigate('/listofhubs')}
+              className="p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200 shadow-sm"
+            >
+              <FiArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2.5 rounded-xl text-white shadow-lg">
+                  <FiZap className="w-6 h-6" />
+                </span>
+                Add Charging Hub
+              </h1>
+              <p className="text-gray-500 mt-1">Create and manage EV charging hubs</p>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+              <form onSubmit={handleSubmit} className="p-6 md:p-8">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-emerald-100">
+                        <FiZap className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Available Chargers</p>
+                        <p className="text-lg font-bold text-gray-800">{chargerids.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100">
+                        <FiCheck className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Selected Chargers</p>
+                        <p className="text-lg font-bold text-gray-800">{hubchargers.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-purple-100">
+                        <FiTag className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Tariff Rate</p>
+                        <p className="text-lg font-bold text-gray-800">{hubtariff || '—'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/50 border border-indigo-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-indigo-100">
+                        <FiMapPin className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Location</p>
+                        <p className="text-lg font-bold text-gray-800 truncate">{hublocation || '—'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Hub Name */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                      <FiZap className="w-4 h-4 text-emerald-500" />
+                      Hub Name <span className="text-red-500 text-xs">*</span>
+                    </label>
+                    <input
+                      value={hubname}
+                      onChange={(e) => sethubname(e.target.value)}
+                      type="text"
+                      placeholder="Enter hub name"
+                      className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                      required
+                    />
+                  </div>
+
+                  {/* Admin ID */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                      <FiUser className="w-4 h-4 text-emerald-500" />
+                      Admin ID <span className="text-red-500 text-xs">*</span>
+                    </label>
+                    <input
+                      value={adminid}
+                      onChange={(e) => setadminid(e.target.value)}
+                      type="text"
+                      placeholder="Enter admin ID"
+                      className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                      required
+                    />
+                  </div>
+
+                  {/* Hub Tariff */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                      <FiTag className="w-4 h-4 text-emerald-500" />
+                      Hub Tariff <span className="text-red-500 text-xs">*</span>
+                    </label>
+                    <input
+                      value={hubtariff}
+                      onChange={(e) => sethubtariff(e.target.value)}
+                      type="text"
+                      placeholder="e.g., 5.00/kWh"
+                      className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                      required
+                    />
+                  </div>
+
+                  {/* Hub Location */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                      <FiMapPin className="w-4 h-4 text-emerald-500" />
+                      Hub Location <span className="text-red-500 text-xs">*</span>
+                    </label>
+                    <input
+                      value={hublocation}
+                      onChange={(e) => sethublocation(e.target.value)}
+                      type="text"
+                      placeholder="Enter location"
+                      className="mt-2 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-300"
+                      required
+                    />
+                  </div>
+
+                  {/* Select Chargers */}
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                        <FiList className="w-4 h-4 text-emerald-500" />
+                        Select Chargers <span className="text-red-500 text-xs">*</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={selectAllChargers}
+                          className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold"
+                        >
+                          {hubchargers.length === chargerids.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative mb-3">
+                      <input
+                        type="text"
+                        placeholder="Search chargers..."
+                        value={searchCharger}
+                        onChange={(e) => setSearchCharger(e.target.value)}
+                        className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200"
+                      />
+                      <FiInfo className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 bg-gray-50 max-h-64 overflow-y-auto">
+                      {filteredChargers.length === 0 ? (
+                        <p className="text-gray-400 text-sm p-4 text-center">
+                          {chargerids.length === 0 ? 'No chargers available' : 'No matching chargers found'}
+                        </p>
+                      ) : (
+                        filteredChargers.map((id) => {
+                          const isSelected = hubchargers.includes(id);
+                          return (
+                            <div
+                              key={id}
+                              onClick={() => handleChargerSelect(id)}
+                              className={`cursor-pointer px-4 py-3 flex items-center justify-between transition-all duration-200 ${
+                                isSelected
+                                  ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-500'
+                                  : 'hover:bg-gray-100 border-l-4 border-transparent'
+                              } ${!isSelected && 'border-l-4 border-transparent'}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                  isSelected 
+                                    ? 'bg-emerald-500 border-emerald-500' 
+                                    : 'border-gray-300 bg-white'
+                                }`}>
+                                  {isSelected && <FiCheck className="w-3 h-3 text-white" />}
+                                </div>
+                                <span className={`font-mono text-sm ${isSelected ? 'text-gray-800 font-semibold' : 'text-gray-600'}`}>
+                                  {id}
+                                </span>
+                              </div>
+                              {isSelected && (
+                                <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                                  Selected
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <p className="text-xs text-gray-500">
+                        <span className="font-semibold">{hubchargers.length}</span> charger{hubchargers.length !== 1 ? 's' : ''} selected
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Click to select/deselect
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/listofhubs')}
+                    className="px-8 py-3 rounded-xl text-gray-700 font-semibold border border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Adding Hub...
+                      </>
+                    ) : (
+                      <>
+                        <FiPlus className="w-5 h-5" />
+                        Add Hub
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-xs text-gray-400">
+            © {new Date().getFullYear()} Admin Panel. All rights reserved.
+          </div>
+        </div>
+      </div>
     </div>
-);
+  );
+};
 
 export default AddHub;

@@ -201,36 +201,86 @@
 // };
 
 // export default ChargerDetails;
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Sidebar from '../partials/Sidebar';
+import { 
+  FiArrowLeft, 
+  FiZap, 
+  FiMapPin, 
+  FiTag, 
+  FiUser, 
+  FiCalendar,
+  FiClock,
+  FiInfo,
+  FiCopy,
+  FiHome,
+  FiImage,
+  FiLink,
+  FiGlobe,
+  FiGrid,
+  FiCode
+} from "react-icons/fi";
 
 /* ---------- UI Helper Components ---------- */
-const Section = ({ title }) => (
-  <h2 className="text-xl font-extrabold text-teal-300 border-b border-white/20 pb-1 mb-3">
-    {title}
-  </h2>
-);
+const Info = ({ label, value, icon: Icon }) => {
+  // 🔥 SAFE RENDERING: Handle objects, arrays, null, undefined
+  let displayValue = "—";
+  
+  if (value !== null && value !== undefined) {
+    if (typeof value === "string") {
+      displayValue = value;
+    } else if (typeof value === "number" || typeof value === "boolean") {
+      displayValue = String(value);
+    } else if (typeof value === "object") {
+      // For objects, show a readable summary
+      if (Array.isArray(value)) {
+        displayValue = `[${value.length} items]`;
+      } else {
+        // For objects like associatedadminid, show the ID if it has one
+        if (value.id) {
+          displayValue = value.id;
+        } else if (value._id) {
+          displayValue = value._id;
+        } else {
+          // Fallback: show JSON string
+          displayValue = JSON.stringify(value);
+        }
+      }
+    }
+  }
 
-const Info = ({ label, value }) => (
-  <div className="flex justify-between gap-4 bg-black/30 rounded-lg px-4 py-2">
-    <span className="text-gray-300 font-semibold">{label}</span>
-    <span className="text-white font-bold text-right break-all">
-      {value || "-"}
-    </span>
+  return (
+    <div className="flex items-start gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-200 hover:border-emerald-200 transition-colors">
+      {Icon && <Icon className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</p>
+        <p className="text-sm text-gray-800 font-medium break-all">{displayValue}</p>
+      </div>
+    </div>
+  );
+};
+
+const Section = ({ title, icon: Icon }) => (
+  <div className="flex items-center gap-2 mb-4">
+    {Icon && <Icon className="w-5 h-5 text-emerald-500" />}
+    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+    <div className="flex-1 h-px bg-gradient-to-r from-emerald-200 to-transparent"></div>
   </div>
 );
 /* ---------------------------------------- */
 
 const ChargerDetails = () => {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { uid } = useParams();
 
   const [chargerData, setChargerData] = useState(null);
   const [qrCode, setQrcode] = useState(null);
   const [chargerImage, setChargerImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   /* ---------- AUTH CHECK ---------- */
   useEffect(() => {
@@ -287,15 +337,34 @@ const ChargerDetails = () => {
 
         if (!res.ok) {
           toast.error("Failed to fetch charger details");
+          setLoading(false);
           return;
         }
 
         const result = await res.json();
-        setChargerData(result.chargerdata);
-        setQrcode(result.qrdata);
-        setChargerImage(result.chargerimageurl);
+        console.log("Charger details response:", result);
+        
+        // Handle different response structures
+        let charger = null;
+        if (result.chargerdata) {
+          charger = result.chargerdata;
+        } else if (result.data) {
+          charger = result.data;
+        } else if (Array.isArray(result) && result.length > 0) {
+          charger = result[0];
+        } else if (typeof result === 'object' && result !== null) {
+          charger = result;
+        }
+
+        setChargerData(charger);
+        setQrcode(result.qrdata || result.qrCode || null);
+        setChargerImage(result.chargerimageurl || result.chargerImage || null);
+        
+        if (!charger) {
+          toast.warning("No charger data found");
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching charger data:", err);
         toast.error("Error fetching charger data");
       } finally {
         setLoading(false);
@@ -337,95 +406,208 @@ const ChargerDetails = () => {
     fetchIpAddress();
   }, []);
 
-  const backtohome = () => {
-    navigate("/");
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      toast.success('UID copied to clipboard!');
+      setTimeout(() => setCopied(false), 3000);
+    });
+  };
+
+  // Helper function to safely get value from nested object
+  const getSafeValue = (obj, key, fallback = "—") => {
+    if (!obj) return fallback;
+    const value = obj[key];
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "object") {
+      if (Array.isArray(value)) return `[${value.length} items]`;
+      if (value.id) return value.id;
+      if (value._id) return value._id;
+      return JSON.stringify(value);
+    }
+    return value;
   };
 
   if (loading) {
     return (
-      <div className="text-center mt-20 text-xl font-bold text-white">
-        Loading...
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="flex items-center gap-3 text-gray-500">
+          <svg className="animate-spin h-8 w-8 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="text-lg font-medium">Loading charger details...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="relative min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://res.cloudinary.com/djvmehyvd/image/upload/v1730708478/jjb6gtwippzrubjbykda.png')",
-      }}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* HOME BUTTON */}
-        <button
-          onClick={backtohome}
-          className="mb-6 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-400 to-blue-600 text-white font-extrabold rounded-full shadow-lg hover:scale-105 transition-transform"
-        >
-          HOME
-        </button>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Charger Details</h1>
+          <div className="w-10" />
+        </header>
 
-        <h1 className="text-4xl font-extrabold text-white mb-2">
-          Charger Details
-        </h1>
-        <p className="text-gray-300 mb-8">
-          Charger UID: <span className="font-bold">{uid}</span>
-        </p>
-
-        {chargerData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* LEFT */}
-            <div className="bg-white/10 rounded-xl p-6 shadow-xl space-y-4">
-              <Section title="Basic Information" />
-              <Info label="Charger Name" value={chargerData.ChargerName} />
-              <Info label="Serial Number" value={chargerData.Chargerserialnum} />
-              <Info label="Type" value={chargerData.Chargertype} />
-              <Info label="Segment" value={chargerData.Segment} />
-              <Info label="Subsegment" value={chargerData.Subsegment} />
-              <Info label="Total Capacity" value={chargerData.Total_Capacity} />
-              <Info label="Connector Type" value={chargerData.Connector_type} />
-            </div>
-
-            {/* RIGHT */}
-            <div className="bg-white/10 rounded-xl p-6 shadow-xl space-y-4">
-              <Section title="Location & Usage" />
-
-              {chargerImage && (
-                <img
-                  src={chargerImage}
-                  alt="Charger"
-                  className="rounded-lg mb-4 w-full max-h-60 object-cover"
-                />
-              )}
-
-              <Info label="Use Type" value={chargerData.charger_use_type} />
-              <Info label="Connector Capacity" value={chargerData.connector_total_capacity} />
-              <Info label="Address" value={chargerData.full_address} />
-              <Info label="Latitude" value={chargerData.lattitude} />
-              <Info label="Longitude" value={chargerData.longitute} />
-              <Info label="Connectors" value={chargerData.number_of_connectors} />
-              <Info label="Parking" value={chargerData.parking} />
-              <Info label="24/7 Open" value={chargerData.twenty_four_seven_open_status} />
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Header */}
+          <div className="hidden lg:flex items-center gap-4 mb-8">
+            <button
+              onClick={() => navigate('/listofcharger')}
+              className="p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 shadow-sm"
+            >
+              <FiArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2.5 rounded-xl text-white shadow-lg">
+                  <FiZap className="w-6 h-6" />
+                </span>
+                Charger Details
+              </h1>
+              <p className="text-gray-500 mt-1">Complete information about this charging station</p>
             </div>
           </div>
-        )}
 
-        {/* QR CODE */}
-        {qrCode && (
-          <div className="mt-10 text-center">
-            <h2 className="text-2xl font-extrabold text-white mb-4">
-              QR Code
-            </h2>
-            <img
-              src={qrCode}
-              alt="QR Code"
-              className="mx-auto rounded-lg shadow-lg"
-            />
+          {/* Charger UID Badge */}
+          <div className="mb-6 inline-flex items-center gap-3 px-5 py-2.5 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <FiZap className="w-4 h-4 text-emerald-500" />
+            <span className="text-sm text-gray-600">Charger UID:</span>
+            <span className="text-sm font-mono font-semibold text-gray-800">{uid}</span>
+            <button
+              onClick={() => copyToClipboard(uid)}
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Copy UID"
+            >
+              <FiCopy className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+            </button>
           </div>
-        )}
+
+          {chargerData ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Basic Info */}
+              <div className="lg:col-span-2">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+                  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                      <FiInfo className="w-5 h-5" />
+                      Basic Information
+                    </h2>
+                  </div>
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Info label="Charger Name" value={getSafeValue(chargerData, 'ChargerName')} icon={FiZap} />
+                    <Info label="Serial Number" value={getSafeValue(chargerData, 'Chargerserialnum')} icon={FiTag} />
+                    <Info label="Type" value={getSafeValue(chargerData, 'Chargertype')} icon={FiZap} />
+                    <Info label="Segment" value={getSafeValue(chargerData, 'Segment')} />
+                    <Info label="Subsegment" value={getSafeValue(chargerData, 'Subsegment')} />
+                    <Info label="Total Capacity" value={getSafeValue(chargerData, 'Total_Capacity') ? `${getSafeValue(chargerData, 'Total_Capacity')} kW` : "—"} icon={FiZap} />
+                    <Info label="Connector Type" value={getSafeValue(chargerData, 'Connector_type')} />
+                    <Info label="Connector Capacity" value={getSafeValue(chargerData, 'connector_total_capacity') ? `${getSafeValue(chargerData, 'connector_total_capacity')} kW` : "—"} />
+                    <Info label="Number of Connectors" value={getSafeValue(chargerData, 'number_of_connectors')} />
+                    <Info label="Parking" value={getSafeValue(chargerData, 'parking')} />
+                    <Info label="Buyer" value={getSafeValue(chargerData, 'chargerbuyer')} icon={FiUser} />
+                    <Info label="Charger Identity" value={getSafeValue(chargerData, 'chargeridentity')} />
+                    <Info label="Status" value={getSafeValue(chargerData, 'status')} icon={FiZap} />
+                    <Info label="Created At" value={getSafeValue(chargerData, 'createdAt')} icon={FiCalendar} />
+                  </div>
+                </div>
+
+                {/* Location Info */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300 mt-6">
+                  <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                      <FiMapPin className="w-5 h-5" />
+                      Location Details
+                    </h2>
+                  </div>
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Info label="Address" value={getSafeValue(chargerData, 'full_address')} icon={FiMapPin} />
+                    <Info label="Latitude" value={getSafeValue(chargerData, 'lattitude')} icon={FiGlobe} />
+                    <Info label="Longitude" value={getSafeValue(chargerData, 'longitute')} icon={FiGlobe} />
+                    <Info label="24/7 Open" value={getSafeValue(chargerData, 'twenty_four_seven_open_status')} />
+                    <Info label="Use Type" value={getSafeValue(chargerData, 'charger_use_type')} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Image & QR */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Charger Image */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                      <FiImage className="w-5 h-5" />
+                      Charger Image
+                    </h2>
+                  </div>
+                  <div className="p-4">
+                    {chargerImage ? (
+                      <img
+                        src={chargerImage}
+                        alt="Charger"
+                        className="w-full rounded-xl object-cover max-h-64"
+                      />
+                    ) : (
+                      <div className="text-center py-12 text-gray-400">
+                        <FiImage className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm">No image available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                {qrCode && (
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
+                      <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                        <FiGrid className="w-5 h-5" />
+                        QR Code
+                      </h2>
+                    </div>
+                    <div className="p-4 text-center">
+                      <img
+                        src={qrCode}
+                        alt="QR Code"
+                        className="mx-auto rounded-xl max-w-[200px]"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
+              <FiZap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600">No charger data found</h3>
+              <p className="text-gray-400 mt-2">The charger with UID {uid} could not be found</p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-xs text-gray-400 border-t border-gray-200 pt-4">
+            © {new Date().getFullYear()} Admin Panel. All rights reserved.
+          </div>
+        </div>
       </div>
     </div>
   );

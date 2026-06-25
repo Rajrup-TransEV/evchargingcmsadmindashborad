@@ -296,15 +296,37 @@
    – Better pagination
 */
 
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Sidebar from '../../partials/Sidebar';
+import { 
+  FiHome, 
+  FiMapPin, 
+  FiZap, 
+  FiTag, 
+  FiUser, 
+  FiList,
+  FiTrash2,
+  FiEye,
+  FiPlus,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCalendar,
+  FiClock,
+  FiUsers,
+  FiTrendingUp
+} from 'react-icons/fi';
 
 const ListofHubData = () => {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const itemsPerPage = 10;
 
   /* ================= AUTH CHECK ================= */
@@ -357,9 +379,17 @@ const ListofHubData = () => {
     fetchHubs();
   }, []);
 
+  /* ================= SEARCH ================= */
+  const filteredHubs = userData.filter(hub => 
+    hub.hubname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    hub.uid?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    hub.hublocation?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    hub.adminuid?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   /* ================= PAGINATION ================= */
-  const totalPages = Math.ceil(userData.length / itemsPerPage);
-  const currentUsers = userData.slice(
+  const totalPages = Math.ceil(filteredHubs.length / itemsPerPage);
+  const currentUsers = filteredHubs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -379,7 +409,7 @@ const ListofHubData = () => {
       });
 
       if (res.ok) {
-        toast.success('Hub deleted');
+        toast.success('Hub deleted successfully');
         setUserData(prev => prev.filter(h => h.uid !== uid));
       } else toast.error('Delete failed');
     } catch {
@@ -387,82 +417,305 @@ const ListofHubData = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-extrabold text-white">Hub Management</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="px-6 py-2 rounded-full font-bold bg-gradient-to-r from-teal-400 to-emerald-500 text-black shadow-lg hover:scale-105 transition"
-        >
-          HOME
-        </button>
-      </div>
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+      {/* Sidebar */}
+      <Sidebar 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        variant="default"
+      />
 
-      {/* TABLE CARD */}
-      <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-gray-300">
-            <thead className="sticky top-0 bg-black text-xs uppercase tracking-wider text-teal-400">
-              <tr>
-                {['ID','UID','Hub Name','Chargers','Tariff','Location','Admin','Created','Updated','Action'].map(h => (
-                  <th key={h} className="px-4 py-3">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {loading ? (
-                <tr><td colSpan="10" className="text-center py-10">Loading...</td></tr>
-              ) : currentUsers.length ? currentUsers.map(hub => (
-                <tr key={hub.id} className="hover:bg-white/5 transition">
-                  <td className="px-4 py-3">{hub.id}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => navigate(`/hubdetails/${hub.uid}`)}
-                      className="text-teal-400 font-semibold hover:underline"
-                    >
-                      {hub.uid}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 font-bold text-white">{hub.hubname}</td>
-                  <td className="px-4 py-3 text-xs">{hub.hubchargers.join(', ')}</td>
-                  <td className="px-4 py-3">₹ {hub.hubtariff}</td>
-                  <td className="px-4 py-3">{hub.hublocation}</td>
-                  <td className="px-4 py-3">{hub.adminuid}</td>
-                  <td className="px-4 py-3">{hub.createdAt}</td>
-                  <td className="px-4 py-3">{hub.updatedAt}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleDelete(hub.uid)}
-                      className="px-3 py-1 text-xs font-bold rounded-full bg-red-600/80 hover:bg-red-600 text-white"
-                    >
-                      DELETE
-                    </button>
-                  </td>
-                </tr>
-              )) : (
-                <tr><td colSpan="10" className="text-center py-10">No hubs found</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Hub Management</h1>
+          <div className="w-10" />
+        </header>
 
-        {/* PAGINATION */}
-        <div className="flex justify-end gap-2 p-4 bg-black">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`w-9 h-9 rounded-full font-bold ${
-                currentPage === i + 1
-                  ? 'bg-teal-500 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Header */}
+          <div className="hidden lg:flex items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2.5 rounded-xl text-white shadow-lg">
+                  <FiMapPin className="w-6 h-6" />
+                </span>
+                Hub Management
+              </h1>
+              <p className="text-gray-500 mt-1">Manage all EV charging hubs</p>
+            </div>
+          </div>
+
+          {/* Stats and Actions */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+                <div className="p-1.5 rounded-lg bg-emerald-100">
+                  <FiMapPin className="w-4 h-4 text-emerald-600" />
+                </div>
+                <span className="text-sm text-gray-600">Total Hubs:</span>
+                <span className="text-lg font-bold text-gray-800">{filteredHubs.length}</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+                <div className="p-1.5 rounded-lg bg-blue-100">
+                  <FiZap className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="text-sm text-gray-600">Active:</span>
+                <span className="text-lg font-bold text-gray-800">{filteredHubs.length}</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+                <div className="p-1.5 rounded-lg bg-purple-100">
+                  <FiTrendingUp className="w-4 h-4 text-purple-600" />
+                </div>
+                <span className="text-sm text-gray-600">Avg Tariff:</span>
+                <span className="text-lg font-bold text-emerald-600">₹{filteredHubs.length > 0 ? 
+                  (filteredHubs.reduce((acc, hub) => acc + parseFloat(hub.hubtariff || 0), 0) / filteredHubs.length).toFixed(2) : '0.00'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search hubs..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200 w-full sm:w-64"
+                />
+              </div>
+              <button
+                onClick={() => navigate('/addhub')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition transform"
+              >
+                <FiPlus className="w-5 h-5" />
+                Add Hub
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                  <tr>
+                    {['#', 'Hub UID', 'Hub Name', 'Chargers', 'Tariff', 'Location', 'Admin', 'Created', 'Actions'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="9" className="px-4 py-12 text-center">
+                        <div className="flex items-center justify-center gap-3 text-gray-500">
+                          <svg className="animate-spin h-6 w-6 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading hubs...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : currentUsers.length ? (
+                    currentUsers.map((hub, index) => (
+                      <tr key={hub.id} className="hover:bg-emerald-50/50 transition-colors duration-150 group">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-500">
+                          {(currentPage - 1) * itemsPerPage + index + 1}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => navigate(`/hubdetails/${hub.uid}`)}
+                            className="text-emerald-600 hover:text-emerald-700 font-mono text-sm hover:underline flex items-center gap-1 group-hover:gap-2 transition-all"
+                          >
+                            <FiEye className="w-3 h-3" />
+                            {hub.uid?.substring(0, 12)}...
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center">
+                              <FiMapPin className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <span className="font-semibold text-gray-800">{hub.hubname}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <FiZap className="w-3 h-3 text-gray-400" />
+                            <span className="text-sm font-semibold text-gray-700">{hub.hubchargers?.length || 0}</span>
+                            <span className="text-xs text-gray-400 ml-1">chargers</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {hub.hubchargers?.slice(0, 2).map((charger, i) => (
+                              <span key={i} className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                {charger.substring(0, 6)}...
+                              </span>
+                            ))}
+                            {hub.hubchargers?.length > 2 && (
+                              <span className="text-xs text-gray-400">+{hub.hubchargers.length - 2}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-bold text-emerald-600">₹</span>
+                            <span className="text-sm font-semibold text-gray-800">{hub.hubtariff}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <FiMapPin className="w-3 h-3 text-gray-400" />
+                            <span className="truncate max-w-[100px]">{hub.hublocation}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <FiUser className="w-3 h-3 text-gray-400" />
+                            {hub.adminuid?.substring(0, 8)}...
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <FiCalendar className="w-3 h-3 text-gray-400" />
+                              {formatDate(hub.createdAt)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => navigate(`/hubdetails/${hub.uid}`)}
+                              className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:scale-110 transition-all duration-200"
+                              title="View Details"
+                            >
+                              <FiEye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(hub.uid)}
+                              className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:scale-110 transition-all duration-200"
+                              title="Delete Hub"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="9" className="px-4 py-12 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                            <FiMapPin className="w-10 h-10 text-gray-300" />
+                          </div>
+                          <p className="text-lg font-medium text-gray-500">No hubs found</p>
+                          <p className="text-sm text-gray-400">Try adjusting your search or create a new hub</p>
+                          <button
+                            onClick={() => navigate('/addhub')}
+                            className="mt-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition"
+                          >
+                            <FiPlus className="inline w-4 h-4 mr-1" />
+                            Create Hub
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 bg-gray-50 border-t border-gray-200">
+                <div className="text-sm text-gray-600">
+                  Showing <span className="font-semibold text-gray-700">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                  <span className="font-semibold text-gray-700">{Math.min(currentPage * itemsPerPage, filteredHubs.length)}</span> of{' '}
+                  <span className="font-semibold text-gray-700">{filteredHubs.length}</span> hubs
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                  >
+                    <FiChevronLeft className="w-4 h-4" />
+                    Previous
+                  </button>
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-9 h-9 rounded-lg transition-all text-sm ${
+                            currentPage === pageNum
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-md"
+                              : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                  >
+                    Next
+                    <FiChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-xs text-gray-400 border-t border-gray-200 pt-4">
+            © {new Date().getFullYear()} Admin Panel. All rights reserved.
+          </div>
         </div>
       </div>
     </div>
